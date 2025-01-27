@@ -14,13 +14,13 @@
 
 <br>
 
-## 📸스크린샷
+## 📸 스크린샷
 > OpenApi 캡쳐본 & Test Code 통과 캡쳐본 필수
 - 
 
 <br>
 
-## 💬 공유사항 to Reviewer
+## 📡 공유사항 to Reviewer
 > Reviewer에게 공유할 사항을 적어주세요.
 -
 

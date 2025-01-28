@@ -5,6 +5,14 @@ plugins {
     id("org.springframework.boot") version "3.4.2"
     id("io.spring.dependency-management") version "1.1.7"
 }
+
+allOpen {
+    annotation("javax.persistence.Entity")
+}
+
+noArg {
+    annotation("javax.persistence.Entity")
+}
 val springCloudAzureVersion by extra("5.19.0")
 
 group = "com.bockerl"
@@ -28,7 +36,6 @@ dependencies {
     implementation("com.azure.spring:spring-cloud-azure-starter-storage")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.projectlombok:lombok")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -39,6 +46,8 @@ dependencies {
     "developmentOnly"("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("org.postgresql:postgresql")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    // env file
+    implementation("me.paulschwarz:spring-dotenv:4.0.0")
 }
 dependencyManagement {
     imports {

@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus
 enum class ErrorCode(
     val code: Int,
     val httpStatus: HttpStatus,
-    val message: String
+    val message: String,
 ) {
     // 400: 잘못된 요청 (Bad Request)
     WRONG_ENTRY_POINT(40000, HttpStatus.BAD_REQUEST, "잘못된 접근입니다"),
@@ -54,12 +54,13 @@ enum class ErrorCode(
     TOO_MANY_REQUESTS(42900, HttpStatus.TOO_MANY_REQUESTS, "요청 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요."),
 
     // 500: 서버 내부 오류 (Internal Server Error)
-    INTERNAL_SERVER_ERROR(50000, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다")
+    INTERNAL_SERVER_ERROR(50000, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다"),
     ;
 
     companion object {
         // 에러 코드로 ErrorCode를 찾는 확장 함수
-        fun findByCode(code: Int): ErrorCode = values().find { it.code == code }
-            ?: throw IllegalArgumentException("Invalid error code: $code")
+        fun findByCode(code: Int): ErrorCode =
+            entries.find { it.code == code }
+                ?: throw IllegalArgumentException("Invalid error code: $code")
     }
 }

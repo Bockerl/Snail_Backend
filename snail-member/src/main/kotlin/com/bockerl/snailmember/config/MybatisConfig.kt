@@ -6,5 +6,4 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 @MapperScan(basePackages = ["com.bockerl.snailmember.*.query.repository"], annotationClass = Mapper::class)
-class MybatisConfig {
-}
+class MybatisConfig

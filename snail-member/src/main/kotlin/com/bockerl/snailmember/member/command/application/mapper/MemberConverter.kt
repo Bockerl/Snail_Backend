@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
 package com.bockerl.snailmember.member.command.application.mapper
 
 import com.bockerl.snailmember.member.command.application.dto.MemberDTO
@@ -8,9 +12,9 @@ import org.springframework.stereotype.Component
 @Component
 class MemberConverter {
     // Entity to DTO 변환
-    fun entityToDTO(entity: Member): MemberDTO {
-        return MemberDTO(
-            memberId = entity.memberId,
+    fun entityToDTO(entity: Member): MemberDTO =
+        MemberDTO(
+            memberId = entity.formattedId,
             memberEmail = entity.memberEmail,
             memberPassword = entity.memberPassword,
             memberNickName = entity.memberNickName,
@@ -24,12 +28,11 @@ class MemberConverter {
             memberPhoneNumber = entity.memberPhoneNumber,
             memberBirth = entity.memberBirth,
             lastAccessTime = entity.lastAccessTime,
-            selfIntroduction = entity.selfIntroduction
+            selfIntroduction = entity.selfIntroduction,
         )
-    }
 
-    fun dtoToResponseVO(dto: MemberDTO): MemberResponseVO {
-        return MemberResponseVO(
+    fun dtoToResponseVO(dto: MemberDTO): MemberResponseVO =
+        MemberResponseVO(
             memberId = dto.memberId,
             memberEmail = dto.memberEmail,
             memberPassword = dto.memberPassword,
@@ -44,7 +47,6 @@ class MemberConverter {
             memberPhoneNumber = dto.memberPhoneNumber,
             memberBirth = dto.memberBirth,
             lastAccessTime = dto.lastAccessTime,
-            selfIntroduction = dto.selfIntroduction
+            selfIntroduction = dto.selfIntroduction,
         )
-    }
 }

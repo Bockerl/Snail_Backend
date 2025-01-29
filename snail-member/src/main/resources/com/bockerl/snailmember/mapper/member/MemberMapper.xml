@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper>
+<mapper namespace="com.bockerl.snailmember.member.query.repository.MemberMapper">
     <resultMap id="memberResultMap" type="com.bockerl.snailmember.member.command.domain.aggregate.entity.Member">
         <result property="memberId" column="member_id"/>
         <result property="memberEmail" column="member_email"/>
@@ -21,7 +21,7 @@
         <result property="selfIntroduction" column="self_introduction"/>
     </resultMap>
 
-    <select id="findMemberById" parameterType="Long" resultMap="MemberResultMap">
+    <select id="findMemberByMemberId" parameterType="Long" resultMap="memberResultMap">
         SELECT
         member_id,
         member_email,
@@ -41,6 +41,6 @@
         FROM
         member
         WHERE
-        id = #{memberId}
+        member_id = #{memberId}
     </select>
 </mapper>

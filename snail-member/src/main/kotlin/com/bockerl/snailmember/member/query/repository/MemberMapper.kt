@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
 package com.bockerl.snailmember.member.query.repository
 
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.Member

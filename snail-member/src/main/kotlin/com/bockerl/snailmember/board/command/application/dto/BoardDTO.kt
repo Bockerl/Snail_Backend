@@ -1,10 +1,10 @@
-package com.bockerl.snailmember.board.command.domain.aggregate.vo.response
+package com.bockerl.snailmember.board.command.application.dto
 
 import com.bockerl.snailmember.board.command.domain.aggregate.entity.BoardType
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 
-data class BoardResponseVO(
+data class BoardDTO(
     @field:Schema(description = "게시글 고유 번호(PK)", example = "1", type = "Long")
     val boardId: String? = null,
     @field:Schema(description = "게시글 내용", example = "달팽이 좋아요", type = "String")

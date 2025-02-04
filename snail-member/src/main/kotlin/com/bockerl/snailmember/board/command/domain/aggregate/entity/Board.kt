@@ -29,6 +29,10 @@ data class Board(
     @Enumerated(EnumType.STRING)
     var boardType: BoardType,
 
+    @Column(name = "board_tag", nullable = false, length = 255)
+    @Enumerated(EnumType.STRING)
+    var boardTag: BoardTag,
+
     @Column(name = "board_location", nullable = false, length = 255)
     var boardLocation: String,
 

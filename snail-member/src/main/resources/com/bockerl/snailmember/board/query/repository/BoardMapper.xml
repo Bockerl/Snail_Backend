@@ -38,20 +38,43 @@
 
     <select id="selectBoardByBoardType" parameterType="String" resultMap="boardResultMap">
         SELECT
-        board_id,
-        board_contents,
-        board_type,
-        board_tag,
-        board_location,
-        board_access_level,
-        board_view,
-        active,
-        member_id,
-        created_at,
-        updated_at
-        FROM
-        board
-        WHERE
-        board_type = #{boardType}
+            board_id,
+            board_contents,
+            board_type,
+            board_tag,
+            board_location,
+            board_access_level,
+            board_view,
+            active,
+            member_id,
+            created_at,
+            updated_at
+          FROM
+            board
+         WHERE
+            board_type = #{boardType}
+    </select>
+
+    <select id="selectBoardByBoardTag" parameterType="String" resultMap="boardResultMap">
+        SELECT
+            board_id,
+            board_contents,
+            board_type,
+            board_tag,
+            board_location,
+            board_access_level,
+            board_view,
+            active,
+            member_id,
+            created_at,
+            updated_at
+          FROM
+            board
+        <if test="boardTagList != null and boardTagList.size() > 0">
+         WHERE board_tag IN
+            <foreach collection="boardTagList" item="board_tag" open="(" separator="," close=")">
+                #{board_tag}
+            </foreach>
+        </if>
     </select>
 </mapper>

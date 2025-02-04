@@ -35,4 +35,14 @@ class QueryBoardServiceImpl(
 
         return boardDTOList
     }
+
+    override fun readBoardByBoardTag(boardTagList: List<String>): List<BoardDTO> {
+        val boardList: List<Board> =
+            boardMapper.selectBoardByBoardTag(boardTagList)
+                ?: throw CommonException(ErrorCode.NOT_FOUND_BOARD)
+
+        val boardDTOList = boardList.map {board -> boardConverter.entityToDTO(board) }
+
+        return boardDTOList
+    }
 }

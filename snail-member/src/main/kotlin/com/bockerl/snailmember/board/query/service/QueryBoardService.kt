@@ -8,4 +8,6 @@ interface QueryBoardService{
 
     fun readBoardByBoardType(boardType: String): List<BoardDTO>
 
+    fun readBoardByBoardTag(boardTagList: List<String>): List<BoardDTO>
+
 }

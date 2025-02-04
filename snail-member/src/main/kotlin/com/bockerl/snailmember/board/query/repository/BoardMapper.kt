@@ -10,4 +10,6 @@ interface BoardMapper {
     fun selectBoardByBoardId(boardId: Long): Board?
 
     fun selectBoardByBoardType(boardType: String): List<Board>?
+
+    fun selectBoardByBoardTag(boardTagList: List<String>): List<Board>?
 }

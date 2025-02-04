@@ -1,5 +1,6 @@
 package com.bockerl.snailmember.board.command.application.dto
 
+import com.bockerl.snailmember.board.command.domain.aggregate.entity.BoardTag
 import com.bockerl.snailmember.board.command.domain.aggregate.entity.BoardType
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
@@ -11,6 +12,8 @@ data class BoardDTO(
     val boardContents: String? = null,
     @field:Schema(description = "게시글 타입", example = "FREE", type = "String")
     val boardType: BoardType? = null,
+    @field:Schema(description = "게시글 태그", example = "TIP", type = "String")
+    val boardTag: BoardTag? = null,
     @field:Schema(description = "게시글 지역", example = "SINDAEBANG", type = "String")
     val boardLocation: String? = null,
     @field:Schema(description = "게시글 공개 범위", example = "ALL", type = "String")

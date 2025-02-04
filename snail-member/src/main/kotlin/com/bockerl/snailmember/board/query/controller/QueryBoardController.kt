@@ -35,7 +35,7 @@ class QueryBoardController(
             ),
         ],
     )
-    @GetMapping("/{boardId}")
+    @GetMapping("/detail/{boardId}")
     fun getBoardByBoardId(
         @PathVariable boardId: Long,
         /* 궁금. 와일드 카드로 *를 쓸 것인지? */

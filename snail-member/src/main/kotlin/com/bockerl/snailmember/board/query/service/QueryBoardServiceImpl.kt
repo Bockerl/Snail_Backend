@@ -6,6 +6,8 @@ import com.bockerl.snailmember.board.command.domain.aggregate.entity.Board
 import com.bockerl.snailmember.board.query.repository.BoardMapper
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -15,11 +17,14 @@ class QueryBoardServiceImpl(
     private val boardConverter: BoardConverter,
 ) :QueryBoardService {
 
+    private val log = LoggerFactory.getLogger(this::class.java)
+
     override fun readBoardByBoardId(boardId: Long): BoardDTO {
 
         val board =
             boardMapper.selectBoardByBoardId(boardId)
                 ?: throw CommonException(ErrorCode.NOT_FOUND_BOARD)
+
 
         return boardConverter.entityToDTO(board)
     }

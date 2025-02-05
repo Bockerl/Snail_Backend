@@ -64,6 +64,8 @@ dependencies {
     implementation("com.opencsv:opencsv:5.9")
     // env file
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
+    // kotlin - logging
+    implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
 }
 dependencyManagement {
     imports {

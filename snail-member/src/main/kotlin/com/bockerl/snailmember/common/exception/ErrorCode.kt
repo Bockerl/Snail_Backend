@@ -55,6 +55,7 @@ enum class ErrorCode(
 
     // 500: 서버 내부 오류 (Internal Server Error)
     INTERNAL_SERVER_ERROR(50000, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다"),
+    MAIL_SEND_FAIL(50001, HttpStatus.INTERNAL_SERVER_ERROR, "인증 메일 전송에 실패했습니다."),
     ;
 
     companion object {

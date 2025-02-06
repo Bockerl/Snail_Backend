@@ -1,13 +1,13 @@
 package com.bockerl.snailmember.board.query.service
 
-import com.bockerl.snailmember.board.command.application.dto.BoardDTO
-import com.bockerl.snailmember.board.command.domain.aggregate.vo.response.BoardResponseVO
+import com.bockerl.snailmember.board.query.dto.QueryBoardDTO
+import com.bockerl.snailmember.board.query.vo.QueryBoardResponseVO
 
 interface QueryBoardService{
-    fun readBoardByBoardId(boardId: Long): BoardDTO
+    fun readBoardByBoardId(boardId: Long): QueryBoardResponseVO
 
-    fun readBoardByBoardType(boardType: String): List<BoardDTO>
+    fun readBoardByBoardType(boardType: String): List<QueryBoardResponseVO>
 
-    fun readBoardByBoardTag(boardTagList: List<String>): List<BoardDTO>
+    fun readBoardByBoardTag(boardTagList: List<String>): List<QueryBoardResponseVO>
 
 }

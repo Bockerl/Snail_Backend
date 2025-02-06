@@ -10,5 +10,5 @@ import org.apache.ibatis.annotations.Mapper
 @Mapper
 interface MemberMapper {
     // null이 조회될 수 있으므로 ?를 붙였습니다
-    fun findMemberByMemberId(memberId: Long): Member?
+    fun selectMemberByMemberId(memberId: Long): Member?
 }

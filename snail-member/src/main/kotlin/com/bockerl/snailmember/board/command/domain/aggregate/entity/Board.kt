@@ -1,5 +1,7 @@
 package com.bockerl.snailmember.board.command.domain.aggregate.entity
 
+import com.bockerl.snailmember.board.command.domain.aggregate.enums.BoardTag
+import com.bockerl.snailmember.board.command.domain.aggregate.enums.BoardType
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp

@@ -25,7 +25,7 @@ data class Board(
     /* 설명. null일 시 "" 빈문자열 저장 */
     @Lob
     @Column(name = "board_contents", columnDefinition = "TEXT")
-    var boardContents: String?= "",
+    var boardContents: String?,
 
     @Column(name = "board_type", nullable = false, length = 255)
     @Enumerated(EnumType.STRING)
@@ -65,7 +65,7 @@ data class Board(
 
     /* 설명. 게시글 업데이트 시 */
     fun updateBoardContents(contents: String?, type: BoardType, accessLevel: String) {
-        this.boardContents = contents ?: ""
+        this.boardContents = contents
         this.boardType = type
         this.boardAccessLevel = accessLevel
     }

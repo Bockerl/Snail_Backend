@@ -3,6 +3,7 @@ package com.bockerl.snailmember.member.command.application.service
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.domain.vo.request.EmailRequestVO
+import com.bockerl.snailmember.member.command.domain.vo.request.EmailVerifyRequestVO
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.mail.MailException
@@ -26,6 +27,7 @@ class AuthServiceImpl(
         private const val EMAIL_PREFIX = "verification:email:"
     }
 
+    // 이메일 인증 코드 생성 메서드
     override fun createEmailVerificationCode(emailRequestVO: EmailRequestVO) {
         // let 연산자로 null 검증
         emailRequestVO.memberEmail?.let { email ->
@@ -37,6 +39,7 @@ class AuthServiceImpl(
         } ?: throw CommonException(ErrorCode.MISSING_REQUIRED_FIELD) // email null에 대한 예외
     }
 
+    // 이메일 인증 코드 재생성 메서드
     override fun createEmailRefreshCode(emailRequestVO: EmailRequestVO) {
         // let 연산자로 null 검증
         emailRequestVO.memberEmail?.let { email ->
@@ -47,6 +50,28 @@ class AuthServiceImpl(
             val verificationCode = generateCode()
             logger.info { "새로 재생성된 인증 코드(이메일-$email): $verificationCode" }
             executeEmailVerification(email, verificationCode)
+        } ?: throw CommonException(ErrorCode.MISSING_REQUIRED_FIELD)
+    }
+
+    // 이메일 인증 메서드
+    override fun verifyEmailCode(emailVerifyRequestVO: EmailVerifyRequestVO) {
+        // 이메일 null 체크
+        val email =
+            emailVerifyRequestVO.memberEmail
+                ?: throw CommonException(ErrorCode.MISSING_REQUEST_PARAMETER)
+        emailVerifyRequestVO.verificationCode?.let { code ->
+            logger.info { "인증 요청 코드:$code" }
+            val key = "$EMAIL_PREFIX$email"
+            val verificationCode =
+                redisTemplate.opsForValue().get(key) ?: throw CommonException(ErrorCode.EXPIRED_CODE)
+            logger.info { "redis에서 조회된 인증 코드: $verificationCode" }
+            if (verificationCode != code) {
+                logger.error { "인증 요청 코드가 redis와 불일치 - redis: $verificationCode, 사용자:$code" }
+                throw CommonException(ErrorCode.INVALID_CODE)
+            }
+            // 성공 시 코드 삭제
+            redisTemplate.delete(key)
+            logger.info { "인증 성공 - 이메일: $email" }
         } ?: throw CommonException(ErrorCode.MISSING_REQUIRED_FIELD)
     }
 

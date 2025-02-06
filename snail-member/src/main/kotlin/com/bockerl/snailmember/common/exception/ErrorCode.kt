@@ -37,7 +37,8 @@ enum class ErrorCode(
     NOT_FOUND_USER_ID(40112, HttpStatus.UNAUTHORIZED, "아이디를 잘못 입력하셨습니다."),
     INVALID_PASSWORD(40113, HttpStatus.UNAUTHORIZED, "비밀번호를 잘못 입력하셨습니다."),
     EXPIRED_CODE(40114, HttpStatus.UNAUTHORIZED, "만료된 코드입니다."),
-    INVALID_AUTHENTICATION_OBJECT(40116, HttpStatus.UNAUTHORIZED, "Authentication 객체가 CustomUserDetails 타입이 아닙니다."),
+    INVALID_AUTHENTICATION_OBJECT(40115, HttpStatus.UNAUTHORIZED, "Authentication 객체가 CustomUserDetails 타입이 아닙니다."),
+    INVALID_CODE(40116, HttpStatus.UNAUTHORIZED, "유효하지 않은 코드입니다."),
 
     // 403: 권한 부족 (Forbidden)
     FORBIDDEN_ROLE(40300, HttpStatus.FORBIDDEN, "요청한 리소스에 대한 권한이 없습니다."),

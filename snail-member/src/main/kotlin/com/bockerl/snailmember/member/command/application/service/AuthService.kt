@@ -4,4 +4,6 @@ import com.bockerl.snailmember.member.command.domain.vo.request.EmailRequestVO
 
 interface AuthService {
     fun createEmailVerificationCode(emailRequestVO: EmailRequestVO)
+
+    fun createEmailRefreshCode(emailRequestVO: EmailRequestVO)
 }

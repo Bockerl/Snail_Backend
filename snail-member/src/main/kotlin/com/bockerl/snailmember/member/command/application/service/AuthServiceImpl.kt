@@ -33,25 +33,47 @@ class AuthServiceImpl(
             // 1. 인증 번호 생성
             val verificationCode = generateCode()
             logger.info { "새로 생성된 인증 코드(이메일-$email): $verificationCode" }
-            runCatching {
-                // 2. Redis에 TTL로 저장
-                saveVerificationCode(email, verificationCode)
-                logger.info { "인증 코드 redis에 저장 성공" }
-                // 3. 메일 전송
-                sendVerificationEmail(email, verificationCode)
-                logger.info { "인증 코드 이메일($email) 전송 성공" }
-            }.onFailure { exception ->
-                // 중간과정 실패 시 redis에 저장된 코드를 삭제 및 예외 던지기
-                logger.error { "이메일 인증 과정 중 에러 발생, 문제 이메일: $email" }
-                redisTemplate.delete("$EMAIL_PREFIX$email")
-                when (exception) {
-                    // Mail 관련 Exception이면 전용 예외 던지기
-                    is MailException -> throw CommonException(ErrorCode.MAIL_SEND_FAIL)
-                    // 아니면 그냥 서버 관련 에러 던지기
-                    else -> throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
-                }
+            executeEmailVerification(email, verificationCode)
+        } ?: throw CommonException(ErrorCode.MISSING_REQUIRED_FIELD) // email null에 대한 예외
+    }
+
+    override fun createEmailRefreshCode(emailRequestVO: EmailRequestVO) {
+        // let 연산자로 null 검증
+        emailRequestVO.memberEmail?.let { email ->
+            logger.info { "입력받은 인증용 이메일 주소: $email" }
+            // 1. Redis에 이미 존재하는 코드 삭제
+            deleteExVerificationCode(email)
+            // 2. 코드 재생성
+            val verificationCode = generateCode()
+            logger.info { "새로 재생성된 인증 코드(이메일-$email): $verificationCode" }
+            executeEmailVerification(email, verificationCode)
+        } ?: throw CommonException(ErrorCode.MISSING_REQUIRED_FIELD)
+    }
+
+    // 이메일 인증 코드 생성 공통 로직
+    private fun executeEmailVerification(
+        email: String,
+        verificationCode: String,
+    ) {
+        runCatching {
+            saveVerificationCode(email, verificationCode)
+            logger.info { "인증 코드 redis에 저장 성공" }
+            sendVerificationEmail(email, verificationCode)
+            logger.info { "인증 코드 이메일($email) 전송 성공" }
+        }.onFailure { exception ->
+            logger.error { "이메일 인증 과정 중 에러 발생, 문제 이메일: $email" }
+            redisTemplate.delete("$EMAIL_PREFIX$email")
+            when (exception) {
+                is MailException -> throw CommonException(ErrorCode.MAIL_SEND_FAIL)
+                else -> throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
             }
-        } ?: throw CommonException(ErrorCode.MISSING_REQUIRED_FIELD) // null에 대한 예외
+        }
+    }
+
+    // redis에 이미 존재하는 코드 삭제
+    private fun deleteExVerificationCode(email: String) {
+        val key = "$EMAIL_PREFIX$email"
+        redisTemplate.delete(key)
     }
 
     // redis에 TTL(5분)으로 코드를 저장하는 메서드

@@ -22,4 +22,12 @@ class AuthController(
         authService.createEmailVerificationCode(emailRequestVO)
         return ResponseDTO.ok("메일 인증 코드가 보내졌습니다.")
     }
+
+    @PostMapping("/verification/trial/email/refresh")
+    fun postEmailRefreshCode(
+        @RequestBody emailRequestVO: EmailRequestVO,
+    ): ResponseDTO<*> {
+        authService.createEmailRefreshCode(emailRequestVO)
+        return ResponseDTO.ok("메일 인증 코드가 재발급되었습니다.")
+    }
 }

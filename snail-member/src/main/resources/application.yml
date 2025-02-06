@@ -27,6 +27,11 @@ spring:
                     auth: true
                     starttls:
                         enable: true
+    data:
+        redis:
+            host: ${REDIS_HOST}
+            port: ${REDIS_PORT}
+
 
 mybatis:
     mapper-locations: classpath:/com/bockerl/snailmember/mapper/**/*.xml

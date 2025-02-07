@@ -22,7 +22,6 @@ data class Board(
     )
     var boardId: Long? = null,
 
-    /* 설명. null일 시 "" 빈문자열 저장 */
     @Lob
     @Column(name = "board_contents", columnDefinition = "TEXT")
     var boardContents: String?,

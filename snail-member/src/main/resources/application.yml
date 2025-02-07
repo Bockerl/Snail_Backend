@@ -16,6 +16,17 @@ spring:
     properties:
         hibernate:
             format_sql: true
+    cloud:
+        azure:
+            storage:
+                blob:
+                    connection-string: ${AZURE_STORAGE_ACCOUNT_ENDPOINT}
+                    container-name: ${AZURE_STORAGE_CONTAINER_NAME}
+    servlet:
+        multipart:
+            max-file-size: 1MB
+            max-request-size: 10MB
+
 mybatis:
     mapper-locations: classpath:/com/bockerl/snailmember/mapper/**/*.xml
 

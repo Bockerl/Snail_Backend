@@ -4,7 +4,6 @@ package com.bockerl.snailmember.member.command.application.service
 
 import com.bockerl.snailmember.config.AuthTestConfiguration
 import com.bockerl.snailmember.config.TestSupport
-import com.bockerl.snailmember.member.command.domain.vo.request.EmailRequestVO
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
@@ -14,7 +13,6 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import java.time.Duration
-import java.time.LocalDate
 
 @Import(AuthTestConfiguration::class)
 class AuthServiceImplTests(
@@ -27,15 +25,9 @@ class AuthServiceImplTests(
     fun emailVerification_success() {
         // given
         val email = "test@test.com"
-        val requestVO =
-            EmailRequestVO(
-                memberNickName = "test",
-                memberEmail = email,
-                memberBirth = LocalDate.now(),
-            )
 
         // when
-        authService.createEmailVerificationCode(requestVO)
+        authService.createEmailVerificationCode(email)
 
         // then
         verify(redisTemplate.opsForValue()).set(

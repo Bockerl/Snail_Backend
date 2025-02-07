@@ -1,12 +1,12 @@
 package com.bockerl.snailmember.member.command.application.service
 
-import com.bockerl.snailmember.member.command.domain.vo.request.EmailRequestVO
-import com.bockerl.snailmember.member.command.domain.vo.request.EmailVerifyRequestVO
-
 interface AuthService {
-    fun createEmailVerificationCode(emailRequestVO: EmailRequestVO)
+    fun createEmailVerificationCode(email: String)
 
-    fun createEmailRefreshCode(emailRequestVO: EmailRequestVO)
+    fun verifyEmailCode(
+        email: String,
+        verificationCode: String,
+    )
 
-    fun verifyEmailCode(emailVerifyRequestVO: EmailVerifyRequestVO)
+    fun createPhoneVerificationCode(phoneNumber: String): String
 }

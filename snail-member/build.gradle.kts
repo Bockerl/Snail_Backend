@@ -67,6 +67,11 @@ dependencies {
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
     // kotlin - logging
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
+    // sms service(coolsms)
+    implementation("net.nurigo:sdk:4.3.2")
+    // redis 직렬화 설정
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 }
 dependencyManagement {
     imports {

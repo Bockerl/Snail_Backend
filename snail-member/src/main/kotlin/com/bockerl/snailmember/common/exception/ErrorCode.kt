@@ -32,7 +32,7 @@ enum class ErrorCode(
     TOKEN_UNKNOWN_ERROR(40107, HttpStatus.UNAUTHORIZED, "알 수 없는 토큰입니다."),
     LOGIN_FAILURE(40108, HttpStatus.UNAUTHORIZED, "로그인에 실패했습니다"),
     UNAUTHORIZED_ACCESS(40109, HttpStatus.UNAUTHORIZED, "인증되지 않은 접근입니다."),
-    EXPIRED_SESSION(40110, HttpStatus.UNAUTHORIZED, "세션이 만료되었습니다."),
+    EXPIRED_SIGNUP_SESSION(40110, HttpStatus.UNAUTHORIZED, "회원가입 세션이 만료되었습니다."),
     EXIST_USER(401121, HttpStatus.UNAUTHORIZED, "이미 회원가입한 회원입니다."),
     NOT_FOUND_USER_ID(40112, HttpStatus.UNAUTHORIZED, "아이디를 잘못 입력하셨습니다."),
     INVALID_PASSWORD(40113, HttpStatus.UNAUTHORIZED, "비밀번호를 잘못 입력하셨습니다."),

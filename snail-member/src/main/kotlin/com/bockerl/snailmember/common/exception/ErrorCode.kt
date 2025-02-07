@@ -20,6 +20,7 @@ enum class ErrorCode(
     INVALID_RANDOM_QUESTION_STATUS(40012, HttpStatus.BAD_REQUEST, "답변이 완료된 상태가 아닙니다."),
     INACTIVE_REPLY(40013, HttpStatus.BAD_REQUEST, "해당 대댓글은 삭제돼 있습니다."),
     EMPTY_REQUEST_INPUTSTREAM(40015, HttpStatus.BAD_REQUEST, "요청 본문이 비어 있습니다. 필수 데이터를 포함해야 합니다."),
+    TOO_MANY_FILES(40016, HttpStatus.BAD_REQUEST, "파일 업로드 제한 수를 넘었습니다."),
 
     // 401: 인증 실패 (Unauthorized)
     INVALID_HEADER_VALUE(40100, HttpStatus.UNAUTHORIZED, "올바르지 않은 헤더값입니다."),

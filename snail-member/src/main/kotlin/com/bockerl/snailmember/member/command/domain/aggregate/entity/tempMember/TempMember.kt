@@ -15,10 +15,8 @@ data class TempMember(
     val nickName: String,
     val birth: LocalDate,
     val email: String,
-    var emailVerificationCode: String? = null,
-    var phoneNumber: String? = null,
-    var phoneNumberVerificationCode: String? = null,
-    var password: String? = null,
+    var phoneNumber: String = "",
+    var password: String = "",
     var signUpStep: SignUpStep = SignUpStep.INITIAL,
 ) : Serializable {
     // Jackson을 위한 기본 생성자
@@ -53,15 +51,13 @@ data class TempMember(
             signUpStep = SignUpStep.EMAIL_VERIFIED,
         )
 
-    fun verifyPhoneNumber(phoneNumber: String): TempMember =
+    fun verifyPhoneNumber(): TempMember =
         copy(
             signUpStep = SignUpStep.PHONE_VERIFIED,
-            phoneNumber = phoneNumber,
         )
 
-    fun verifyPassword(password: String): TempMember =
+    fun verifyPassword(): TempMember =
         copy(
             signUpStep = SignUpStep.PASSWORD_VERIFIED,
-            password = password,
         )
 }

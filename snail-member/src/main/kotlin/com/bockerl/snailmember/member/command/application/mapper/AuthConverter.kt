@@ -5,14 +5,16 @@ import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.dto.request.EmailRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.EmailVerifyRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.PhoneRequestDTO
+import com.bockerl.snailmember.member.command.application.dto.request.PhoneVerifyRequestDTO
 import com.bockerl.snailmember.member.command.domain.vo.request.EmailRequestVO
 import com.bockerl.snailmember.member.command.domain.vo.request.EmailVerifyRequestVO
 import com.bockerl.snailmember.member.command.domain.vo.request.PhoneRequestVO
+import com.bockerl.snailmember.member.command.domain.vo.request.PhoneVerifyRequestVO
 import org.springframework.stereotype.Component
 
 @Component
 class AuthConverter {
-    // 회원가입 요청 Vo to dto
+    // 회원가입 요청 vo to dto
     fun emailRequestVOToDTO(requestVO: EmailRequestVO) =
         EmailRequestDTO(
             memberEmail = requestVO.memberEmail ?: throw CommonException(ErrorCode.INVALID_INPUT_VALUE),
@@ -20,17 +22,24 @@ class AuthConverter {
             memberBirth = requestVO.memberBirth ?: throw CommonException(ErrorCode.INVALID_INPUT_VALUE),
         )
 
-    // 이메일 인증 코드 Vo to dto
+    // 이메일 인증 코드 vo to dto
     fun emailVerifyRequestVOToDTO(requestVO: EmailVerifyRequestVO) =
         EmailVerifyRequestDTO(
             verificationCode = requestVO.verificationCode ?: throw CommonException(ErrorCode.INVALID_INPUT_VALUE),
             redisId = requestVO.redisId ?: throw CommonException(ErrorCode.INVALID_INPUT_VALUE),
         )
 
-    // 휴대폰 인증 코드 요청 Vo to dto
+    // 휴대폰 인증 코드 요청 vo to dto
     fun phoneRequestVOToDTO(requestVO: PhoneRequestVO): PhoneRequestDTO =
         PhoneRequestDTO(
             phoneNumber = requestVO.phoneNumber ?: throw CommonException(ErrorCode.INVALID_INPUT_VALUE),
+            redisId = requestVO.redisId ?: throw CommonException(ErrorCode.INVALID_INPUT_VALUE),
+        )
+
+    // 휴대폰 인증 코드 vo to dto
+    fun phoneVerifyRequestVOToDTO(requestVO: PhoneVerifyRequestVO) =
+        PhoneVerifyRequestDTO(
+            verificationCode = requestVO.verificationCode ?: throw CommonException(ErrorCode.INVALID_INPUT_VALUE),
             redisId = requestVO.redisId ?: throw CommonException(ErrorCode.INVALID_INPUT_VALUE),
         )
 }

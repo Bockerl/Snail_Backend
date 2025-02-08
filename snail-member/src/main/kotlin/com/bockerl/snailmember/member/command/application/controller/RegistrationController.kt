@@ -6,6 +6,7 @@ import com.bockerl.snailmember.member.command.application.service.RegistrationSe
 import com.bockerl.snailmember.member.command.domain.vo.request.EmailRequestVO
 import com.bockerl.snailmember.member.command.domain.vo.request.EmailVerifyRequestVO
 import com.bockerl.snailmember.member.command.domain.vo.request.PhoneRequestVO
+import com.bockerl.snailmember.member.command.domain.vo.request.PhoneVerifyRequestVO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -61,8 +62,8 @@ class RegistrationController(
         @RequestBody requestVO: EmailRequestVO,
     ): ResponseDTO<*> {
         val requestDTO = authConverter.emailRequestVOToDTO(requestVO)
-        val redisKey = registrationService.initiateRegistration(requestDTO)
-        return ResponseDTO.ok(redisKey)
+        val redisId = registrationService.initiateRegistration(requestDTO)
+        return ResponseDTO.ok(redisId)
     }
 
     @Operation(
@@ -88,8 +89,8 @@ class RegistrationController(
         @RequestBody requestVO: EmailVerifyRequestVO,
     ): ResponseDTO<*> {
         val requestDTO = authConverter.emailVerifyRequestVOToDTO(requestVO)
-        val redisKey = registrationService.verifyEmailCode(requestDTO)
-        return ResponseDTO.ok(redisKey)
+        val redisId = registrationService.verifyEmailCode(requestDTO)
+        return ResponseDTO.ok(redisId)
     }
 
     @Operation(
@@ -110,11 +111,11 @@ class RegistrationController(
             ),
         ],
     )
-    @PostMapping("/verification/email/refresh/{redisKey}")
+    @PostMapping("/verification/email/refresh/{redisId}")
     fun postEmailRefreshCode(
-        @PathVariable redisKey: String,
+        @PathVariable redisId: String,
     ): ResponseDTO<*> {
-        registrationService.createEmailRefreshCode(redisKey)
+        registrationService.createEmailRefreshCode(redisId)
         return ResponseDTO.ok("메일 인증 코드가 재발급되었습니다.")
     }
 
@@ -152,5 +153,32 @@ class RegistrationController(
             )
         val response = messageService.sendOne(SingleMessageSendingRequest(message))
         return response
+    }
+
+    @Operation(
+        summary = "핸드폰 인증 시도",
+        description = "핸드폰 인증 코드로 인증을 시도합니다.",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "핸드폰 인증 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = PhoneVerifyRequestVO::class),
+                    ),
+                ],
+            ),
+        ],
+    )
+    @PostMapping("/verification/phone")
+    fun postPhoneVerification(
+        @RequestBody requestVO: PhoneVerifyRequestVO,
+    ): ResponseDTO<*> {
+        val requestDTO = authConverter.phoneVerifyRequestVOToDTO(requestVO)
+        val redisId = registrationService.verifyPhoneCode(requestDTO)
+        return ResponseDTO.ok(redisId)
     }
 }

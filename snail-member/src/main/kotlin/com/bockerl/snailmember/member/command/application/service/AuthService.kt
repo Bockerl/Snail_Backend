@@ -9,4 +9,9 @@ interface AuthService {
     )
 
     fun createPhoneVerificationCode(phoneNumber: String): String
+
+    fun verifyPhoneCode(
+        phoneNumber: String,
+        verificationCode: String,
+    )
 }

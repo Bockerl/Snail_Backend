@@ -15,4 +15,6 @@ interface RegistrationService {
     fun createPhoneVerificationCode(requestDTO: PhoneRequestDTO): String
 
     fun verifyPhoneCode(requestDTO: PhoneVerifyRequestDTO): String
+
+    fun createPhoneRefreshCode(redisId: String)
 }

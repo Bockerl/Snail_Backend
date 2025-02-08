@@ -7,7 +7,10 @@ import org.springframework.test.context.TestExecutionListeners
 @SpringBootTest
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @TestExecutionListeners(
-    listeners = [ContextLoadListener::class],
+    listeners = [
+        ContextLoadListener::class,
+        ResetMockTestExecutionListener::class,
+    ],
     mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS,
 )
 abstract class TestSupport

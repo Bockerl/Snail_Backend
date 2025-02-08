@@ -136,4 +136,21 @@ class AuthServiceImpl(
         logger.info { "redis 코드와 사용자 제공 코드가 일치함" }
         deleteExVerificationCode(email)
     }
+
+    // 휴대폰 인증 메서드
+    override fun verifyPhoneCode(
+        phoneNumber: String,
+        verificationCode: String,
+    ) {
+        logger.info { "핸드폰 인증 메서드 시작 - phone:$phoneNumber, code:$verificationCode" }
+        val key = "$PHONE_PREFIX$phoneNumber"
+        val savedCode =
+            redisTemplate.opsForValue().get(key)
+                ?: throw CommonException(ErrorCode.EXPIRED_CODE)
+        logger.info { "redis에 저장되어 있던 코드: $savedCode" }
+        // 코드 일치하지 않으면 예외 던지기
+        if (savedCode != verificationCode) throw CommonException(ErrorCode.INVALID_CODE)
+        logger.info { "redis 코드와 사용자 제공 코드가 일치함" }
+        deleteExVerificationCode(phoneNumber)
+    }
 }

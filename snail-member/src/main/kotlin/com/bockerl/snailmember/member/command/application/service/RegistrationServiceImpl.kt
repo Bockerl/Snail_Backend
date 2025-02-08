@@ -5,6 +5,7 @@ import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.dto.request.EmailRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.EmailVerifyRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.PhoneRequestDTO
+import com.bockerl.snailmember.member.command.application.dto.request.PhoneVerifyRequestDTO
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.SignUpStep
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.TempMember
 import com.bockerl.snailmember.member.command.domain.repository.TempMemberRepository
@@ -43,6 +44,10 @@ class RegistrationServiceImpl(
         val tempMember =
             tempMemberRepository.find(redisId)
                 ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
+        if (tempMember.signUpStep != SignUpStep.INITIAL) {
+            logger.error { "이메일 인증 순서가 아닌 상태에서 인증 요청이 날라온 에러 발생 - redisId: $redisId" }
+            throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
+        }
         logger.info { "redis에서 저장된 tempMember: $tempMember" }
         authService.createEmailVerificationCode(tempMember.email)
     }
@@ -88,7 +93,37 @@ class RegistrationServiceImpl(
         }
         // 휴대폰 인증 코드 생성
         val verificationCode = authService.createPhoneVerificationCode(requestDTO.phoneNumber)
+        // 임시 회원의 번호에 휴대폰 번호 등록
+        tempMember.phoneNumber = requestDTO.phoneNumber
+        // 임시 회원 상태 변경
+        tempMemberRepository.update(redisId, tempMember)
         logger.info { "휴대폰 인증 코드 발송 성공" }
         return verificationCode
+    }
+
+    // 3-1. 휴대폰 인증 코드 재요청
+
+    // 4. 휴대폰 인증 요청
+    override fun verifyPhoneCode(requestDTO: PhoneVerifyRequestDTO): String {
+        val redisId = requestDTO.redisId
+        logger.info { "이메일 인증 시작 - key: $redisId" }
+        // redis에서 tempMember 조회
+        val tempMember =
+            tempMemberRepository.find(redisId)
+                ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
+        logger.info { "redis에서 조회된 tempMember: $tempMember" }
+        // 휴대폰 인증 순서인지 확인
+        if (tempMember.signUpStep != SignUpStep.EMAIL_VERIFIED) {
+            logger.error { "휴대폰 인증 순서가 아닌 상태에서 인증 요청이 날라온 에러 발생 - redisId: $redisId" }
+            throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
+        }
+        val phoneNumber = tempMember.phoneNumber
+        // 휴대폰 인증 시도
+        authService.verifyPhoneCode(phoneNumber, requestDTO.verificationCode)
+        // 인증된 상태로 임시회원 변경
+        val updatedMember = tempMember.verifyPhoneNumber()
+        // 임시 회원 저장
+        tempMemberRepository.update(redisId, updatedMember)
+        return redisId
     }
 }

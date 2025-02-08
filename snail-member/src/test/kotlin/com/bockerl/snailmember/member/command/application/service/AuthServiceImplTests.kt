@@ -50,6 +50,30 @@ class AuthServiceImplTests(
         }
 
         @Test
+        @DisplayName("이메일 인증 코드 재발급 테스트")
+        fun emailVerification_recreate_success() {
+            // given
+            val email = "test@test.com"
+
+            whenever(redisTemplate.delete("verification:email:$email")).thenReturn(true)
+
+            // when
+            authService.createEmailVerificationCode(email)
+
+            // then
+            verify(redisTemplate).delete("verification:email:$email")
+            verify(redisTemplate.opsForValue()).set(
+                argThat { it.startsWith("verification:email:") },
+                argThat { it.length == 5 },
+            )
+            verify(redisTemplate).expire(
+                argThat { it.startsWith("verification:email:") },
+                eq(Duration.ofMinutes(5)),
+            )
+            verify(mailSender).send(any<SimpleMailMessage>())
+        }
+
+        @Test
         @DisplayName("이메일 인증 요청 성공 테스트")
         fun emailVerification_success() {
             // given

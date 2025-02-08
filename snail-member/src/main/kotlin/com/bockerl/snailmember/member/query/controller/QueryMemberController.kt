@@ -34,7 +34,10 @@ class QueryMemberController(
                 responseCode = "200",
                 description = "멤버 조회 성공",
                 content = [
-                    Content(mediaType = "application/json", schema = Schema(implementation = MemberDTO::class)),
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = MemberDTO::class),
+                    ),
                 ],
             ),
         ],

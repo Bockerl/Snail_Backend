@@ -9,7 +9,7 @@ interface RegistrationService {
 
     fun verifyEmailCode(requestDTO: EmailVerifyRequestDTO): String
 
-    fun createEmailRefreshCode(redisKey: String)
+    fun createEmailRefreshCode(redisId: String)
 
     fun createPhoneVerificationCode(requestDTO: PhoneRequestDTO): String
 }

@@ -6,6 +6,11 @@ import com.bockerl.snailmember.member.command.application.service.RegistrationSe
 import com.bockerl.snailmember.member.command.domain.vo.request.EmailRequestVO
 import com.bockerl.snailmember.member.command.domain.vo.request.EmailVerifyRequestVO
 import com.bockerl.snailmember.member.command.domain.vo.request.PhoneRequestVO
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import net.nurigo.sdk.NurigoApp
 import net.nurigo.sdk.message.model.Message
 import net.nurigo.sdk.message.request.SingleMessageSendingRequest
@@ -33,6 +38,24 @@ class RegistrationController(
     val messageService: DefaultMessageService =
         NurigoApp.initialize(coolKey, coolSecret, "https://api.coolsms.co.kr")
 
+    @Operation(
+        summary = "이메일 회원 가입 시작",
+        description = "닉네임, 이메일, 생년월일을 입력하여 회원가입을 시작합니다.",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "이메일 인증 코드 발송 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = EmailRequestVO::class),
+                    ),
+                ],
+            ),
+        ],
+    )
     @PostMapping("/initiation/email")
     fun postEmailRegistration(
         @RequestBody requestVO: EmailRequestVO,
@@ -42,6 +65,24 @@ class RegistrationController(
         return ResponseDTO.ok(redisKey)
     }
 
+    @Operation(
+        summary = "이메일 인증 시도",
+        description = "이메일 인증 코드로 인증을 시도합니다.",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "이메일 인증 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = EmailVerifyRequestVO::class),
+                    ),
+                ],
+            ),
+        ],
+    )
     @PostMapping("/verification/email")
     fun postEmailVerification(
         @RequestBody requestVO: EmailVerifyRequestVO,
@@ -51,6 +92,24 @@ class RegistrationController(
         return ResponseDTO.ok(redisKey)
     }
 
+    @Operation(
+        summary = "이메일 인증 코드 재발급",
+        description = "이메일 인증 코드를 재발급 요청합니다.",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "이메일 인증 코드 재발급 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = EmailVerifyRequestVO::class),
+                    ),
+                ],
+            ),
+        ],
+    )
     @PostMapping("/verification/email/refresh/{redisKey}")
     fun postEmailRefreshCode(
         @PathVariable redisKey: String,
@@ -59,6 +118,24 @@ class RegistrationController(
         return ResponseDTO.ok("메일 인증 코드가 재발급되었습니다.")
     }
 
+    @Operation(
+        summary = "핸드폰 인증 코드 발급",
+        description = "핸드폰 인증 코드를 발급",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "휴대폰 인증 코드 발급 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = PhoneRequestVO::class),
+                    ),
+                ],
+            ),
+        ],
+    )
     @PostMapping("/initiation/phone")
     fun postPhoneRegistration(
         @RequestBody requestVO: PhoneRequestVO,

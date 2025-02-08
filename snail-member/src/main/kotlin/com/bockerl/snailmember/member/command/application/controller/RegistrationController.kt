@@ -67,6 +67,32 @@ class RegistrationController(
     }
 
     @Operation(
+        summary = "이메일 인증 코드 재발급",
+        description = "이메일 인증 코드를 재발급 요청합니다.",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "이메일 인증 코드 재발급 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = EmailVerifyRequestVO::class),
+                    ),
+                ],
+            ),
+        ],
+    )
+    @PostMapping("/verification/email/refresh/{redisId}")
+    fun postEmailRefreshCode(
+        @PathVariable redisId: String,
+    ): ResponseDTO<*> {
+        registrationService.createEmailRefreshCode(redisId)
+        return ResponseDTO.ok("메일 인증 코드가 재발급되었습니다.")
+    }
+
+    @Operation(
         summary = "이메일 인증 시도",
         description = "이메일 인증 코드로 인증을 시도합니다.",
     )
@@ -91,32 +117,6 @@ class RegistrationController(
         val requestDTO = authConverter.emailVerifyRequestVOToDTO(requestVO)
         val redisId = registrationService.verifyEmailCode(requestDTO)
         return ResponseDTO.ok(redisId)
-    }
-
-    @Operation(
-        summary = "이메일 인증 코드 재발급",
-        description = "이메일 인증 코드를 재발급 요청합니다.",
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "이메일 인증 코드 재발급 성공",
-                content = [
-                    Content(
-                        mediaType = "application/json",
-                        schema = Schema(implementation = EmailVerifyRequestVO::class),
-                    ),
-                ],
-            ),
-        ],
-    )
-    @PostMapping("/verification/email/refresh/{redisId}")
-    fun postEmailRefreshCode(
-        @PathVariable redisId: String,
-    ): ResponseDTO<*> {
-        registrationService.createEmailRefreshCode(redisId)
-        return ResponseDTO.ok("메일 인증 코드가 재발급되었습니다.")
     }
 
     @Operation(
@@ -153,6 +153,14 @@ class RegistrationController(
             )
         val response = messageService.sendOne(SingleMessageSendingRequest(message))
         return response
+    }
+
+    @PostMapping("/verification/phone/refresh/{redisId}")
+    fun postPhoneRefreshCode(
+        @PathVariable redisId: String,
+    ): ResponseDTO<*> {
+        registrationService.createPhoneRefreshCode(redisId)
+        return ResponseDTO.ok("휴대폰 인증 코드가 재발급되었습니다.")
     }
 
     @Operation(

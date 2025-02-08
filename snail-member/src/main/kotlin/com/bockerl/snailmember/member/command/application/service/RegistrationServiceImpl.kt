@@ -8,6 +8,7 @@ import com.bockerl.snailmember.member.command.application.dto.request.PhoneReque
 import com.bockerl.snailmember.member.command.application.dto.request.PhoneVerifyRequestDTO
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.SignUpStep
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.TempMember
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.VerificationType
 import com.bockerl.snailmember.member.command.domain.repository.TempMemberRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
@@ -67,7 +68,7 @@ class RegistrationServiceImpl(
             throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
         }
         // 이메일 인증 시도
-        authService.verifyEmailCode(tempMember.email, requestDTO.verificationCode)
+        authService.verifyCode(tempMember.email, requestDTO.verificationCode, VerificationType.EMAIL)
         // 이메일 인증 상태로 변경
         val updatedTempMember = tempMember.verifyEmail()
         logger.info { "이메일 인증 성공 후 redis에 업데이트되는 임시 회원: $updatedTempMember" }
@@ -102,6 +103,18 @@ class RegistrationServiceImpl(
     }
 
     // 3-1. 휴대폰 인증 코드 재요청
+    override fun createPhoneRefreshCode(redisId: String) {
+        logger.info { "휴대폰 인증 코드 재요청 시작" }
+        val tempMember =
+            tempMemberRepository.find(redisId)
+                ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
+        if (tempMember.signUpStep != SignUpStep.EMAIL_VERIFIED) {
+            logger.error { "휴대폰 인증 순서가 아닌 상태에서 인증 요청이 날라온 에러 발생 - redisId: $redisId" }
+            throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
+        }
+        logger.info { "redis에서 저장된 tempMember: $tempMember" }
+        authService.createPhoneVerificationCode(tempMember.phoneNumber)
+    }
 
     // 4. 휴대폰 인증 요청
     override fun verifyPhoneCode(requestDTO: PhoneVerifyRequestDTO): String {
@@ -119,7 +132,7 @@ class RegistrationServiceImpl(
         }
         val phoneNumber = tempMember.phoneNumber
         // 휴대폰 인증 시도
-        authService.verifyPhoneCode(phoneNumber, requestDTO.verificationCode)
+        authService.verifyCode(phoneNumber, requestDTO.verificationCode, VerificationType.PHONE)
         // 인증된 상태로 임시회원 변경
         val updatedMember = tempMember.verifyPhoneNumber()
         // 임시 회원 저장

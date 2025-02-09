@@ -19,13 +19,32 @@ class CommandFileController(
     @PostMapping("")
     fun postFiles(
         @RequestPart("files") files: List<MultipartFile>,
-        @RequestPart("commandFileDTO") commandFileDTO: CommandFileDTO
+        @RequestPart("commandFileRequestVO") commandFileRequestVO: CommandFileRequestVO,
     ): ResponseDTO<Void> {
 
-        commandFileService.uploadFiles(files, commandFileDTO)
+        commandFileService.uploadFiles(files, commandFileRequestVO)
 
         return ResponseDTO.ok(null)
     }
+
+    @PatchMapping("")
+    fun patchFiles(
+        @RequestPart("commandFileRequestVO") commandFileRequestVO: CommandFileRequestVO,
+        @RequestPart("deleteFilesIds") deleteFilesIds: List<Long>,
+        @RequestPart("newFiles") newFiles: List<MultipartFile>,
+    ) :ResponseDTO<Void> {
+
+        commandFileService.updateFiles(commandFileRequestVO, deleteFilesIds, newFiles)
+
+        return ResponseDTO.ok(null);
+    }
+
+    @DeleteMapping("")
+    fun deleteFile(@RequestBody commandFileRequestVO: CommandFileRequestVO): ResponseDTO<Void> {
+        commandFileService.deleteFile(commandFileRequestVO)
+        return ResponseDTO.ok(null);
+    }
+
 
     @GetMapping("/download/{fileName}")
     fun downloadFile(@PathVariable fileName: String): ResponseEntity<ByteArray> {
@@ -37,11 +56,4 @@ class CommandFileController(
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"$fileName\"")
             .body(data)
     }
-
-    @DeleteMapping("")
-    fun deleteFile(@RequestBody commandFileRequestVO: CommandFileRequestVO): ResponseDTO<Void> {
-        commandFileService.deleteFile(commandFileRequestVO)
-        return ResponseDTO.ok(null);
-    }
-
 }

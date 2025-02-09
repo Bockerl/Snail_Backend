@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bockerl.snailmember.board.query.repository.BoardMapper">
+    <resultMap id="boardResultMap" type="com.bockerl.snailmember.board.query.dto.QueryBoardDTO">
+        <result property="boardId" column="board_id"/>
+        <result property="boardContents" column="board_contents"/>
+        <result property="boardType" column="board_type"/>
+        <result property="boardTag" column="board_tag"/>
+        <result property="boardLocation" column="board_location"/>
+        <result property="boardAccessLevel" column="board_access_level"/>
+        <result property="boardView" column="board_view"/>
+        <result property="active" column="active"/>
+        <result property="memberId" column="member_id"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectBoardByBoardId" parameterType="Long" resultMap="boardResultMap">
+        SELECT
+            board_id,
+            board_contents,
+            board_type,
+            board_tag,
+            board_location,
+            board_access_level,
+            board_view,
+            active,
+            member_id,
+            created_at,
+            updated_at
+          FROM
+            board
+         WHERE
+            board_id = #{boardId}
+    </select>
+
+    <select id="selectBoardByBoardType" parameterType="String" resultMap="boardResultMap">
+        SELECT
+            board_id,
+            board_contents,
+            board_type,
+            board_tag,
+            board_location,
+            board_access_level,
+            board_view,
+            active,
+            member_id,
+            created_at,
+            updated_at
+          FROM
+            board
+         WHERE
+            board_type = #{boardType}
+    </select>
+
+    <select id="selectBoardByBoardTag" parameterType="String" resultMap="boardResultMap">
+        SELECT
+            board_id,
+            board_contents,
+            board_type,
+            board_tag,
+            board_location,
+            board_access_level,
+            board_view,
+            active,
+            member_id,
+            created_at,
+            updated_at
+          FROM
+            board
+        <if test="boardTagList != null and boardTagList.size() > 0">
+         WHERE board_tag IN
+            <foreach collection="boardTagList" item="board_tag" open="(" separator="," close=")">
+                #{board_tag}
+            </foreach>
+        </if>
+    </select>
+</mapper>

@@ -4,7 +4,7 @@ package com.bockerl.snailmember.member.command.application.service
 
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
-import com.bockerl.snailmember.config.AuthTestConfiguration
+import com.bockerl.snailmember.config.TestConfiguration
 import com.bockerl.snailmember.config.TestSupport
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.VerificationType
 import org.junit.jupiter.api.*
@@ -20,7 +20,7 @@ import java.time.Duration
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-@Import(AuthTestConfiguration::class)
+@Import(TestConfiguration::class)
 class AuthServiceImplTests : TestSupport() {
     @Autowired
     private lateinit var redisTemplate: RedisTemplate<String, String>

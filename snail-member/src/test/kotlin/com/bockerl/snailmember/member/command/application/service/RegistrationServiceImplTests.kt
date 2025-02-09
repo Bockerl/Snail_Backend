@@ -4,7 +4,7 @@ package com.bockerl.snailmember.member.command.application.service
 
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
-import com.bockerl.snailmember.config.RegistrationTestConfiguration
+import com.bockerl.snailmember.config.TestConfiguration
 import com.bockerl.snailmember.config.TestSupport
 import com.bockerl.snailmember.member.command.application.dto.request.*
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.SignUpStep
@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import java.time.LocalDate
 
-@Import(RegistrationTestConfiguration::class)
+@Import(TestConfiguration::class)
 class RegistrationServiceImplTests : TestSupport() {
     @Autowired
     private lateinit var tempMemberRepository: TempMemberRepository

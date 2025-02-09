@@ -30,7 +30,7 @@ class OpenApiConfig {
 
     @Bean
     @Profile("!Prod")
-    fun coupleApi(): GroupedOpenApi =
+    fun boardApi(): GroupedOpenApi =
         createGroupedOpenApi(
             groupName = "게시글 관련 api",
             paths = arrayOf("/api/board/**"),
@@ -38,10 +38,18 @@ class OpenApiConfig {
 
     @Bean
     @Profile("!Prod")
-    fun momentApi(): GroupedOpenApi =
+    fun gatheringApi(): GroupedOpenApi =
         createGroupedOpenApi(
             groupName = "모임 관련 api",
             paths = arrayOf("/api/gathering/**"),
+        )
+
+    @Bean
+    @Profile("!Prod")
+    fun fileApi(): GroupedOpenApi =
+        createGroupedOpenApi(
+            groupName = "파일 관련 api",
+            paths = arrayOf("/api/file/**"),
         )
 
     private fun createGroupedOpenApi(

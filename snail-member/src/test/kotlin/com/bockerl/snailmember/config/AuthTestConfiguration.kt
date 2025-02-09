@@ -1,7 +1,5 @@
 package com.bockerl.snailmember.config
 
-import com.bockerl.snailmember.member.command.application.service.AuthService
-import com.bockerl.snailmember.member.command.application.service.AuthServiceImpl
 import org.mockito.Mockito.mock
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -19,12 +17,5 @@ class AuthTestConfiguration {
 
     @Primary
     @Bean
-    fun mockMailSender(): JavaMailSender = mock()
-
-    @Primary
-    @Bean
-    fun mockAuthService(
-        redisTemplate: RedisTemplate<String, String>,
-        mailSender: JavaMailSender,
-    ): AuthService = AuthServiceImpl(redisTemplate, mailSender)
+    fun mockMailSender() = mock(JavaMailSender::class.java)!!
 }

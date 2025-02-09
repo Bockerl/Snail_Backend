@@ -3,10 +3,7 @@ package com.bockerl.snailmember.member.command.application.controller
 import com.bockerl.snailmember.common.ResponseDTO
 import com.bockerl.snailmember.member.command.application.mapper.AuthConverter
 import com.bockerl.snailmember.member.command.application.service.RegistrationService
-import com.bockerl.snailmember.member.command.domain.vo.request.EmailRequestVO
-import com.bockerl.snailmember.member.command.domain.vo.request.EmailVerifyRequestVO
-import com.bockerl.snailmember.member.command.domain.vo.request.PhoneRequestVO
-import com.bockerl.snailmember.member.command.domain.vo.request.PhoneVerifyRequestVO
+import com.bockerl.snailmember.member.command.domain.vo.request.*
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -187,6 +184,33 @@ class RegistrationController(
     ): ResponseDTO<*> {
         val requestDTO = authConverter.phoneVerifyRequestVOToDTO(requestVO)
         val redisId = registrationService.verifyPhoneCode(requestDTO)
+        return ResponseDTO.ok(redisId)
+    }
+
+    @Operation(
+        summary = "계정 비밀번호 입력",
+        description = "새 계정의 비밀번호를 입력합니다.",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "비밀번호 입력 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = PasswordRequestVO::class),
+                    ),
+                ],
+            ),
+        ],
+    )
+    @PostMapping("/password")
+    fun postPasswordRegistration(
+        @RequestBody requestVO: PasswordRequestVO,
+    ): ResponseDTO<*> {
+        val requestDTO = authConverter.passwordRequestVOToDTO(requestVO)
+        val redisId = registrationService.postPassword(requestDTO)
         return ResponseDTO.ok(redisId)
     }
 }

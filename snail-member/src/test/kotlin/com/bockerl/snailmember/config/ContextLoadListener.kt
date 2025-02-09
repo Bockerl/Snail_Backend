@@ -16,7 +16,7 @@ class ContextLoadListener : TestExecutionListener {
             loadCount++
             println(
                 """
-                ApplicationContext 새로 초기화됌
+                ApplicationContext 새로 초기화됨
                 ContextId: $contextId
                 총 초기화 횟수: $loadCount
                 테스트 클래스: ${testContext.testClass.simpleName}

@@ -12,7 +12,7 @@ spring:
         database: postgresql
         database-platform: org.hibernate.dialect.PostgreSQLDialect
         hibernate:
-            ddl-auto: none
+            ddl-auto: update
     properties:
         hibernate:
             format_sql: true
@@ -32,6 +32,17 @@ spring:
             host: ${REDIS_HOST}
             port: ${REDIS_PORT}
 
+
+    cloud:
+        azure:
+            storage:
+                blob:
+                    connection-string: ${AZURE_STORAGE_ACCOUNT_ENDPOINT}
+                    container-name: ${AZURE_STORAGE_CONTAINER_NAME}
+    servlet:
+        multipart:
+            max-file-size: 1MB
+            max-request-size: 10MB
 
 mybatis:
     mapper-locations: classpath:/com/bockerl/snailmember/mapper/**/*.xml

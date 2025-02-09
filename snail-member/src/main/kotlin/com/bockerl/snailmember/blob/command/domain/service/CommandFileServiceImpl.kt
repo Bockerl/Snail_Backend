@@ -21,8 +21,10 @@ class CommandFileServiceImpl(
 ) : CommandFileService {
 
     @Transactional
-    override fun uploadFiles(files: List<MultipartFile>, commandFileDTO: CommandFileDTO) {
+    override fun uploadFiles(files: List<MultipartFile>, commandFileRequestVO: CommandFileRequestVO) {
         val fileEntities = mutableListOf<File>()
+        /* 설명. 최대값에 순서를 더 하는 방식.*/
+        var maxOrder = commandFileRepository.findMaxFileOrderByFileTargetTypeAndFileTargetId(commandFileRequestVO.fileTargetType, commandFileRequestVO.fileTargetId) ?: 0
 
         /* 설명. 업로드 파일 수 제한 10개 초과 되지 않도록... */
         if(files.size > 10){
@@ -39,9 +41,10 @@ class CommandFileServiceImpl(
                 fileName = fileName,
                 fileType = file.contentType ?: "unknown",
                 fileUrl = fileUrl,
-                fileTargetType = commandFileDTO.fileTargetType,
-                fileTargetId = commandFileDTO.fileTargetId,
-                memberId = commandFileDTO.memberId // 필요한 경우 추가
+                fileTargetType = commandFileRequestVO.fileTargetType,
+                fileTargetId = commandFileRequestVO.fileTargetId,
+                fileOrder = ++maxOrder,
+                memberId = commandFileRequestVO.memberId,
             )
             fileEntities.add(fileEntity)
         }
@@ -49,16 +52,55 @@ class CommandFileServiceImpl(
         commandFileRepository.saveAll(fileEntities)
     }
 
-    /* 설명.
-         *  Filename을 받아 Blob에서 파일을 다운로드함.
-         *  ByteArrayOutputStream을 사용해서 바이너리 데이터를 읽어옴
-        * */
-    override fun downloadFile(fileName: String): ByteArray {
-        val blobClient = blobContainerClient.getBlobClient(fileName)
-        val outputStream = ByteArrayOutputStream()
-        blobClient.download(outputStream)
-        return outputStream.toByteArray()
+    /* 설명. 삭제할 파일 삭제 후 새로운 파일 추가 */
+    @Transactional
+    override fun updateFiles(commandFileRequestVO: CommandFileRequestVO, deletedFileIds: List<Long>, newFiles: List<MultipartFile>) {
+        val existingFiles = commandFileRepository.findByFileTargetTypeAndFileTargetId(
+            commandFileRequestVO.fileTargetType,
+            commandFileRequestVO.fileTargetId
+        )
+
+        // 삭제할 파일만 삭제
+        if (deletedFileIds.isNotEmpty()) {
+            val filesToDelete = existingFiles.filter { it.fileId in deletedFileIds }
+            filesToDelete.forEach { file ->
+                val blobClient = blobContainerClient.getBlobClient(file.fileName)
+                blobClient.delete()
+            }
+            commandFileRepository.deleteAll(filesToDelete)
+        }
+
+        // 기존 파일 중 유지할 파일 리스트 (삭제되지 않은 파일들)
+        val remainingFiles = existingFiles.filterNot { it.fileId in deletedFileIds }
+            .sortedBy { it.fileOrder } // 기존 순서 유지
+
+        // 새 파일 추가
+        val maxOrder = remainingFiles.maxOf { it.fileOrder } ?: 0
+        val newFileEntities = newFiles.mapIndexed { index, file ->
+            val fileName = generateUniqueFileName(file.originalFilename)
+            val blobClient = blobContainerClient.getBlobClient(fileName)
+            blobClient.upload(file.inputStream, file.size, true)
+
+            File(
+                fileName = fileName,
+                fileType = file.contentType ?: "unknown",
+                fileUrl = blobClient.blobUrl,
+                fileTargetType = commandFileRequestVO.fileTargetType,
+                fileTargetId = commandFileRequestVO.fileTargetId,
+                fileOrder = maxOrder + index + 1,
+                memberId = commandFileRequestVO.memberId,
+            )
+        }
+
+        // 파일 개수 초과 체크
+        if (remainingFiles.size + newFileEntities.size > 10) {
+            throw CommonException(ErrorCode.TOO_MANY_FILES)
+        }
+
+        // 새 파일 저장
+        commandFileRepository.saveAll(newFileEntities)
     }
+
 
     /* 설명.
      *  fileName에 해당하는 Blob을 삭제함.
@@ -73,6 +115,17 @@ class CommandFileServiceImpl(
         }
 
         commandFileRepository.deleteAll(files)
+    }
+
+    /* 설명.
+         *  Filename을 받아 Blob에서 파일을 다운로드함.
+         *  ByteArrayOutputStream을 사용해서 바이너리 데이터를 읽어옴
+        * */
+    override fun downloadFile(fileName: String): ByteArray {
+        val blobClient = blobContainerClient.getBlobClient(fileName)
+        val outputStream = ByteArrayOutputStream()
+        blobClient.download(outputStream)
+        return outputStream.toByteArray()
     }
 
     /* 설명. uuid 생성으로 파일 이름 중복 방지 */

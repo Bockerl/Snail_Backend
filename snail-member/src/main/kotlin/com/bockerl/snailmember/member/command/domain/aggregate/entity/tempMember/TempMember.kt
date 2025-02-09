@@ -56,8 +56,9 @@ data class TempMember(
             signUpStep = SignUpStep.PHONE_VERIFIED,
         )
 
-    fun verifyPassword(): TempMember =
+    fun verifyPassword(password: String): TempMember =
         copy(
+            password = password,
             signUpStep = SignUpStep.PASSWORD_VERIFIED,
         )
 }

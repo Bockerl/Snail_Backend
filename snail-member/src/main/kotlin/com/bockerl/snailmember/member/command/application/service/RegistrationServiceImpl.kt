@@ -4,6 +4,7 @@ import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.dto.request.EmailRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.EmailVerifyRequestDTO
+import com.bockerl.snailmember.member.command.application.dto.request.PasswordRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.PhoneRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.PhoneVerifyRequestDTO
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.SignUpStep
@@ -32,7 +33,7 @@ class RegistrationServiceImpl(
             )
         logger.info { "임시 회원 객체 생성: $tempMember" }
         val redisId = tempMemberRepository.save(tempMember)
-        logger.info { "임시 회원 객체 redisKey 생성완료: $redisId" }
+        logger.info { "임시 회원 객체 redisId 생성완료: $redisId" }
         // 이메일 인증 요청
         authService.createEmailVerificationCode(requestDTO.memberEmail)
         logger.info { "이메일 인증 코드 메일 전송 성공 in registrationService" }
@@ -56,7 +57,7 @@ class RegistrationServiceImpl(
     // 2.이메일 인증 요청
     override fun verifyEmailCode(requestDTO: EmailVerifyRequestDTO): String {
         val redisId = requestDTO.redisId
-        logger.info { "이메일 인증 시작 - key: $redisId" }
+        logger.info { "이메일 인증 시작 - redisId: $redisId" }
         // redis에서 tempMember 조회
         val tempMember =
             tempMemberRepository.find(redisId)
@@ -81,7 +82,7 @@ class RegistrationServiceImpl(
     // 3. 휴대폰 인증 코드 생성
     override fun createPhoneVerificationCode(requestDTO: PhoneRequestDTO): String {
         val redisId = requestDTO.redisId
-        logger.info { "휴대폰 인증 시작 - key: $redisId" }
+        logger.info { "휴대폰 인증 시작 - redisId: $redisId" }
         // redis에서 tempMember조회
         val tempMember =
             tempMemberRepository.find(redisId)
@@ -119,7 +120,7 @@ class RegistrationServiceImpl(
     // 4. 휴대폰 인증 요청
     override fun verifyPhoneCode(requestDTO: PhoneVerifyRequestDTO): String {
         val redisId = requestDTO.redisId
-        logger.info { "이메일 인증 시작 - key: $redisId" }
+        logger.info { "이메일 인증 시작 - redisId: $redisId" }
         // redis에서 tempMember 조회
         val tempMember =
             tempMemberRepository.find(redisId)
@@ -137,6 +138,27 @@ class RegistrationServiceImpl(
         val updatedMember = tempMember.verifyPhoneNumber()
         // 임시 회원 저장
         tempMemberRepository.update(redisId, updatedMember)
+        return redisId
+    }
+
+    // 5. 비밀번호 입력
+    override fun postPassword(requestDTO: PasswordRequestDTO): String {
+        val redisId = requestDTO.redisId
+        logger.info { "비밀번호 입력 시작 - redisId: $redisId" }
+        // redis에서 tempMember 조회
+        val tempMember =
+            tempMemberRepository.find(redisId)
+                ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
+        logger.info { "redis에서 조회된 tempMember: $tempMember" }
+        // 비밀번호 입력 순서인지 확인
+        if (tempMember.signUpStep != SignUpStep.PHONE_VERIFIED) {
+            logger.error { "비밀번호 입력 순서가 아닌 상태에서 인증 요청이 날라온 에러 발성 - redisId: $redisId" }
+            throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
+        }
+        // 비밀번호 입력한 임시회원 상태로 변경
+        val updateMember = tempMember.verifyPassword(requestDTO.password)
+        tempMemberRepository.update(redisId, updateMember)
+        logger.info { "임시회원에 비밀번호 입력 성공" }
         return redisId
     }
 }

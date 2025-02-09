@@ -2,14 +2,8 @@ package com.bockerl.snailmember.member.command.application.mapper
 
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
-import com.bockerl.snailmember.member.command.application.dto.request.EmailRequestDTO
-import com.bockerl.snailmember.member.command.application.dto.request.EmailVerifyRequestDTO
-import com.bockerl.snailmember.member.command.application.dto.request.PhoneRequestDTO
-import com.bockerl.snailmember.member.command.application.dto.request.PhoneVerifyRequestDTO
-import com.bockerl.snailmember.member.command.domain.vo.request.EmailRequestVO
-import com.bockerl.snailmember.member.command.domain.vo.request.EmailVerifyRequestVO
-import com.bockerl.snailmember.member.command.domain.vo.request.PhoneRequestVO
-import com.bockerl.snailmember.member.command.domain.vo.request.PhoneVerifyRequestVO
+import com.bockerl.snailmember.member.command.application.dto.request.*
+import com.bockerl.snailmember.member.command.domain.vo.request.*
 import org.springframework.stereotype.Component
 
 @Component
@@ -40,6 +34,13 @@ class AuthConverter {
     fun phoneVerifyRequestVOToDTO(requestVO: PhoneVerifyRequestVO) =
         PhoneVerifyRequestDTO(
             verificationCode = requestVO.verificationCode ?: throw CommonException(ErrorCode.INVALID_INPUT_VALUE),
+            redisId = requestVO.redisId ?: throw CommonException(ErrorCode.INVALID_INPUT_VALUE),
+        )
+
+    // 비밀번호 vo to dto
+    fun passwordRequestVOToDTO(requestVO: PasswordRequestVO): PasswordRequestDTO =
+        PasswordRequestDTO(
+            password = requestVO.password ?: throw CommonException(ErrorCode.INVALID_INPUT_VALUE),
             redisId = requestVO.redisId ?: throw CommonException(ErrorCode.INVALID_INPUT_VALUE),
         )
 }

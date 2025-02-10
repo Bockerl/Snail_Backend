@@ -5,7 +5,7 @@ import com.bockerl.snailmember.board.command.domain.aggregate.enums.BoardType
 import io.swagger.v3.oas.annotations.media.Schema
 
 
-data class CommandBoardRequestVO(
+data class CommandBoardCreateRequestVO(
     @field:Schema(description = "게시글 내용", example = "달팽이 좋아요", type = "String")
     val boardContents: String?,
     @field:Schema(description = "게시글 타입", example = "FREE", type = "String")

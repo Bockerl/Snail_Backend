@@ -5,17 +5,17 @@ import com.bockerl.snailmember.board.command.domain.aggregate.enums.BoardType
 import io.swagger.v3.oas.annotations.media.Schema
 
 
-data class BoardRequestVO(
+data class CommandBoardRequestVO(
     @field:Schema(description = "게시글 내용", example = "달팽이 좋아요", type = "String")
-    val boardContents: String? = null,
+    val boardContents: String?,
     @field:Schema(description = "게시글 타입", example = "FREE", type = "String")
-    val boardType: BoardType? = null,
+    val boardType: BoardType,
     @field:Schema(description = "게시글 태그", example = "TIP", type = "String")
-    val boardTag: BoardTag? = null,
+    val boardTag: BoardTag,
     @field:Schema(description = "게시글 지역", example = "SINDAEBANG", type = "String")
-    val boardLocation: String? = null,
+    val boardLocation: String,
     @field:Schema(description = "게시글 공개 범위", example = "ALL", type = "String")
-    val boardAccessLevel: String? = null,
+    val boardAccessLevel: String,
     @field:Schema(description = "회원번호", example = "1", type = "Long")
-    val memberId: Long? = null,
+    val memberId: Long,
 )

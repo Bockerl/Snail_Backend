@@ -22,7 +22,6 @@ data class Board(
     )
     var boardId: Long? = null,
 
-    @Lob
     @Column(name = "board_contents", columnDefinition = "TEXT")
     var boardContents: String?,
 

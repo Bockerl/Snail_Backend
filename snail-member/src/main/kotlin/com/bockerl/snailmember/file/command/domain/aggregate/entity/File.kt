@@ -46,9 +46,6 @@ data class File (
     @Column(name = "file_target_id", nullable = false)
     var fileTargetId: Long? = null,
 
-//    @Column(name = "file_order", nullable = false)
-//    var fileOrder: Int,
-
     ){
         @CreationTimestamp
         @Column(name = "created_at", nullable = false, updatable = false)

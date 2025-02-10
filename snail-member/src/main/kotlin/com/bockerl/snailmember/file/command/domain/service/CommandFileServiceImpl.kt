@@ -274,6 +274,6 @@ class CommandFileServiceImpl(
         val uuid = UUID.randomUUID().toString()
         /* 설명. 확장자 파싱 */
         val extension = originalFileName?.substringAfterLast(".", "")?: ""
-        return if(extension.isNotEmpty()) "$uuid-$extension" else uuid
+        return if(extension.isNotEmpty()) "$uuid.$extension" else uuid
     }
 }

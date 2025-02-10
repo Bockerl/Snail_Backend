@@ -5,7 +5,7 @@ import com.bockerl.snailmember.board.command.domain.aggregate.enums.BoardType
 import io.swagger.v3.oas.annotations.media.Schema
 
 data class CommandBoardUpdateRequestVO(
-    @field:Schema(description = "게시글", example = "BOA-00000001", type = "String")
+    @field:Schema(description = "게시글 번호", example = "BOA-00000001", type = "String")
     val boardId: String,
     @field:Schema(description = "게시글 내용", example = "달팽이 좋아요", type = "String")
     val boardContents: String?,

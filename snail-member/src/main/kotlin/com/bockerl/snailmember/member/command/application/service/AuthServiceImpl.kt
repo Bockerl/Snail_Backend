@@ -9,6 +9,7 @@ import org.springframework.mail.MailException
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 import kotlin.random.Random
 
@@ -27,6 +28,7 @@ class AuthServiceImpl(
     }
 
     // 이메일 인증 코드 생성 메서드
+    @Transactional
     override fun createEmailVerificationCode(email: String) {
         logger.info { "새로운 이메일 인증 코드 생성 메서드 시작" }
         val verificationCode = generateCode()
@@ -47,7 +49,8 @@ class AuthServiceImpl(
     }
 
     // 인증 메일을 보내는 메서드
-    private fun sendVerificationEmail(
+    @Transactional
+    fun sendVerificationEmail(
         email: String,
         code: String,
     ) {
@@ -72,6 +75,7 @@ class AuthServiceImpl(
     }
 
     // 휴대폰 인증 코드 생성 메서드
+    @Transactional
     override fun createPhoneVerificationCode(phoneNumber: String): String {
         logger.info { "새로운 휴대폰 인증 코드 생성 메서드 시작" }
         val verificationCode = generateCode()
@@ -88,7 +92,8 @@ class AuthServiceImpl(
     }
 
     // redis에 TTL(5분)으로 코드를 저장하는 공통 메서드
-    private fun saveVerificationCode(
+    @Transactional
+    fun saveVerificationCode(
         thing: String,
         code: String,
         type: VerificationType,
@@ -105,6 +110,7 @@ class AuthServiceImpl(
     }
 
     // 공통 인증 메서드
+    @Transactional
     override fun verifyCode(
         thing: String,
         verificationCode: String,
@@ -130,7 +136,8 @@ class AuthServiceImpl(
     private fun generateCode(): String = Random.nextInt(10000, 99999).toString()
 
     // redis에 이미 존재하는 코드 삭제하는 공통 메서드
-    private fun deleteExVerificationCode(
+    @Transactional
+    fun deleteExVerificationCode(
         redisId: String,
         type: VerificationType,
     ) {

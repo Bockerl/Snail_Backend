@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bockerl.snailmember">
+    <resultMap id="sidoResultMap" type="QuerySidoAreaDTO">
+        <result property="sidoAreaId" column="sido_areas_id"/>
+        <result property="sidoAreaAdmCode" column="sido_area_adm_code"/>
+        <result property="sidoAreaName" column="sido_area_name"/>
+    </resultMap>
+
+    <select id="selectSidoAreaBySidoAreaId" parameterType="Long" resultMap="sidoResultMap">
+        SELECT
+        sido_areas_id,
+        sido_area_adm_code,
+        sido_area_name
+        FROM
+        sido_areas
+        WHERE
+        sido_areas_id = #{sidoAreaId}
+    </select>
+</mapper>

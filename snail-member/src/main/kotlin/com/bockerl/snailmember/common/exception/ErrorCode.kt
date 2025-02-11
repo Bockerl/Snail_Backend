@@ -47,7 +47,10 @@ enum class ErrorCode(
 
     // 404: 리소스를 찾을 수 없음 (Not Found)
     NOT_FOUND_MEMBER(40401, HttpStatus.NOT_FOUND, "회원이 존재하지 않습니다."),
-    NOT_FOUND_COMMENT(40404, HttpStatus.NOT_FOUND, "댓글이 존재하지 않습니다."),
+    NOT_FOUND_SIDO(40402, HttpStatus.NOT_FOUND, "존재하지 않는 시도(Sido)입니다."),
+    NOT_FOUND_SIGG(40403, HttpStatus.NOT_FOUND, "존재하지 않는 시군구(Sigg)입니다."),
+    NOT_FOUND_EMD(40404, HttpStatus.NOT_FOUND, "존재하지 않는 읍면동(Emd)입니다."),
+    NOT_FOUND_COMMENT(40405, HttpStatus.NOT_FOUND, "댓글이 존재하지 않습니다."),
     NOT_FOUND_INQUIRY(40408, HttpStatus.NOT_FOUND, "문의가 존재하지 않습니다."),
     NOT_FOUND_QUES_ANSWER(40411, HttpStatus.NOT_FOUND, "답변이 존재하지 않습니다."),
     NOT_FOUND_REPLY(40414, HttpStatus.NOT_FOUND, "해당 대댓글이 존재하지 않습니다"),

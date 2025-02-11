@@ -19,4 +19,6 @@ data class CommandBoardUpdateRequestVO(
     val boardAccessLevel: String,
     @field:Schema(description = "회원번호", example = "1", type = "Long")
     val memberId: Long,
-)
+    @field:Schema(description = "삭제할 파일 리스트", example = "[1,2]", type = "List<Long>")
+    val deleteFilesIds: List<Long>,
+    )

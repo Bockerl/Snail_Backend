@@ -4,5 +4,4 @@ import com.bockerl.snailmember.board.command.application.service.CommandBoardSer
 import org.springframework.stereotype.Service
 
 @Service
-class CommandBoardServiceImpl :CommandBoardService {
-}
+class CommandBoardServiceImpl : CommandBoardService

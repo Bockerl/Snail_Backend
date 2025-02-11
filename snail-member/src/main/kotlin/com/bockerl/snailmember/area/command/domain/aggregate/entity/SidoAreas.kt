@@ -8,25 +8,25 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "sido_areas")
+@Table(name = "sido_area")
 class SidoAreas(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "sido_areas_id")
-    val sidoAreasId: Long? = null,
+    @Column(name = "sido_area_id")
+    val sidoAreaId: Long,
     @Column(name = "sido_area_adm_code")
-    val sidoAreasAdmCode: String,
+    val sidoAreaAdmCode: String,
     @Column(name = "sido_area_name")
-    val sidoAreasName: String,
+    val sidoAreaName: String,
 ) {
     companion object {
         fun create(
             admCode: String,
             name: String,
         ) = SidoAreas(
-            sidoAreasId = 0,
-            sidoAreasAdmCode = admCode,
-            sidoAreasName = name,
+            sidoAreaId = 0,
+            sidoAreaAdmCode = admCode,
+            sidoAreaName = name,
         )
     }
 }

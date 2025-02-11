@@ -72,6 +72,8 @@ dependencies {
     // redis 직렬화 설정
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    // hibernate(Json 저장을 위한)
+    implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
 }
 dependencyManagement {
     imports {

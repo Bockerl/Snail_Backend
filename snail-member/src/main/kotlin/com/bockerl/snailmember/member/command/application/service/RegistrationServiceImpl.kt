@@ -13,6 +13,7 @@ import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember
 import com.bockerl.snailmember.member.command.domain.repository.TempMemberRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class RegistrationServiceImpl(
@@ -22,6 +23,7 @@ class RegistrationServiceImpl(
     private val logger = KotlinLogging.logger {}
 
     // 1.회원가입 시작(닉네임, 이메일, 생년월일 입력 및 이메일 코드 생성)
+    @Transactional
     override fun initiateRegistration(requestDTO: EmailRequestDTO): String {
         logger.info { "임시회원 생성 시작" }
         // redis에 저장할 임시회원 생성
@@ -41,6 +43,7 @@ class RegistrationServiceImpl(
     }
 
     // 1-1.이메일 인증 코드 재요청
+    @Transactional
     override fun createEmailRefreshCode(redisId: String) {
         logger.info { "이메일 인증 코드 재요청 시작" }
         val tempMember =
@@ -55,6 +58,7 @@ class RegistrationServiceImpl(
     }
 
     // 2.이메일 인증 요청
+    @Transactional
     override fun verifyEmailCode(requestDTO: EmailVerifyRequestDTO): String {
         val redisId = requestDTO.redisId
         logger.info { "이메일 인증 시작 - redisId: $redisId" }
@@ -80,6 +84,7 @@ class RegistrationServiceImpl(
     }
 
     // 3. 휴대폰 인증 코드 생성
+    @Transactional
     override fun createPhoneVerificationCode(requestDTO: PhoneRequestDTO): String {
         val redisId = requestDTO.redisId
         logger.info { "휴대폰 인증 시작 - redisId: $redisId" }
@@ -104,6 +109,7 @@ class RegistrationServiceImpl(
     }
 
     // 3-1. 휴대폰 인증 코드 재요청
+    @Transactional
     override fun createPhoneRefreshCode(redisId: String) {
         logger.info { "휴대폰 인증 코드 재요청 시작" }
         val tempMember =
@@ -118,6 +124,7 @@ class RegistrationServiceImpl(
     }
 
     // 4. 휴대폰 인증 요청
+    @Transactional
     override fun verifyPhoneCode(requestDTO: PhoneVerifyRequestDTO): String {
         val redisId = requestDTO.redisId
         logger.info { "이메일 인증 시작 - redisId: $redisId" }
@@ -142,6 +149,7 @@ class RegistrationServiceImpl(
     }
 
     // 5. 비밀번호 입력
+    @Transactional
     override fun postPassword(requestDTO: PasswordRequestDTO): String {
         val redisId = requestDTO.redisId
         logger.info { "비밀번호 입력 시작 - redisId: $redisId" }

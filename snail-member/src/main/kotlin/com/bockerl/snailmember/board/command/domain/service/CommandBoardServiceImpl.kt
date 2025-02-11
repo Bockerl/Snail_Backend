@@ -75,7 +75,7 @@ class CommandBoardServiceImpl(
                 )
             }
 
-            commandFileRequestVO?.let { commandFileService.uploadFiles(files, it) }
+            commandFileRequestVO?.let { commandFileService.updateFiles(it, commandBoardUpdateRequestVO.deleteFilesIds, files) }
         }
     }
 

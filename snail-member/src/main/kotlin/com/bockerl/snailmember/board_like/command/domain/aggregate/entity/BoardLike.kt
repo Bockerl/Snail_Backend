@@ -1,4 +1,4 @@
-package com.bockerl.snailmember.board.command.domain.aggregate.entity
+package com.bockerl.snailmember.board_like.command.domain.aggregate.entity
 
 import com.bockerl.snailmember.board.command.domain.aggregate.enums.BoardTag
 import com.bockerl.snailmember.board.command.domain.aggregate.enums.BoardType
@@ -8,19 +8,19 @@ import org.hibernate.annotations.UpdateTimestamp
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "Board")
-data class Board(
+@Table(name = "Board_like")
+data class BoardLike(
     @Id
     @GeneratedValue(
         strategy = GenerationType.SEQUENCE,
-        generator = "boa_seq_generator", // 사용할 generator 이름
+        generator = "boa_lik_seq_generator", // 사용할 generator 이름
     )
     @SequenceGenerator(
-        name = "boa_seq_generator", // generator 이름
-        sequenceName = "boa", // db seq 이름
+        name = "boa_lik_seq_generator", // generator 이름
+        sequenceName = "boa_lik", // db seq 이름
         allocationSize = 1, // seq 증가량 (추후에 성능에 따라 변경해야 할지도 모름)
     )
-    var boardId: Long? = null,
+    var boardLikeId: Long? = null,
 
     @Column(name = "board_contents", columnDefinition = "TEXT")
     var boardContents: String?,
@@ -54,22 +54,8 @@ data class Board(
     @Column(name = "created_at", nullable = false, updatable = false)
     lateinit var createdAt: LocalDateTime
 
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    lateinit var updatedAt: LocalDateTime
 
     val formattedId: String
-        get() = "BOA-${boardId?.toString()?.padStart(8, '0') ?: "00000000"}"
+        get() = "BOA-LIK-${boardLikeId?.toString()?.padStart(8, '0') ?: "00000000"}"
 
-    /* 설명. 게시글 업데이트 시 */
-    fun updateBoardContents(contents: String?, type: BoardType, accessLevel: String) {
-        this.boardContents = contents
-        this.boardType = type
-        this.boardAccessLevel = accessLevel
-    }
-
-    /* 설명. 게시글 삭제 시*/
-    fun deleteBoardContents() {
-        this.active = false
-    }
 }

@@ -10,6 +10,4 @@ import org.springframework.web.bind.annotation.RestController
 class CommandMemberController(
     private val commandMemberService: CommandMemberService,
     private val memberConverter: MemberConverter,
-) {
-//    @PostMapping("//")
-}
+)

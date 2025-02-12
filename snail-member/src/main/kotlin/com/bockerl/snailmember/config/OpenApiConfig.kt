@@ -30,6 +30,14 @@ class OpenApiConfig {
 
     @Bean
     @Profile("!Prod")
+    fun registrationApi(): GroupedOpenApi =
+        createGroupedOpenApi(
+            groupName = "회원가입 관련 api",
+            paths = arrayOf("/api/registration/**"),
+        )
+
+    @Bean
+    @Profile("!Prod")
     fun boardApi(): GroupedOpenApi =
         createGroupedOpenApi(
             groupName = "게시글 관련 api",

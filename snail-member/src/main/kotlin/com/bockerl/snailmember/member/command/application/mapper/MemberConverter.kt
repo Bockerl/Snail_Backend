@@ -6,7 +6,7 @@ package com.bockerl.snailmember.member.command.application.mapper
 
 import com.bockerl.snailmember.member.command.application.dto.MemberDTO
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.Member
-import com.bockerl.snailmember.member.command.domain.vo.response.MemberResponseVO
+import com.bockerl.snailmember.member.command.domain.aggregate.vo.response.MemberResponseVO
 import org.springframework.stereotype.Component
 
 @Component

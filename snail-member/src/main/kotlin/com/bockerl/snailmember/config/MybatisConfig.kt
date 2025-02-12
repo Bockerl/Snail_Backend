@@ -3,6 +3,8 @@ package com.bockerl.snailmember.config
 import com.bockerl.snailmember.area.query.config.JsonTypeHandler
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.apache.ibatis.annotations.Mapper
 import org.mybatis.spring.annotation.MapperScan
@@ -16,7 +18,9 @@ class MybatisConfig {
     fun objectMapper(): ObjectMapper =
         ObjectMapper().apply {
             registerModule(KotlinModule.Builder().build())
-            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false) // 알 수 없는 필드 무시
+            registerModule(JavaTimeModule())
+            enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) // 타임스탬프 형식 사용
+            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         }
 
     @Bean

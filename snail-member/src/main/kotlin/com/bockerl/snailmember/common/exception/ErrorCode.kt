@@ -21,6 +21,9 @@ enum class ErrorCode(
     INACTIVE_REPLY(40013, HttpStatus.BAD_REQUEST, "해당 대댓글은 삭제돼 있습니다."),
     EMPTY_REQUEST_INPUTSTREAM(40015, HttpStatus.BAD_REQUEST, "요청 본문이 비어 있습니다. 필수 데이터를 포함해야 합니다."),
     TOO_MANY_FILES(40016, HttpStatus.BAD_REQUEST, "파일 업로드 제한 수를 넘었습니다."),
+    NULL_BLANK_SEARCH_KEYWORD(40017, HttpStatus.BAD_REQUEST, "검색어가 null이거나 공백입니다."),
+    OVERSIZE_KEYWORD_LENGTH(40018, HttpStatus.BAD_REQUEST, "검색어가 최대 글자 수 제한을 넘었습니다."),
+    SQL_INJECTION_DETECTED(40019, HttpStatus.BAD_REQUEST, "SQL INJECTION이 탐지되었습니다."),
 
     // 401: 인증 실패 (Unauthorized)
     INVALID_HEADER_VALUE(40100, HttpStatus.UNAUTHORIZED, "올바르지 않은 헤더값입니다."),

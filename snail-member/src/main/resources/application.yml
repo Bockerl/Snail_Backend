@@ -30,10 +30,9 @@ spring:
                     auth: true
                     starttls:
                         enable: true
-    data:
-        redis:
-            host: ${REDIS_HOST}
-            port: ${REDIS_PORT}
+    #        redis:
+#            host: ${REDIS_HOST}
+#            port: ${REDIS_PORT}
 
 
     cloud:
@@ -46,6 +45,14 @@ spring:
         multipart:
             max-file-size: 1MB
             max-request-size: 10MB
+    data:
+        redis:
+            sentinel:
+                master: ${REDIS_MASTER}
+                nodes:
+                    - ${REDIS_PORT1}
+                    - ${REDIS_PORT2}
+                    - ${REDIS_PORT3}
 
 mybatis:
     mapper-locations: classpath:/com/bockerl/snailmember/mapper/**/*.xml

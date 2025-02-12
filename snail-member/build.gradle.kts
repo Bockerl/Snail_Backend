@@ -74,6 +74,9 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     // hibernate(Json 저장을 위한)
     implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
+
+    // redis sentinel 가용을 위한
+    implementation("io.lettuce:lettuce-core") // Redis Sentinel 지원을 위해 Lettuce 클라이언트 사용
 }
 dependencyManagement {
     imports {

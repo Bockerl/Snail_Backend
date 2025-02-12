@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/board")
 class QueryBoardController(
     private val queryBoardService: QueryBoardService,
-    private val boardConverter: BoardConverter,
 ){
 
     private val log = LoggerFactory.getLogger(this.javaClass)

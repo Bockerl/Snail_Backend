@@ -6,31 +6,47 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 
 @Entity
-@Table(name = "emd_areas")
+@Table(name = "emd_area")
 class EmdAreas(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "emd_areas_id")
-    var emdAreasId: Long? = null,
-    @Column(name = "sigg_areas_id")
-    var siggAreasId: Long,
-    @Column(name = "emd_areas_adm_code")
-    var emdAreasAdmCode: String,
-    @Column(name = "emd_areas_name")
-    var emdAreasName: String,
+    @Column(name = "emd_area_id")
+    var emdAreaId: Long,
+    @Column(name = "sigg_area_id")
+    var siggAreaId: Long,
+    @Column(name = "emd_area_adm_code")
+    var emdAreaAdmCode: String,
+    @Column(name = "emd_area_name")
+    var emdAreaName: String,
+    @Column(name = "emd_full_name")
+    var emdFullName: String,
+    // Postgres에서 지원하는 타입인 JsonB를 활용, 컬럼이 binary 형식으로 저장
+    @Column(name = "ree_area", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    var ReeAreas: List<ReeArea> = listOf(),
 ) {
+    data class ReeArea(
+        val reeAreaAdmCode: String,
+        val reeAreasName: String,
+        val fullName: String,
+    )
+
     companion object {
         fun create(
-            siggAreasId: Long,
+            siggAreaId: Long,
             admCode: String,
-            name: String,
+            areaName: String,
+            fullName: String,
         ) = EmdAreas(
-            emdAreasId = 0,
-            siggAreasId = siggAreasId,
-            emdAreasAdmCode = admCode,
-            emdAreasName = name,
+            emdAreaId = 0,
+            siggAreaId = siggAreaId,
+            emdAreaAdmCode = admCode,
+            emdAreaName = areaName,
+            emdFullName = fullName,
         )
     }
 }

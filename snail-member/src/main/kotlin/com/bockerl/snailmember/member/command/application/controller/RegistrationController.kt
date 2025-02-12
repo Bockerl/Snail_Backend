@@ -5,7 +5,7 @@ package com.bockerl.snailmember.member.command.application.controller
 import com.bockerl.snailmember.common.ResponseDTO
 import com.bockerl.snailmember.member.command.application.mapper.AuthConverter
 import com.bockerl.snailmember.member.command.application.service.RegistrationService
-import com.bockerl.snailmember.member.command.domain.vo.request.*
+import com.bockerl.snailmember.member.command.domain.aggregate.vo.request.*
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -17,11 +17,7 @@ import net.nurigo.sdk.message.request.SingleMessageSendingRequest
 import net.nurigo.sdk.message.response.SingleMessageSentResponse
 import net.nurigo.sdk.message.service.DefaultMessageService
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/registration")
@@ -214,5 +210,13 @@ class RegistrationController(
         val requestDTO = authConverter.passwordRequestVOToDTO(requestVO)
         val redisId = registrationService.postPassword(requestDTO)
         return ResponseDTO.ok(redisId)
+    }
+
+    @PostMapping("/activity_area")
+    fun postActivityAreasByKeyword(
+        @RequestParam(required = true) keyword: String,
+    ): ResponseDTO<*> {
+        val requestDTO = authConverter
+        return ResponseDTO.ok("")
     }
 }

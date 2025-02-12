@@ -3,7 +3,7 @@ package com.bockerl.snailmember.member.command.application.mapper
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.dto.request.*
-import com.bockerl.snailmember.member.command.domain.vo.request.*
+import com.bockerl.snailmember.member.command.domain.aggregate.vo.request.*
 import org.springframework.stereotype.Component
 
 @Component

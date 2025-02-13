@@ -7,9 +7,5 @@ interface AuthService {
 
     fun createPhoneVerificationCode(phoneNumber: String): String
 
-    fun verifyCode(
-        thing: String,
-        verificationCode: String,
-        type: VerificationType,
-    )
+    fun verifyCode(thing: String, verificationCode: String, type: VerificationType)
 }

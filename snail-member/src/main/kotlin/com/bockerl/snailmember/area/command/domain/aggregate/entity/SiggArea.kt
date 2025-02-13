@@ -9,7 +9,7 @@ import jakarta.persistence.Table
 
 @Entity
 @Table(name = "sigg_area")
-class SiggAreas(
+class SiggArea(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "sigg_area_id")
@@ -24,12 +24,7 @@ class SiggAreas(
     var siggFullName: String,
 ) {
     companion object {
-        fun create(
-            sidoAreaId: Long,
-            admCode: String,
-            areaName: String,
-            fullName: String,
-        ) = SiggAreas(
+        fun create(sidoAreaId: Long, admCode: String, areaName: String, fullName: String) = SiggArea(
             siggAreaId = 0,
             sidoAreaId = sidoAreaId,
             siggAreaAdmCode = admCode,
@@ -37,4 +32,9 @@ class SiggAreas(
             siggFullName = fullName,
         )
     }
+
+    val formattedSiggId: String
+        get() = "Sig-${siggAreaId.toString().padStart(8, '0')}"
+    val formattedSidoId: String
+        get() = "Sid-${sidoAreaId.toString().padStart(8, '0')}"
 }

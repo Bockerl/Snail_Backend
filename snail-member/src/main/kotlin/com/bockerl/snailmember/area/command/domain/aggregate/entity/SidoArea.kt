@@ -9,7 +9,7 @@ import jakarta.persistence.Table
 
 @Entity
 @Table(name = "sido_area")
-class SidoAreas(
+class SidoArea(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "sido_area_id")
@@ -20,10 +20,7 @@ class SidoAreas(
     val sidoAreaName: String,
 ) {
     companion object {
-        fun create(
-            admCode: String,
-            name: String,
-        ) = SidoAreas(
+        fun create(admCode: String, name: String) = SidoArea(
             sidoAreaId = 0,
             sidoAreaAdmCode = admCode,
             sidoAreaName = name,

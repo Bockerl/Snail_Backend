@@ -12,10 +12,8 @@ import com.bockerl.snailmember.member.query.repository.MemberMapper
 import org.springframework.stereotype.Service
 
 @Service
-class QueryMemberServiceImpl(
-    private val memberMapper: MemberMapper,
-    private val memberConverter: MemberConverter,
-) : QueryMemberService {
+class QueryMemberServiceImpl(private val memberMapper: MemberMapper, private val memberConverter: MemberConverter) :
+    QueryMemberService {
     override fun selectMemberByMemberId(memberId: Long): MemberDTO {
         val member =
             memberMapper.selectMemberByMemberId(memberId)

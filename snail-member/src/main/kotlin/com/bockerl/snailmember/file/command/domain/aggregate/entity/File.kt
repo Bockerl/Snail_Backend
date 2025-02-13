@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 
 @Entity
 @Table(name = "File")
-data class File (
+data class File(
     @Id
     @GeneratedValue(
         strategy = GenerationType.SEQUENCE,
@@ -46,15 +46,15 @@ data class File (
     @Column(name = "file_target_id", nullable = false)
     var fileTargetId: Long? = null,
 
-    ){
-        @CreationTimestamp
-        @Column(name = "created_at", nullable = false, updatable = false)
-        lateinit var createdAt: LocalDateTime
+) {
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    lateinit var createdAt: LocalDateTime
 
-        @UpdateTimestamp
-        @Column(name = "updated_at", nullable = false)
-        lateinit var updatedAt: LocalDateTime
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    lateinit var updatedAt: LocalDateTime
 
-        val formattedId: String
+    val formattedId: String
         get() = "FIL-${fileId?.toString()?.padStart(8, '0') ?: "00000000"}"
 }

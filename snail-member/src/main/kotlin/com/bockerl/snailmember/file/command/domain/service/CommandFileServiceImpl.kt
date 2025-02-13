@@ -1,14 +1,14 @@
 package com.bockerl.snailmember.file.command.domain.service
 
 import com.azure.storage.blob.BlobContainerClient
-import com.bockerl.snailmember.file.command.application.service.CommandFileService
-import com.bockerl.snailmember.file.command.domain.aggregate.entity.File
-import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileRequestVO
-import com.bockerl.snailmember.file.command.domain.repository.CommandFileRepository
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
+import com.bockerl.snailmember.file.command.application.service.CommandFileService
 import com.bockerl.snailmember.file.command.application.service.CommandGatheringFileService
+import com.bockerl.snailmember.file.command.domain.aggregate.entity.File
+import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileRequestVO
 import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileWithGatheringRequestVO
+import com.bockerl.snailmember.file.command.domain.repository.CommandFileRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
@@ -24,7 +24,6 @@ class CommandFileServiceImpl(
 
     @Transactional
     override fun uploadProfileImage(file: MultipartFile, commandFileRequestVO: CommandFileRequestVO) {
-
         val fileName = generateUniqueFileName(file.originalFilename)
         val blobClient = blobContainerClient.getBlobClient(fileName)
         blobClient.upload(file.inputStream, file.size, true)
@@ -47,7 +46,7 @@ class CommandFileServiceImpl(
         val fileEntities = mutableListOf<File>()
 
         /* 설명. 업로드 파일 수 제한 10개 초과 되지 않도록... */
-        if(files.size > 10){
+        if (files.size > 10) {
             throw CommonException(ErrorCode.TOO_MANY_FILES)
         }
 
@@ -72,14 +71,17 @@ class CommandFileServiceImpl(
     }
 
     @Transactional
-    override fun uploadFilesWithGatheringId(files: List<MultipartFile>, commandFileWithGatheringRequestVO: CommandFileWithGatheringRequestVO) {
+    override fun uploadFilesWithGatheringId(
+        files: List<MultipartFile>,
+        commandFileWithGatheringRequestVO: CommandFileWithGatheringRequestVO,
+    ) {
         val fileEntities = mutableListOf<File>()
 
         /* 설명. targetType이 앨범 도메인 일 시 초과 체크 x*/
 //        if(commandFileWithGatheringRequestVO.fileTargetType != "album") {}
 
         /* 설명. 업로드 파일 수 제한 10개 초과 되지 않도록... */
-        if(files.size > 10){
+        if (files.size > 10) {
             throw CommonException(ErrorCode.TOO_MANY_FILES)
         }
         files.forEach { file ->
@@ -111,13 +113,12 @@ class CommandFileServiceImpl(
     /* 설명. 삭제 후 재생성 */
     @Transactional
     override fun updateProfileImage(file: MultipartFile, commandFileRequestVO: CommandFileRequestVO) {
-
         if (!file.contentType?.startsWith("image/")!!) {
-            throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT);
+            throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT)
         }
         val existingFile = commandFileRepository.findByFileTargetTypeAndFileTargetId(
             commandFileRequestVO.fileTargetType,
-            commandFileRequestVO.fileTargetId
+            commandFileRequestVO.fileTargetId,
         )
 
         val blobClient = blobContainerClient.getBlobClient(existingFile[0].fileName)
@@ -144,10 +145,14 @@ class CommandFileServiceImpl(
 
     /* 설명. 삭제할 파일 삭제 후 새로운 파일 추가 */
     @Transactional
-    override fun updateFiles(commandFileRequestVO: CommandFileRequestVO, deletedFileIds: List<Long>, newFiles: List<MultipartFile>) {
+    override fun updateFiles(
+        commandFileRequestVO: CommandFileRequestVO,
+        deletedFileIds: List<Long>,
+        newFiles: List<MultipartFile>,
+    ) {
         val existingFiles = commandFileRepository.findByFileTargetTypeAndFileTargetId(
             commandFileRequestVO.fileTargetType,
-            commandFileRequestVO.fileTargetId
+            commandFileRequestVO.fileTargetId,
         )
 
         // 삭제할 파일만 삭제
@@ -190,10 +195,14 @@ class CommandFileServiceImpl(
 
     /* 설명. 모임 삭제할 파일 삭제 후 새로운 파일 추가 */
     @Transactional
-    override fun updateFilesWithGatheringId(commandFileWithGatheringRequestVO: CommandFileWithGatheringRequestVO, deletedFileIds: List<Long>, newFiles: List<MultipartFile>) {
+    override fun updateFilesWithGatheringId(
+        commandFileWithGatheringRequestVO: CommandFileWithGatheringRequestVO,
+        deletedFileIds: List<Long>,
+        newFiles: List<MultipartFile>,
+    ) {
         val existingFiles = commandFileRepository.findByFileTargetTypeAndFileTargetId(
             commandFileWithGatheringRequestVO.fileTargetType,
-            commandFileWithGatheringRequestVO.fileTargetId
+            commandFileWithGatheringRequestVO.fileTargetId,
         )
 
         // 삭제할 파일만 삭제
@@ -240,16 +249,17 @@ class CommandFileServiceImpl(
         }
     }
 
-
     /* 설명.
      *  fileName에 해당하는 Blob을 삭제함.
-    * */
+     * */
     @Transactional
     override fun deleteFile(commandFileRequestVO: CommandFileRequestVO) {
+        val files = commandFileRepository.findByFileTargetTypeAndFileTargetId(
+            commandFileRequestVO.fileTargetType,
+            commandFileRequestVO.fileTargetId,
+        )
 
-        val files = commandFileRepository.findByFileTargetTypeAndFileTargetId(commandFileRequestVO.fileTargetType, commandFileRequestVO.fileTargetId)
-
-        for(file in files){
+        for (file in files) {
             val blobClient = blobContainerClient.getBlobClient(file.fileName)
             blobClient.delete()
         }
@@ -260,7 +270,7 @@ class CommandFileServiceImpl(
     /* 설명.
      *  Filename을 받아 Blob에서 파일을 다운로드함.
      *  ByteArrayOutputStream을 사용해서 바이너리 데이터를 읽어옴
-    * */
+     * */
     @Transactional
     override fun downloadFile(fileName: String): ByteArray {
         val blobClient = blobContainerClient.getBlobClient(fileName)
@@ -270,10 +280,10 @@ class CommandFileServiceImpl(
     }
 
     /* 설명. uuid 생성으로 파일 이름 중복 방지 */
-    private fun generateUniqueFileName(originalFileName: String?): String{
+    private fun generateUniqueFileName(originalFileName: String?): String {
         val uuid = UUID.randomUUID().toString()
         /* 설명. 확장자 파싱 */
-        val extension = originalFileName?.substringAfterLast(".", "")?: ""
-        return if(extension.isNotEmpty()) "$uuid.$extension" else uuid
+        val extension = originalFileName?.substringAfterLast(".", "") ?: ""
+        return if (extension.isNotEmpty()) "$uuid.$extension" else uuid
     }
 }

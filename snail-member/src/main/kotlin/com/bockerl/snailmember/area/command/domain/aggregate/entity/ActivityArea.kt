@@ -16,7 +16,7 @@ import java.time.LocalDateTime
 @Entity
 @Table(name = "activity_areas")
 @EntityListeners(AuditingEntityListener::class)
-class ActivityAreas(
+class ActivityArea(
     @EmbeddedId
     val id: ActivityId? = null,
     @Enumerated(EnumType.STRING)

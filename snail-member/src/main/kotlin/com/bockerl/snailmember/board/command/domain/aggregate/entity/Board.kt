@@ -49,7 +49,7 @@ data class Board(
     /* 설명. fk인 회원 번호 */
     @Column(name = "member_id", nullable = false)
     var memberId: Long? = null,
-){
+) {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     lateinit var createdAt: LocalDateTime

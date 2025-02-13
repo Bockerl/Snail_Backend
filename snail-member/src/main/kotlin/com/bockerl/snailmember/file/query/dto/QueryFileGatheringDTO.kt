@@ -37,8 +37,7 @@ class QueryFileGatheringDTO(
 
     @field:Schema(description = "모임 번호", example = "1", type = "Long")
     val gatheringId: Long? = null,
-){
+) {
     val formattedId: String
-    get() = "FIL-${fileId?.toString()?.padStart(8, '0') ?: "00000000"}"
-
+        get() = "FIL-${fileId?.toString()?.padStart(8, '0') ?: "00000000"}"
 }

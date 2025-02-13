@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.bockerl.snailmember.area.query.repository.SiggAreasMapper">
-    <resultMap id="sidoResultMap" type="QuerySiggAreaDTO">
-        <result property="siggAreaId" column="sigg_area_id"/>
+<mapper namespace="com.bockerl.snailmember.area.query.repository.SiggAreaMapper">
+    <resultMap id="siggResultMap" type="com.bockerl.snailmember.area.query.dto.QueryEmdAreaDTO">
+        <id property="siggAreaId" column="sigg_area_id"/>
         <result property="sidoAreaId" column="sido_area_id"/>
         <result property="siggAreaAdmCode" column="sigg_area_adm_code"/>
         <result property="siggAreaName" column="sigg_area_name"/>
@@ -12,7 +12,7 @@
     </resultMap>
 
     <select id="selectSiggAreasByKeyword" parameterType="String" resultMap="siggResultMap">
-        SELECT
+        SELECT DISTINCT
         sigg_area_id,
         sido_area_id,
         sigg_area_adm_code,
@@ -20,7 +20,6 @@
         sigg_full_name
         FROM
         sigg_area
-        WHERE
         WHERE sigg_full_name LIKE CONCAT('%', #{keyword}, '%')
     </select>
 </mapper>

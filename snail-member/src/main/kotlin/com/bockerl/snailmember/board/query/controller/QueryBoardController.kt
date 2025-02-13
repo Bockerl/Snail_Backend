@@ -1,8 +1,7 @@
 package com.bockerl.snailmember.board.query.controller
 
-import com.bockerl.snailmember.board.query.dto.QueryBoardDTO
-import com.bockerl.snailmember.board.command.application.mapper.BoardConverter
 import com.bockerl.snailmember.board.command.domain.aggregate.vo.response.BoardResponseVO
+import com.bockerl.snailmember.board.query.dto.QueryBoardDTO
 import com.bockerl.snailmember.board.query.service.QueryBoardService
 import com.bockerl.snailmember.board.query.vo.QueryBoardResponseVO
 import com.bockerl.snailmember.common.ResponseDTO
@@ -16,9 +15,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/board")
-class QueryBoardController(
-    private val queryBoardService: QueryBoardService,
-){
+class QueryBoardController(private val queryBoardService: QueryBoardService) {
 
     private val log = LoggerFactory.getLogger(this.javaClass)
 
@@ -42,7 +39,6 @@ class QueryBoardController(
         @PathVariable boardId: Long,
         /* 궁금. 와일드 카드로 *를 쓸 것인지? */
     ): ResponseDTO<*> {
-
         val queryBoardResponseVO: QueryBoardResponseVO = queryBoardService.readBoardByBoardId(boardId)
 
 //        return ResponseDTO.ok(boardConverter.dtoToResponseVO(boardDTO))
@@ -65,11 +61,9 @@ class QueryBoardController(
         ],
     )
     @GetMapping("/{boardType}")
-    fun getBoardByType(
-        @PathVariable boardType: String,
-    ): ResponseDTO<List<QueryBoardResponseVO>> {
+    fun getBoardByType(@PathVariable boardType: String): ResponseDTO<List<QueryBoardResponseVO>> {
         val boardList: List<QueryBoardResponseVO> = queryBoardService.readBoardByBoardType(boardType)
-        
+
 //        return ResponseDTO.ok(boardConverter.dtoToResponseVO(boardList))
         return ResponseDTO.ok(boardList)
     }
@@ -90,12 +84,9 @@ class QueryBoardController(
         ],
     )
     @PostMapping("/tag")
-    fun getBoardByTag(
-        @RequestBody boardTagList: List<String>,
-    ): ResponseDTO<List<QueryBoardResponseVO>> {
+    fun getBoardByTag(@RequestBody boardTagList: List<String>): ResponseDTO<List<QueryBoardResponseVO>> {
         val boardList: List<QueryBoardResponseVO> = queryBoardService.readBoardByBoardTag(boardTagList)
 
         return ResponseDTO.ok(boardList)
     }
-
 }

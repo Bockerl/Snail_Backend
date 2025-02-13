@@ -46,16 +46,14 @@ class RegistrationController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = EmailRequestVO::class),
+                        schema = Schema(implementation = ResponseDTO::class),
                     ),
                 ],
             ),
         ],
     )
     @PostMapping("/initiation/email")
-    fun postEmailRegistration(
-        @RequestBody requestVO: EmailRequestVO,
-    ): ResponseDTO<*> {
+    fun postEmailRegistration(@RequestBody requestVO: EmailRequestVO): ResponseDTO<*> {
         val requestDTO = authConverter.emailRequestVOToDTO(requestVO)
         val redisId = registrationService.initiateRegistration(requestDTO)
         return ResponseDTO.ok(redisId)
@@ -73,16 +71,14 @@ class RegistrationController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = EmailVerifyRequestVO::class),
+                        schema = Schema(implementation = ResponseDTO::class),
                     ),
                 ],
             ),
         ],
     )
     @PostMapping("/verification/email/refresh/{redisId}")
-    fun postEmailRefreshCode(
-        @PathVariable redisId: String,
-    ): ResponseDTO<*> {
+    fun postEmailRefreshCode(@PathVariable redisId: String): ResponseDTO<*> {
         registrationService.createEmailRefreshCode(redisId)
         return ResponseDTO.ok("메일 인증 코드가 재발급되었습니다.")
     }
@@ -99,16 +95,14 @@ class RegistrationController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = EmailVerifyRequestVO::class),
+                        schema = Schema(implementation = ResponseDTO::class),
                     ),
                 ],
             ),
         ],
     )
     @PostMapping("/verification/email")
-    fun postEmailVerification(
-        @RequestBody requestVO: EmailVerifyRequestVO,
-    ): ResponseDTO<*> {
+    fun postEmailVerification(@RequestBody requestVO: EmailVerifyRequestVO): ResponseDTO<*> {
         val requestDTO = authConverter.emailVerifyRequestVOToDTO(requestVO)
         val redisId = registrationService.verifyEmailCode(requestDTO)
         return ResponseDTO.ok(redisId)
@@ -126,16 +120,14 @@ class RegistrationController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = PhoneRequestVO::class),
+                        schema = Schema(implementation = SingleMessageSentResponse::class),
                     ),
                 ],
             ),
         ],
     )
     @PostMapping("/initiation/phone")
-    fun postPhoneRegistration(
-        @RequestBody requestVO: PhoneRequestVO,
-    ): SingleMessageSentResponse? {
+    fun postPhoneRegistration(@RequestBody requestVO: PhoneRequestVO): SingleMessageSentResponse? {
         val requestDTO = authConverter.phoneRequestVOToDTO(requestVO)
         val verificationCode = registrationService.createPhoneVerificationCode(requestDTO)
         // 발신번호 및 수신번호는 반드시 01012345678 형태로 입력되어야 함
@@ -151,9 +143,7 @@ class RegistrationController(
     }
 
     @PostMapping("/verification/phone/refresh/{redisId}")
-    fun postPhoneRefreshCode(
-        @PathVariable redisId: String,
-    ): ResponseDTO<*> {
+    fun postPhoneRefreshCode(@PathVariable redisId: String): ResponseDTO<*> {
         registrationService.createPhoneRefreshCode(redisId)
         return ResponseDTO.ok("휴대폰 인증 코드가 재발급되었습니다.")
     }
@@ -170,16 +160,14 @@ class RegistrationController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = PhoneVerifyRequestVO::class),
+                        schema = Schema(implementation = ResponseDTO::class),
                     ),
                 ],
             ),
         ],
     )
     @PostMapping("/verification/phone")
-    fun postPhoneVerification(
-        @RequestBody requestVO: PhoneVerifyRequestVO,
-    ): ResponseDTO<*> {
+    fun postPhoneVerification(@RequestBody requestVO: PhoneVerifyRequestVO): ResponseDTO<*> {
         val requestDTO = authConverter.phoneVerifyRequestVOToDTO(requestVO)
         val redisId = registrationService.verifyPhoneCode(requestDTO)
         return ResponseDTO.ok(redisId)
@@ -197,25 +185,39 @@ class RegistrationController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = PasswordRequestVO::class),
+                        schema = Schema(implementation = ResponseDTO::class),
                     ),
                 ],
             ),
         ],
     )
     @PostMapping("/password")
-    fun postPasswordRegistration(
-        @RequestBody requestVO: PasswordRequestVO,
-    ): ResponseDTO<*> {
+    fun postPasswordRegistration(@RequestBody requestVO: PasswordRequestVO): ResponseDTO<*> {
         val requestDTO = authConverter.passwordRequestVOToDTO(requestVO)
         val redisId = registrationService.postPassword(requestDTO)
         return ResponseDTO.ok(redisId)
     }
 
+    @Operation(
+        summary = "활동지역 등록",
+        description = "새 계정의 주 지역과 직장 지역을 등록합니다.",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "활동지역 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = ResponseDTO::class),
+                    ),
+                ],
+            ),
+        ],
+    )
     @PostMapping("/activity_area")
-    fun postActivityAreasByKeyword(
-        @RequestParam(required = true) keyword: String,
-    ): ResponseDTO<*> {
+    fun postActivityAreasByKeyword(@RequestParam(required = true) keyword: String): ResponseDTO<*> {
         val requestDTO = authConverter
         return ResponseDTO.ok("")
     }

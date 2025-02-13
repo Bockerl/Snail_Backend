@@ -34,8 +34,7 @@ data class QueryFileDTO(
 
     @field:Schema(description = "수정일시", example = "1", type = "LocalDateTime")
     val updatedAt: LocalDateTime? = null,
-){
+) {
     val formattedId: String
         get() = "FIL-${fileId?.toString()?.padStart(8, '0') ?: "00000000"}"
-
 }

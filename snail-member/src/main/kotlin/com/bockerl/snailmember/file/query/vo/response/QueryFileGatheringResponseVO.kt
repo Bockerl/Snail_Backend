@@ -37,5 +37,4 @@ class QueryFileGatheringResponseVO(
 
     @field:Schema(description = "모임 번호", example = "1", type = "Long")
     val gatheringId: Long? = null,
-) {
-}
+)

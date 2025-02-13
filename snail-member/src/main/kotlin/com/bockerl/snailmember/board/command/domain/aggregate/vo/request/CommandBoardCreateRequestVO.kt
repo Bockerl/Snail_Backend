@@ -2,9 +2,7 @@ package com.bockerl.snailmember.board.command.domain.aggregate.vo.request
 
 import com.bockerl.snailmember.board.command.domain.aggregate.enums.BoardTag
 import com.bockerl.snailmember.board.command.domain.aggregate.enums.BoardType
-import com.bockerl.snailmember.common.exception.CommonException
 import io.swagger.v3.oas.annotations.media.Schema
-
 
 data class CommandBoardCreateRequestVO(
     @field:Schema(description = "게시글 내용", example = "달팽이 좋아요", type = "String")

@@ -1,7 +1,5 @@
 package com.bockerl.snailmember.file.query.mapper
 
-import com.bockerl.snailmember.board.query.dto.QueryBoardDTO
-import com.bockerl.snailmember.board.query.vo.QueryBoardResponseVO
 import com.bockerl.snailmember.file.query.dto.QueryFileDTO
 import com.bockerl.snailmember.file.query.dto.QueryFileGatheringDTO
 import com.bockerl.snailmember.file.query.vo.response.QueryFileGatheringResponseVO
@@ -10,19 +8,18 @@ import org.springframework.stereotype.Component
 
 @Component
 class QueryFileConverter {
-    fun dtoToResponseVO(dto: QueryFileDTO): QueryFileResponseVO =
-        QueryFileResponseVO(
-            fileId = dto.formattedId,
-            fileName = dto.fileName,
-            fileType = dto.fileType,
-            fileUrl = dto.fileUrl,
-            active = dto.active,
-            memberId = dto.memberId,
-            fileTargetType = dto.fileTargetType,
-            fileTargetId = dto.fileTargetId,
-            createdAt = dto.createdAt,
-            updatedAt = dto.updatedAt,
-        )
+    fun dtoToResponseVO(dto: QueryFileDTO): QueryFileResponseVO = QueryFileResponseVO(
+        fileId = dto.formattedId,
+        fileName = dto.fileName,
+        fileType = dto.fileType,
+        fileUrl = dto.fileUrl,
+        active = dto.active,
+        memberId = dto.memberId,
+        fileTargetType = dto.fileTargetType,
+        fileTargetId = dto.fileTargetId,
+        createdAt = dto.createdAt,
+        updatedAt = dto.updatedAt,
+    )
 
     fun gatheringDTOToResponseVO(dto: QueryFileGatheringDTO): QueryFileGatheringResponseVO =
         QueryFileGatheringResponseVO(
@@ -38,5 +35,4 @@ class QueryFileConverter {
             updatedAt = dto.updatedAt,
             gatheringId = dto.gatheringId,
         )
-
 }

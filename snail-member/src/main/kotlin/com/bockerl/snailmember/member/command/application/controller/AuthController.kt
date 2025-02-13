@@ -1,4 +1,6 @@
-// package com.bockerl.snailmember.member.command.application.controller
+@file:Suppress("ktlint:standard:no-empty-file")
+
+package com.bockerl.snailmember.member.command.application.controller
 //
 // import com.bockerl.snailmember.common.ResponseDTO
 // import org.springframework.web.bind.annotation.PostMapping

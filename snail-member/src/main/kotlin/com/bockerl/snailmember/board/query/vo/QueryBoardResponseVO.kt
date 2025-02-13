@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
+
 package com.bockerl.snailmember.board.query.vo
 
 import com.bockerl.snailmember.board.query.enums.QueryBoardTag
@@ -22,10 +27,10 @@ data class QueryBoardResponseVO(
     val boardView: Int? = null,
     @field:Schema(description = "게시글 활성화 여부", example = "true", type = "String")
     val active: Boolean? = null,
-    @field:Schema(description = "회원번호", example = "1", type = "Long")
-    val memberId: Long? = null,
+    @field:Schema(description = "회원번호", example = "1", type = "String")
+    val memberId: String? = null,
     @field:Schema(description = "게시글 생성 시각", example = "2024-12-11 14:45:30", type = "LocalDateTime")
     val createdAt: LocalDateTime? = null,
     @field:Schema(description = "게시글 수정 시각", example = "2024-12-11 14:45:30", type = "LocalDateTime")
     val updatedAt: LocalDateTime? = null,
-    )
+)

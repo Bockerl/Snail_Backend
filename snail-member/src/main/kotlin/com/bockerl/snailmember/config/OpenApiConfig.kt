@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
 package com.bockerl.snailmember.config
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition

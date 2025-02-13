@@ -1,7 +1,9 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
 package com.bockerl.snailmember.file.query.mapper
 
-import com.bockerl.snailmember.board.query.dto.QueryBoardDTO
-import com.bockerl.snailmember.board.query.vo.QueryBoardResponseVO
 import com.bockerl.snailmember.file.query.dto.QueryFileDTO
 import com.bockerl.snailmember.file.query.dto.QueryFileGatheringDTO
 import com.bockerl.snailmember.file.query.vo.response.QueryFileGatheringResponseVO
@@ -38,5 +40,4 @@ class QueryFileConverter {
             updatedAt = dto.updatedAt,
             gatheringId = dto.gatheringId,
         )
-
 }

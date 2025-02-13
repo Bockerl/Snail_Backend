@@ -1,3 +1,9 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
+@file:Suppress("DEPRECATION")
+
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 plugins {
@@ -10,12 +16,16 @@ plugins {
 }
 
 ktlint {
-    version.set("1.2.1")
+    version.set("1.5.0")
     verbose.set(true)
     outputToConsole.set(true)
     reporters {
         reporter(ReporterType.JSON)
     }
+    filter {
+        exclude("**/*.kts")
+    }
+    disabledRules.set(setOf("header")) // HEADER_KEYWORD 규칙 비활성화
 }
 
 // build.gradle.kts

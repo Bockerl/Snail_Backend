@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
+
 package com.bockerl.snailmember.board.command.domain.service
 
 import com.bockerl.snailmember.board.command.application.service.CommandBoardService
@@ -19,41 +24,45 @@ import org.springframework.web.multipart.MultipartFile
 class CommandBoardServiceImpl(
     private val commandBoardRepository: CommandBoardRepository,
     private val commandFileService: CommandFileService,
-)  :CommandBoardService{
-
+) : CommandBoardService {
     @Transactional
-    override fun createBoard(commandBoardCreateRequestVO: CommandBoardCreateRequestVO, files: List<MultipartFile>) {
-
-        val board = Board(
-            boardContents = commandBoardCreateRequestVO.boardContents,
-            boardType = commandBoardCreateRequestVO.boardType,
-            boardTag = commandBoardCreateRequestVO.boardTag,
-            boardLocation = commandBoardCreateRequestVO.boardLocation,
-            boardAccessLevel = commandBoardCreateRequestVO.boardAccessLevel,
-            memberId = commandBoardCreateRequestVO.memberId,
-        )
-
+    override fun createBoard(
+        commandBoardCreateRequestVO: CommandBoardCreateRequestVO,
+        files: List<MultipartFile>,
+    ) {
+        val board =
+            Board(
+                boardContents = commandBoardCreateRequestVO.boardContents,
+                boardType = commandBoardCreateRequestVO.boardType,
+                boardTag = commandBoardCreateRequestVO.boardTag,
+                boardLocation = commandBoardCreateRequestVO.boardLocation,
+                boardAccessLevel = commandBoardCreateRequestVO.boardAccessLevel,
+                memberId = commandBoardCreateRequestVO.memberId,
+            )
 
         val boardEntity = commandBoardRepository.save(board)
 
-        if(files.isNotEmpty()) {
-            val commandFileRequestVO = boardEntity.boardId?.let {
-                CommandFileRequestVO(
-                    fileTargetType = FileTargetType.BOARD,
-                    fileTargetId = it,
-                    memberId = commandBoardCreateRequestVO.memberId,
-                )
-            }
+        if (files.isNotEmpty()) {
+            val commandFileRequestVO =
+                boardEntity.boardId?.let {
+                    CommandFileRequestVO(
+                        fileTargetType = FileTargetType.BOARD,
+                        fileTargetId = it,
+                        memberId = commandBoardCreateRequestVO.memberId,
+                    )
+                }
 
             commandFileRequestVO?.let { commandFileService.uploadFiles(files, it) }
         }
     }
 
-    override fun updateBoard(commandBoardUpdateRequestVO: CommandBoardUpdateRequestVO, files: List<MultipartFile>) {
-
+    override fun updateBoard(
+        commandBoardUpdateRequestVO: CommandBoardUpdateRequestVO,
+        files: List<MultipartFile>,
+    ) {
         val boardId = extractDigits(commandBoardUpdateRequestVO.boardId)
 
-        val board = commandBoardRepository.findById(boardId).orElseThrow { CommonException(ErrorCode.NOT_FOUND_BOARD)}
+        val board = commandBoardRepository.findById(boardId).orElseThrow { CommonException(ErrorCode.NOT_FOUND_BOARD) }
 
         board.apply {
             boardContents = commandBoardUpdateRequestVO.boardContents
@@ -66,14 +75,15 @@ class CommandBoardServiceImpl(
 
         val boardEntity = commandBoardRepository.save(board)
 
-        if(files.isNotEmpty()) {
-            val commandFileRequestVO = boardEntity.boardId?.let {
-                CommandFileRequestVO(
-                    fileTargetType = FileTargetType.BOARD,
-                    fileTargetId = it,
-                    memberId = commandBoardUpdateRequestVO.memberId,
-                )
-            }
+        if (files.isNotEmpty()) {
+            val commandFileRequestVO =
+                boardEntity.boardId?.let {
+                    CommandFileRequestVO(
+                        fileTargetType = FileTargetType.BOARD,
+                        fileTargetId = it,
+                        memberId = commandBoardUpdateRequestVO.memberId,
+                    )
+                }
 
             commandFileRequestVO?.let { commandFileService.updateFiles(it, commandBoardUpdateRequestVO.deleteFilesIds, files) }
         }
@@ -84,16 +94,15 @@ class CommandBoardServiceImpl(
 
         commandBoardRepository.deleteById(boardId)
 
-        val commandFileRequestVO = CommandFileRequestVO(
-            fileTargetType = FileTargetType.BOARD,
-            fileTargetId = boardId,
-            memberId = commandBoardDeleteRequestVO.memberId
-        )
+        val commandFileRequestVO =
+            CommandFileRequestVO(
+                fileTargetType = FileTargetType.BOARD,
+                fileTargetId = boardId,
+                memberId = commandBoardDeleteRequestVO.memberId,
+            )
 
         commandFileService.deleteFile(commandFileRequestVO)
     }
 
-    fun extractDigits(input: String): Long {
-        return input.filter { it.isDigit() }.toLong()
-    }
+    fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
 }

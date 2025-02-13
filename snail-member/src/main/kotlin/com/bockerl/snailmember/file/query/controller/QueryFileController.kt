@@ -1,7 +1,12 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
+
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.bockerl.snailmember.file.query.controller
 
-import com.bockerl.snailmember.board.command.domain.aggregate.vo.response.BoardResponseVO
-import com.bockerl.snailmember.board.query.vo.QueryBoardResponseVO
 import com.bockerl.snailmember.common.ResponseDTO
 import com.bockerl.snailmember.file.query.service.QueryFileService
 import com.bockerl.snailmember.file.query.vo.request.QueryFileRequestVO
@@ -37,7 +42,6 @@ class QueryFileController(
     fun getFilesByTarget(
         @RequestBody queryFileRequestVO: QueryFileRequestVO,
     ): ResponseDTO<*> {
-
         val fileList = queryFileService.readFilesByTarget(queryFileRequestVO)
 
         return ResponseDTO.ok(fileList)
@@ -62,7 +66,6 @@ class QueryFileController(
     fun getFilesByGatheringId(
         @PathVariable("gatheringId") gatheringId: Long,
     ): ResponseDTO<*> {
-
         val fileList = queryFileService.readFilesByGatheringId(gatheringId)
 
         return ResponseDTO.ok(fileList)
@@ -91,6 +94,4 @@ class QueryFileController(
 //
 //        return ResponseDTO.ok(fileList)
 //    }
-
-
 }

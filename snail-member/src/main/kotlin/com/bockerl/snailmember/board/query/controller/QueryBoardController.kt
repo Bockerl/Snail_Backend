@@ -1,8 +1,13 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
+
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.bockerl.snailmember.board.query.controller
 
-import com.bockerl.snailmember.board.query.dto.QueryBoardDTO
-import com.bockerl.snailmember.board.command.application.mapper.BoardConverter
-import com.bockerl.snailmember.board.command.domain.aggregate.vo.response.BoardResponseVO
+// import com.bockerl.snailmember.board.command.domain.aggregate.vo.response.BoardResponseVO
 import com.bockerl.snailmember.board.query.service.QueryBoardService
 import com.bockerl.snailmember.board.query.vo.QueryBoardResponseVO
 import com.bockerl.snailmember.common.ResponseDTO
@@ -18,8 +23,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/board")
 class QueryBoardController(
     private val queryBoardService: QueryBoardService,
-){
-
+) {
     private val log = LoggerFactory.getLogger(this.javaClass)
 
     @Operation(
@@ -32,7 +36,7 @@ class QueryBoardController(
                 responseCode = "200",
                 description = "게시글 pk로 게시판 상세 조회 성공",
                 content = [
-                    Content(mediaType = "application/json", schema = Schema(implementation = BoardResponseVO::class)),
+                    Content(mediaType = "application/json", schema = Schema(implementation = QueryBoardResponseVO::class)),
                 ],
             ),
         ],
@@ -40,9 +44,8 @@ class QueryBoardController(
     @GetMapping("/detail/{boardId}")
     fun getBoardByBoardId(
         @PathVariable boardId: Long,
-        /* 궁금. 와일드 카드로 *를 쓸 것인지? */
+        // 궁금. 와일드 카드로 *를 쓸 것인지?
     ): ResponseDTO<*> {
-
         val queryBoardResponseVO: QueryBoardResponseVO = queryBoardService.readBoardByBoardId(boardId)
 
 //        return ResponseDTO.ok(boardConverter.dtoToResponseVO(boardDTO))
@@ -59,7 +62,7 @@ class QueryBoardController(
                 responseCode = "200",
                 description = "게시글 타입으로 게시글 List 조회 성공",
                 content = [
-                    Content(mediaType = "application/json", schema = Schema(implementation = QueryBoardDTO::class)),
+                    Content(mediaType = "application/json", schema = Schema(implementation = QueryBoardResponseVO::class)),
                 ],
             ),
         ],
@@ -69,7 +72,7 @@ class QueryBoardController(
         @PathVariable boardType: String,
     ): ResponseDTO<List<QueryBoardResponseVO>> {
         val boardList: List<QueryBoardResponseVO> = queryBoardService.readBoardByBoardType(boardType)
-        
+
 //        return ResponseDTO.ok(boardConverter.dtoToResponseVO(boardList))
         return ResponseDTO.ok(boardList)
     }
@@ -84,7 +87,7 @@ class QueryBoardController(
                 responseCode = "200",
                 description = "게시판 태그로 게시판 List 조회 성공",
                 content = [
-                    Content(mediaType = "application/json", schema = Schema(implementation = QueryBoardDTO::class)),
+                    Content(mediaType = "application/json", schema = Schema(implementation = QueryBoardResponseVO::class)),
                 ],
             ),
         ],
@@ -97,5 +100,4 @@ class QueryBoardController(
 
         return ResponseDTO.ok(boardList)
     }
-
 }

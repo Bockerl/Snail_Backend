@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
+
 package com.bockerl.snailmember.board.query.dto
 
 import com.bockerl.snailmember.board.query.enums.QueryBoardTag
@@ -28,9 +33,10 @@ data class QueryBoardDTO(
     val createdAt: LocalDateTime? = null,
     @field:Schema(description = "게시글 수정 시각", example = "2024-12-11 14:45:30", type = "LocalDateTime")
     val updatedAt: LocalDateTime? = null,
-    ){
-
+) {
     val formattedId: String
         get() = "BOA-${boardId?.toString()?.padStart(8, '0') ?: "00000000"}"
 
+    val formatedMemberId: String
+        get() = "MEM-${memberId?.toString()?.padStart(8, '0') ?: "00000000"}"
 }

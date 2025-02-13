@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
+
 package com.bockerl.snailmember.board.command.domain.aggregate.vo.request
 
 import io.swagger.v3.oas.annotations.media.Schema

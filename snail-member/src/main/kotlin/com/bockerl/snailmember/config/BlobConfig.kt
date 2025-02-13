@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
 package com.bockerl.snailmember.config
 
 import com.azure.storage.blob.BlobContainerClient
@@ -11,14 +15,11 @@ import org.springframework.context.annotation.Configuration
 data class BlobConfig(
     @Value("\${spring.cloud.azure.storage.blob.connection-string}")
     val connectionString: String,
-
     @Value("\${spring.cloud.azure.storage.blob.container-name}")
     val containerName: String,
 ) {
-
     @Bean
     fun blobServiceClient(): BlobServiceClient {
-
         println("connectionString: " + connectionString)
 
         if (connectionString.isBlank()) {

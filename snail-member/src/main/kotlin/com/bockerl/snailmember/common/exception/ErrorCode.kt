@@ -2,11 +2,7 @@ package com.bockerl.snailmember.common.exception
 
 import org.springframework.http.HttpStatus
 
-enum class ErrorCode(
-    val code: Int,
-    val httpStatus: HttpStatus,
-    val message: String,
-) {
+enum class ErrorCode(val code: Int, val httpStatus: HttpStatus, val message: String) {
     // 400: 잘못된 요청 (Bad Request)
     WRONG_ENTRY_POINT(40000, HttpStatus.BAD_REQUEST, "잘못된 접근입니다"),
     MISSING_REQUEST_PARAMETER(40001, HttpStatus.BAD_REQUEST, "필수 요청 파라미터가 누락되었습니다."),
@@ -70,8 +66,7 @@ enum class ErrorCode(
 
     companion object {
         // 에러 코드로 ErrorCode를 찾는 확장 함수
-        fun findByCode(code: Int): ErrorCode =
-            entries.find { it.code == code }
-                ?: throw IllegalArgumentException("Invalid error code: $code")
+        fun findByCode(code: Int): ErrorCode = entries.find { it.code == code }
+            ?: throw IllegalArgumentException("Invalid error code: $code")
     }
 }

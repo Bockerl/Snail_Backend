@@ -28,9 +28,8 @@ data class QueryBoardDTO(
     val createdAt: LocalDateTime? = null,
     @field:Schema(description = "게시글 수정 시각", example = "2024-12-11 14:45:30", type = "LocalDateTime")
     val updatedAt: LocalDateTime? = null,
-    ){
+) {
 
     val formattedId: String
         get() = "BOA-${boardId?.toString()?.padStart(8, '0') ?: "00000000"}"
-
 }

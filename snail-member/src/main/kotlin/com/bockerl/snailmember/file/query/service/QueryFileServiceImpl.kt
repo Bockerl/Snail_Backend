@@ -12,18 +12,14 @@ import com.bockerl.snailmember.file.query.vo.response.QueryFileResponseVO
 import org.springframework.stereotype.Service
 
 @Service
-class QueryFileServiceImpl(
-    private val fileMapper: FileMapper,
-    private val fileConverter: QueryFileConverter,
-
-    ) :QueryFileService
-{
+class QueryFileServiceImpl(private val fileMapper: FileMapper, private val fileConverter: QueryFileConverter) :
+    QueryFileService {
 
     override fun readFilesByTarget(queryFileRequestVO: QueryFileRequestVO): List<QueryFileResponseVO> {
         val fileList: List<QueryFileDTO> = fileMapper.selectFilesByFileTarget(queryFileRequestVO)
             ?: throw CommonException(ErrorCode.NOT_FOUND_FILE)
 
-        val fileDTOList = fileList.map { file -> fileConverter.dtoToResponseVO(file)}
+        val fileDTOList = fileList.map { file -> fileConverter.dtoToResponseVO(file) }
 
         return fileDTOList
     }

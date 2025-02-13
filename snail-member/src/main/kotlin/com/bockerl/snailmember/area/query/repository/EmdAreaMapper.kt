@@ -4,6 +4,7 @@ import com.bockerl.snailmember.area.query.dto.QueryEmdAreaDTO
 import org.apache.ibatis.annotations.Mapper
 
 @Mapper
-interface EmdAreasMapper {
+interface EmdAreaMapper {
+    // 읍면동 + 리 검색, TypeHandler 사용
     fun selectEmdAreasByKeyword(keyword: String): List<QueryEmdAreaDTO>
 }

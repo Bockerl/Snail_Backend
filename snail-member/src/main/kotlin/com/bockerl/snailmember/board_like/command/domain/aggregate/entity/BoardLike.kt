@@ -4,7 +4,6 @@ import com.bockerl.snailmember.board.command.domain.aggregate.enums.BoardTag
 import com.bockerl.snailmember.board.command.domain.aggregate.enums.BoardType
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
-import org.hibernate.annotations.UpdateTimestamp
 import java.time.LocalDateTime
 
 @Entity
@@ -49,13 +48,11 @@ data class BoardLike(
     /* 설명. fk인 회원 번호 */
     @Column(name = "member_id", nullable = false)
     var memberId: Long? = null,
-){
+) {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     lateinit var createdAt: LocalDateTime
 
-
     val formattedId: String
         get() = "BOA-LIK-${boardLikeId?.toString()?.padStart(8, '0') ?: "00000000"}"
-
 }

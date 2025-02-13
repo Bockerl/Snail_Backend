@@ -7,8 +7,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.validation.constraints.NotNull
 import org.springframework.http.HttpStatus
 import org.springframework.lang.Nullable
-import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 
 @Validated
@@ -20,7 +20,7 @@ data class ResponseDTO<T>(
     @field:Nullable
     val data: T? = null,
     @field:Nullable
-    val error: ExceptionDTO? = null
+    val error: ExceptionDTO? = null,
 ) {
     companion object {
         // 성공 응답 생성
@@ -28,7 +28,7 @@ data class ResponseDTO<T>(
             httpStatus = HttpStatus.OK,
             success = true,
             data = data,
-            error = null
+            error = null,
         )
 
         // 커스텀 예외 기반 실패 응답
@@ -36,7 +36,7 @@ data class ResponseDTO<T>(
             httpStatus = e.errorCode.httpStatus,
             success = false,
             data = null,
-            error = ExceptionDTO.of(e.errorCode)
+            error = ExceptionDTO.of(e.errorCode),
         )
 
         // 파라미터 누락 예외 처리
@@ -44,7 +44,7 @@ data class ResponseDTO<T>(
             httpStatus = HttpStatus.BAD_REQUEST,
             success = false,
             data = null,
-            error = ExceptionDTO.of(ErrorCode.MISSING_REQUEST_PARAMETER)
+            error = ExceptionDTO.of(ErrorCode.MISSING_REQUEST_PARAMETER),
         )
 
         // 타입 불일치 예외 처리
@@ -52,7 +52,7 @@ data class ResponseDTO<T>(
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
             success = false,
             data = null,
-            error = ExceptionDTO.of(ErrorCode.INVALID_PARAMETER_FORMAT)
+            error = ExceptionDTO.of(ErrorCode.INVALID_PARAMETER_FORMAT),
         )
     }
 }

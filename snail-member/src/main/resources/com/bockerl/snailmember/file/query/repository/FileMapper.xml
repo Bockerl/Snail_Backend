@@ -32,72 +32,72 @@
 
     <select id="selectFilesByFileTarget" resultMap="fileResultMap">
         SELECT
-            file_id,
-            file_name,
-            file_type,
-            file_url,
-            active,
-            file_target_type,
-            file_target_id,
-            member_id,
-            created_at,
-            updated_at
-          FROM
-           file
-         WHERE
-            file_target_type = #{queryFileRequestVO.fileTargetType} AND file_target_id = #{queryFileRequestVO.fileTargetId}
+        file_id,
+        file_name,
+        file_type,
+        file_url,
+        active,
+        file_target_type,
+        file_target_id,
+        member_id,
+        created_at,
+        updated_at
+        FROM
+        file
+        WHERE
+        file_target_type = #{queryFileRequestVO.fileTargetType} AND file_target_id = #{queryFileRequestVO.fileTargetId}
     </select>
 
     <select id="selectFilesByGatheringId" resultMap="fileGatheringResultMap">
         SELECT
-            a.file_id,
-            a.file_name,
-            a.file_type,
-            a.file_url,
-            a.active,
-            a.file_target_type,
-            a.file_target_id,
-            a.member_id,
-            a.created_at,
-            a.updated_at,
-            b.gathering_id
-          FROM file a
-          JOIN gathering_file b ON a.file_id = b.file_id
-         WHERE
-            b.gathering_id = #{gatheringId}
+        a.file_id,
+        a.file_name,
+        a.file_type,
+        a.file_url,
+        a.active,
+        a.file_target_type,
+        a.file_target_id,
+        a.member_id,
+        a.created_at,
+        a.updated_at,
+        b.gathering_id
+        FROM file a
+        JOIN gathering_file b ON a.file_id = b.file_id
+        WHERE
+        b.gathering_id = #{gatheringId}
     </select>
 
     <select id="selectFirstFilesByGatheringId" resultMap="fileGatheringResultMap">
         SELECT
-            file_id,
-            file_name,
-            file_type,
-            file_url,
-            active,
-            file_target_type,
-            file_target_id,
-            member_id,
-            created_at,
-            updated_at,
-            gathering_id
-          FROM (
-            SELECT
-                a.file_id,
-                a.file_name,
-                a.file_type,
-                a.file_url,
-                a.active,
-                a.file_target_type,
-                a.file_target_id,
-                a.member_id,
-                a.created_at,
-                a.updated_at,
-                b.gathering_id,
-                ROW_NUMBER() OVER (PARTITION BY a.file_target_id ORDER BY a.created_at ASC) AS row_num
-              FROM file a
-              JOIN gathering_file b ON a.file_id = b.file_id
-         WHERE b.gathering_id = #{gatheringId}
-         ) sub
-         WHERE row_num = 1
+        file_id,
+        file_name,
+        file_type,
+        file_url,
+        active,
+        file_target_type,
+        file_target_id,
+        member_id,
+        created_at,
+        updated_at,
+        gathering_id
+        FROM (
+        SELECT
+        a.file_id,
+        a.file_name,
+        a.file_type,
+        a.file_url,
+        a.active,
+        a.file_target_type,
+        a.file_target_id,
+        a.member_id,
+        a.created_at,
+        a.updated_at,
+        b.gathering_id,
+        ROW_NUMBER() OVER (PARTITION BY a.file_target_id ORDER BY a.created_at ASC) AS row_num
+        FROM file a
+        JOIN gathering_file b ON a.file_id = b.file_id
+        WHERE b.gathering_id = #{gatheringId}
+        ) sub
+        WHERE row_num = 1
     </select>
 </mapper>

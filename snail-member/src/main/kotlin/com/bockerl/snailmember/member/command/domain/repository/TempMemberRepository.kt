@@ -8,9 +8,7 @@ import org.springframework.stereotype.Repository
 import java.time.Duration
 
 @Repository
-class TempMemberRepository(
-    private val redisTemplate: RedisTemplate<String, TempMember>,
-) {
+class TempMemberRepository(private val redisTemplate: RedisTemplate<String, TempMember>) {
     companion object {
         private const val EXPIRE_MINUTES = 30L
     }
@@ -23,10 +21,7 @@ class TempMemberRepository(
     }
 
     // 회원 가입 과정 거치면서 TTL 늘려주는 메서드
-    fun update(
-        redisId: String,
-        tempMember: TempMember,
-    ) {
+    fun update(redisId: String, tempMember: TempMember) {
         val key = TempMember.createRedisKey(redisId)
         val remainingTtl = redisTemplate.getExpire(key)
         if (remainingTtl > 0) {

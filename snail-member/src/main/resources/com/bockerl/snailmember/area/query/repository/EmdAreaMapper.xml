@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bockerl.snailmember.area.query.repository.EmdAreaMapper">
+    <resultMap id="emdResultMap" type="com.bockerl.snailmember.area.query.dto.QueryEmdAreaDTO">
+        <result property="emdAreaId" column="emd_area_id"/>
+        <result property="siggAreaId" column="sigg_area_id"/>
+        <result property="emdAreaAdmCode" column="emd_area_adm_code"/>
+        <result property="emdAreaName" column="emd_area_name"/>
+        <result property="emdFullName" column="emd_full_name"/>
+        <result property="reeAreas" column="ree_area"
+                typeHandler="com.bockerl.snailmember.area.query.config.JsonTypeHandler"/>
+    </resultMap>
+
+    <!-- 키워드로 검색하는 쿼리 -->
+    <select id="selectEmdAreasByKeyword" resultMap="emdResultMap" parameterType="String">
+        SELECT DISTINCT
+        emd_area_id,
+        sigg_area_id,
+        emd_area_adm_code,
+        emd_area_name,
+        emd_full_name,
+        ree_area
+        FROM emd_area
+        WHERE emd_full_name ILIKE '%' || #{keyword} || '%'
+        OR EXISTS (
+        SELECT 1
+        FROM jsonb_array_elements(ree_area) AS ree
+        WHERE ree->>'fullName' ILIKE '%' || #{keyword} || '%'
+        AND NOT (emd_full_name ILIKE '%' || #{keyword} || '%')
+        )
+    </select>
+</mapper>

@@ -4,6 +4,6 @@ import com.bockerl.snailmember.area.query.dto.QuerySidoAreaDTO
 import org.apache.ibatis.annotations.Mapper
 
 @Mapper
-interface SidoAreasMapper {
+interface SidoAreaMapper {
     fun selectSidoAreaBySidoAreaId(sidoAreaId: Long): QuerySidoAreaDTO?
 }

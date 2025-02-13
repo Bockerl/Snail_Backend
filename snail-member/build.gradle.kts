@@ -12,7 +12,15 @@ plugins {
 ktlint {
     version.set("1.2.1")
     verbose.set(true)
+    android.set(false)
     outputToConsole.set(true)
+    enableExperimentalRules.set(true)
+    filter {
+        exclude("**/generated/**")
+        exclude("**/test/**") // 테스트 소스 제외
+        exclude("**/*.kts") // Kotlin 스크립트 파일 제외
+        include("**/kotlin/**")
+    }
     reporters {
         reporter(ReporterType.JSON)
     }

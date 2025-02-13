@@ -19,11 +19,10 @@ import org.springframework.web.multipart.MultipartFile
 class CommandBoardServiceImpl(
     private val commandBoardRepository: CommandBoardRepository,
     private val commandFileService: CommandFileService,
-)  :CommandBoardService{
+) : CommandBoardService {
 
     @Transactional
     override fun createBoard(commandBoardCreateRequestVO: CommandBoardCreateRequestVO, files: List<MultipartFile>) {
-
         val board = Board(
             boardContents = commandBoardCreateRequestVO.boardContents,
             boardType = commandBoardCreateRequestVO.boardType,
@@ -33,10 +32,9 @@ class CommandBoardServiceImpl(
             memberId = commandBoardCreateRequestVO.memberId,
         )
 
-
         val boardEntity = commandBoardRepository.save(board)
 
-        if(files.isNotEmpty()) {
+        if (files.isNotEmpty()) {
             val commandFileRequestVO = boardEntity.boardId?.let {
                 CommandFileRequestVO(
                     fileTargetType = FileTargetType.BOARD,
@@ -50,10 +48,9 @@ class CommandBoardServiceImpl(
     }
 
     override fun updateBoard(commandBoardUpdateRequestVO: CommandBoardUpdateRequestVO, files: List<MultipartFile>) {
-
         val boardId = extractDigits(commandBoardUpdateRequestVO.boardId)
 
-        val board = commandBoardRepository.findById(boardId).orElseThrow { CommonException(ErrorCode.NOT_FOUND_BOARD)}
+        val board = commandBoardRepository.findById(boardId).orElseThrow { CommonException(ErrorCode.NOT_FOUND_BOARD) }
 
         board.apply {
             boardContents = commandBoardUpdateRequestVO.boardContents
@@ -66,7 +63,7 @@ class CommandBoardServiceImpl(
 
         val boardEntity = commandBoardRepository.save(board)
 
-        if(files.isNotEmpty()) {
+        if (files.isNotEmpty()) {
             val commandFileRequestVO = boardEntity.boardId?.let {
                 CommandFileRequestVO(
                     fileTargetType = FileTargetType.BOARD,
@@ -82,7 +79,7 @@ class CommandBoardServiceImpl(
     /* 설명. soft delete로 바꾸기 */
     override fun deleteBoard(commandBoardDeleteRequestVO: CommandBoardDeleteRequestVO) {
         val boardId = extractDigits(commandBoardDeleteRequestVO.boardId)
-        val board = commandBoardRepository.findById(boardId).orElseThrow { CommonException(ErrorCode.NOT_FOUND_BOARD)}
+        val board = commandBoardRepository.findById(boardId).orElseThrow { CommonException(ErrorCode.NOT_FOUND_BOARD) }
 
         board.apply {
             active = false
@@ -91,13 +88,11 @@ class CommandBoardServiceImpl(
         val commandFileRequestVO = CommandFileRequestVO(
             fileTargetType = FileTargetType.BOARD,
             fileTargetId = boardId,
-            memberId = commandBoardDeleteRequestVO.memberId
+            memberId = commandBoardDeleteRequestVO.memberId,
         )
 
         commandFileService.deleteFile(commandFileRequestVO)
     }
 
-    fun extractDigits(input: String): Long {
-        return input.filter { it.isDigit() }.toLong()
-    }
+    fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
 }

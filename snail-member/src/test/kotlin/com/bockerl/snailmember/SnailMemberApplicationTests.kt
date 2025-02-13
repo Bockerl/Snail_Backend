@@ -9,5 +9,4 @@ class SnailMemberApplicationTests {
     @Test
     fun contextLoads() {
     }
-
 }

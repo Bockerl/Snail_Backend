@@ -3,7 +3,6 @@ package com.bockerl.snailmember.file.query.repository
 import com.bockerl.snailmember.file.query.dto.QueryFileDTO
 import com.bockerl.snailmember.file.query.dto.QueryFileGatheringDTO
 import com.bockerl.snailmember.file.query.vo.request.QueryFileRequestVO
-import com.bockerl.snailmember.file.query.vo.response.QueryFileResponseVO
 import org.apache.ibatis.annotations.Mapper
 import org.apache.ibatis.annotations.Param
 

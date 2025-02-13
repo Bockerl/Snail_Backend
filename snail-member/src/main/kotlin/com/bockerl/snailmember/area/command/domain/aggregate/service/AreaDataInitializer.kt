@@ -7,9 +7,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
-class AreaDataInitializer(
-    private val areaApiService: AreaApiService,
-) : ApplicationRunner {
+class AreaDataInitializer(private val areaApiService: AreaApiService) : ApplicationRunner {
     private val logger = KotlinLogging.logger {}
 
     @Transactional

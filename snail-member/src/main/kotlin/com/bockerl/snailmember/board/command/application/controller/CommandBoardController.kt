@@ -14,16 +14,12 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.http.MediaType
-import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/api/board")
-class CommandBoardController(
-    private val commandBoardService: CommandBoardService,
-)
-{
+class CommandBoardController(private val commandBoardService: CommandBoardService) {
 
     @Operation(
         summary = "게시글 등록",
@@ -46,20 +42,23 @@ class CommandBoardController(
     @OpenApiBody(
         content = [
             Content(
-                encoding = [Encoding(name = "commandBoardRequestVO",
-                    contentType = MediaType.APPLICATION_JSON_VALUE)]
-            )
+                encoding = [
+                    Encoding(
+                        name = "commandBoardRequestVO",
+                        contentType = MediaType.APPLICATION_JSON_VALUE,
+                    ),
+                ],
+            ),
         ],
     )
     @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun postBoard(
         @RequestPart("commandBoardRequestVO") commandBoardCreateRequestVO: CommandBoardCreateRequestVO,
         @RequestPart("files", required = false) files: List<MultipartFile>?,
-        ): ResponseDTO<BoardResponseVO> {
+    ): ResponseDTO<BoardResponseVO> {
+        commandBoardService.createBoard(commandBoardCreateRequestVO, files ?: emptyList())
 
-        commandBoardService.createBoard(commandBoardCreateRequestVO, files?: emptyList())
-
-        return ResponseDTO.ok(null);
+        return ResponseDTO.ok(null)
     }
 
     @Operation(
@@ -81,9 +80,13 @@ class CommandBoardController(
     @OpenApiBody(
         content = [
             Content(
-                encoding = [Encoding(name = "commandBoardUpdateRequestVO",
-                    contentType = MediaType.APPLICATION_JSON_VALUE)]
-            )
+                encoding = [
+                    Encoding(
+                        name = "commandBoardUpdateRequestVO",
+                        contentType = MediaType.APPLICATION_JSON_VALUE,
+                    ),
+                ],
+            ),
         ],
     )
     @PatchMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -91,15 +94,14 @@ class CommandBoardController(
         @RequestPart("commandBoardUpdateRequestVO") commandBoardUpdateRequestVO: CommandBoardUpdateRequestVO,
         @RequestPart("files", required = false) files: List<MultipartFile>?,
     ): ResponseDTO<BoardResponseVO> {
+        commandBoardService.updateBoard(commandBoardUpdateRequestVO, files ?: emptyList())
 
-        commandBoardService.updateBoard(commandBoardUpdateRequestVO, files?: emptyList())
-
-        return ResponseDTO.ok(null);
+        return ResponseDTO.ok(null)
     }
 
     @Operation(
         summary = "게시글 삭제",
-        description = "게시글 번호와 회원 번호를 이용하여 삭제합니다. 회원 번호는 검증 용도로 사용됩니다.(추후 로직 상에서 구현 예정)"
+        description = "게시글 번호와 회원 번호를 이용하여 삭제합니다. 회원 번호는 검증 용도로 사용됩니다.(추후 로직 상에서 구현 예정)",
     )
     @ApiResponses(
         value = [
@@ -116,9 +118,8 @@ class CommandBoardController(
     fun deleteBoard(
         @RequestBody commandBoardDeleteRequestVO: CommandBoardDeleteRequestVO,
     ): ResponseDTO<BoardResponseVO> {
-
         commandBoardService.deleteBoard(commandBoardDeleteRequestVO)
 
-        return ResponseDTO.ok(null);
+        return ResponseDTO.ok(null)
     }
 }

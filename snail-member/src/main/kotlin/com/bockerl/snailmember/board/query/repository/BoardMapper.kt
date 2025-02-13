@@ -1,6 +1,5 @@
 package com.bockerl.snailmember.board.query.repository
 
-import com.bockerl.snailmember.board.command.domain.aggregate.entity.Board
 import com.bockerl.snailmember.board.query.dto.QueryBoardDTO
 import org.apache.ibatis.annotations.Mapper
 

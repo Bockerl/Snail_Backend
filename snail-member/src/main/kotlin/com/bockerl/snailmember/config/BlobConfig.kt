@@ -18,7 +18,6 @@ data class BlobConfig(
 
     @Bean
     fun blobServiceClient(): BlobServiceClient {
-
         println("connectionString: " + connectionString)
 
         if (connectionString.isBlank()) {

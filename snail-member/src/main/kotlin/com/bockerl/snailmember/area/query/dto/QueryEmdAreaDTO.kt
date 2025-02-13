@@ -1,16 +1,18 @@
 package com.bockerl.snailmember.area.query.dto
 
-import com.bockerl.snailmember.area.command.domain.aggregate.entity.EmdAreas.ReeArea
-import org.hibernate.annotations.JdbcTypeCode
-import org.hibernate.type.SqlTypes
+import com.bockerl.snailmember.area.command.domain.aggregate.entity.EmdArea.ReeArea
 
-class QueryEmdAreaDTO(
+data class QueryEmdAreaDTO(
     val emdAreaId: Long,
     val siggAreaId: Long,
     val emdAreaAdmCode: String,
     val emdAreaName: String,
     val emdFullName: String,
-    // Postgres에서 지원하는 타입인 JsonB를 활용, 컬럼이 binary 형식으로 저장
-    @JdbcTypeCode(SqlTypes.JSON)
-    val ReeAreas: List<ReeArea> = listOf(),
-)
+    val reeAreas: List<ReeArea> = listOf(),
+) {
+    val formattedEmdId: String
+        get() = "Emd-${emdAreaId.toString().padStart(8, '0') ?: "00000000"}"
+
+    val formattedSiggId: String
+        get() = "Sig-${siggAreaId.toString().padStart(8, '0') ?: "00000000"}"
+}

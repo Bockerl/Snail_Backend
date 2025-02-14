@@ -1,5 +1,7 @@
 package com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.Id
 import org.springframework.data.redis.core.RedisHash
 import java.io.Serializable
@@ -17,10 +19,12 @@ data class TempMember(
     val email: String,
     var phoneNumber: String = "",
     var password: String = "",
+    @JsonProperty("signUpStep")
     var signUpStep: SignUpStep = SignUpStep.INITIAL,
 ) : Serializable {
     // Jackson을 위한 기본 생성자
-    private constructor() : this(
+    @JsonCreator
+    constructor() : this(
         redisId = UUID.randomUUID().toString(),
         nickName = "",
         birth = Timestamp(System.currentTimeMillis()),

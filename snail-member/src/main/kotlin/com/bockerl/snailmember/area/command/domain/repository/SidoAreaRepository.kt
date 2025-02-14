@@ -5,4 +5,4 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface SidoAreasRepository : JpaRepository<SidoArea, Long>
+interface SidoAreaRepository : JpaRepository<SidoArea, Long>

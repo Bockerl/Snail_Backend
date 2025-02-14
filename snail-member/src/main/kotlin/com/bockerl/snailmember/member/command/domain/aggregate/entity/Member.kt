@@ -6,6 +6,7 @@ package com.bockerl.snailmember.member.command.domain.aggregate.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
@@ -13,13 +14,15 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
-import org.hibernate.annotations.CreationTimestamp
-import org.hibernate.annotations.UpdateTimestamp
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "Member")
+@Table(name = "member")
+@EntityListeners(AuditingEntityListener::class)
 data class Member(
     @Id
     @GeneratedValue(
@@ -59,11 +62,11 @@ data class Member(
     @Column(name = "self_introduction", length = 330, nullable = true)
     var selfIntroduction: String,
 ) {
-    @CreationTimestamp
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     lateinit var createdAt: LocalDateTime
 
-    @UpdateTimestamp
+    @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     lateinit var updatedAt: LocalDateTime
 

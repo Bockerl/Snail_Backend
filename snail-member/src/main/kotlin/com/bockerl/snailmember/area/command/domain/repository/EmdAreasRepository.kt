@@ -9,4 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface EmdAreasRepository : JpaRepository<EmdAreas, Long>
+interface EmdAreasRepository : JpaRepository<EmdAreas, Long> {
+    fun findEmdAreasByEmdAreaAdmCode(admCode: String): EmdAreas?
+}

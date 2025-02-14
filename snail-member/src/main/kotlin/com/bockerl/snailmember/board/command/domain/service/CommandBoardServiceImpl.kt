@@ -89,10 +89,14 @@ class CommandBoardServiceImpl(
         }
     }
 
+    // 설명. soft delete로 바꾸기
     override fun deleteBoard(commandBoardDeleteRequestVO: CommandBoardDeleteRequestVO) {
         val boardId = extractDigits(commandBoardDeleteRequestVO.boardId)
+        val board = commandBoardRepository.findById(boardId).orElseThrow { CommonException(ErrorCode.NOT_FOUND_BOARD) }
 
-        commandBoardRepository.deleteById(boardId)
+        board.apply {
+            active = false
+        }
 
         val commandFileRequestVO =
             CommandFileRequestVO(

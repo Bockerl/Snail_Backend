@@ -12,29 +12,33 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "sigg_areas")
+@Table(name = "sigg_area")
 class SiggAreas(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "sigg_areas_id")
-    var siggAreasId: Long? = null,
-    @Column(name = "sido_areas_id")
-    var sidoAreasId: Long,
-    @Column(name = "sigg_areas_adm_code")
-    var siggAreasAdmCode: String,
-    @Column(name = "sigg_areas_name")
-    var siggAreasName: String,
+    @Column(name = "sigg_area_id")
+    var siggAreaId: Long,
+    @Column(name = "sido_area_id")
+    var sidoAreaId: Long,
+    @Column(name = "sigg_area_adm_code")
+    var siggAreaAdmCode: String,
+    @Column(name = "sigg_area_name")
+    var siggAreaName: String,
+    @Column(name = "sigg_full_name")
+    var siggFullName: String,
 ) {
     companion object {
         fun create(
-            sidoAreasId: Long,
+            sidoAreaId: Long,
             admCode: String,
-            name: String,
+            areaName: String,
+            fullName: String,
         ) = SiggAreas(
-            siggAreasId = 0,
-            sidoAreasId = sidoAreasId,
-            siggAreasAdmCode = admCode,
-            siggAreasName = name,
+            siggAreaId = 0,
+            sidoAreaId = sidoAreaId,
+            siggAreaAdmCode = admCode,
+            siggAreaName = areaName,
+            siggFullName = fullName,
         )
     }
 }

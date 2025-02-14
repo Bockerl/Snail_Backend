@@ -66,6 +66,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-mail")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.4")
     testImplementation("org.springframework.security:spring-security-test")
     "developmentOnly"("org.springframework.boot:spring-boot-devtools")
@@ -74,6 +75,18 @@ dependencies {
     implementation("com.opencsv:opencsv:5.9")
     // env file
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
+    // kotlin - logging
+    implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
+    // sms service(coolsms)
+    implementation("net.nurigo:sdk:4.3.2")
+    // redis 직렬화 설정
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    // hibernate(Json 저장을 위한)
+    implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
+
+    // redis sentinel 가용을 위한
+    implementation("io.lettuce:lettuce-core") // Redis Sentinel 지원을 위해 Lettuce 클라이언트 사용
 }
 dependencyManagement {
     imports {

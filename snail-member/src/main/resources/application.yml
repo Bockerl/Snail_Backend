@@ -13,9 +13,28 @@ spring:
         database-platform: org.hibernate.dialect.PostgreSQLDialect
         hibernate:
             ddl-auto: update
+    sql:
+        init:
+            mode: always
     properties:
         hibernate:
             format_sql: true
+    mail:
+        host: smtp.gmail.com
+        port: 587
+        username: ${MAIL_USERNAME}
+        password: ${MAIL_PASSWORD}
+        properties:
+            mail:
+                smtp:
+                    auth: true
+                    starttls:
+                        enable: true
+    #        redis:
+#            host: ${REDIS_HOST}
+#            port: ${REDIS_PORT}
+
+
     cloud:
         azure:
             storage:
@@ -26,6 +45,14 @@ spring:
         multipart:
             max-file-size: 1MB
             max-request-size: 10MB
+    data:
+        redis:
+            sentinel:
+                master: ${REDIS_MASTER}
+                nodes:
+                    - ${REDIS_PORT1}
+                    - ${REDIS_PORT2}
+                    - ${REDIS_PORT3}
 
 mybatis:
     mapper-locations: classpath:/com/bockerl/snailmember/mapper/**/*.xml

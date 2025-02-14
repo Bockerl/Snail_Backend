@@ -34,16 +34,19 @@ class QueryMemberController(
                 responseCode = "200",
                 description = "멤버 조회 성공",
                 content = [
-                    Content(mediaType = "application/json", schema = Schema(implementation = MemberDTO::class)),
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = MemberDTO::class),
+                    ),
                 ],
             ),
         ],
     )
     @GetMapping("/{memberId}")
-    fun findMemberByMemberId(
+    fun getMemberByMemberId(
         @PathVariable memberId: Long,
     ): ResponseDTO<*> {
-        val memberDTO: MemberDTO = queryMemberService.findMemberByMemberId(memberId)
+        val memberDTO: MemberDTO = queryMemberService.selectMemberByMemberId(memberId)
         return ResponseDTO.ok(memberConverter.dtoToResponseVO(memberDTO))
     }
 }

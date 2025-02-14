@@ -14,7 +14,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "activity_areas")
+@Table(name = "activity_area")
 @EntityListeners(AuditingEntityListener::class)
 class ActivityArea(
     @EmbeddedId
@@ -33,7 +33,7 @@ class ActivityArea(
     data class ActivityId(
         @Column(name = "member_id")
         val memberId: Long,
-        @Column(name = "emd_areas_id")
+        @Column(name = "emd_area_id")
         val emdAreasId: Long,
     )
 }

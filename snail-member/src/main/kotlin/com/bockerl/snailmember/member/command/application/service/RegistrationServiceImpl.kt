@@ -1,24 +1,33 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.bockerl.snailmember.member.command.application.service
 
+import com.bockerl.snailmember.area.command.domain.aggregate.entity.ActivityArea
+import com.bockerl.snailmember.area.command.domain.aggregate.entity.AreaType
+import com.bockerl.snailmember.area.command.domain.repository.ActivityAreaRepository
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
-import com.bockerl.snailmember.member.command.application.dto.request.EmailRequestDTO
-import com.bockerl.snailmember.member.command.application.dto.request.EmailVerifyRequestDTO
-import com.bockerl.snailmember.member.command.application.dto.request.PasswordRequestDTO
-import com.bockerl.snailmember.member.command.application.dto.request.PhoneRequestDTO
-import com.bockerl.snailmember.member.command.application.dto.request.PhoneVerifyRequestDTO
+import com.bockerl.snailmember.member.command.application.dto.request.*
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.Gender
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.Language
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.Member
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.MemberStatus
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.SignUpStep
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.TempMember
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.VerificationType
+import com.bockerl.snailmember.member.command.domain.repository.MemberRepository
 import com.bockerl.snailmember.member.command.domain.repository.TempMemberRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Service
 class RegistrationServiceImpl(
     private val authService: AuthService,
     private val tempMemberRepository: TempMemberRepository,
+    private val memberRepository: MemberRepository,
+    private val activityAreaRepository: ActivityAreaRepository,
 ) : RegistrationService {
     private val logger = KotlinLogging.logger {}
 
@@ -169,4 +178,81 @@ class RegistrationServiceImpl(
         logger.info { "임시회원에 비밀번호 입력 성공" }
         return redisId
     }
+
+    // 6. 활동지역 등록(회원가입 완료)
+    @Transactional
+    override fun postActivityArea(requestDTO: ActivityAreaRequestDTO) {
+        val redisId = requestDTO.redisId
+        logger.info { "활동지역 등록 시작 - redisId: $redisId" }
+        // redis에서 tempMember 조회
+        val tempMember =
+            tempMemberRepository.find(redisId)
+                ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
+        logger.info { "redis에서 조회된 tempMember: $tempMember" }
+        // 활동지역 등록 순서인지 확인
+        if (tempMember.signUpStep != SignUpStep.PASSWORD_VERIFIED) {
+            logger.error { "활동지역 등록 순서가 아닌 상태에서 등록 요청이 날라온 에러 발생 - redisId: $redisId" }
+            throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
+        }
+        // 실제 회원 생성 후 등록
+        val newMember = Member(
+            memberEmail = tempMember.email,
+            memberNickName = tempMember.nickName,
+            // tempMember의 timestamp를 localDate로 변환
+            memberBirth = tempMember.birth.toLocalDateTime().toLocalDate(),
+            memberPassword = tempMember.password,
+            memberPhoneNumber = tempMember.phoneNumber,
+            memberPhoto = "",
+            memberGender = Gender.UNKNOWN,
+            memberLanguage = Language.KOR,
+            memberRegion = "",
+            memberStatus = MemberStatus.USER,
+            selfIntroduction = "",
+        )
+        logger.info { "새로 생성된 회원 정보: $newMember" }
+        memberRepository.save(newMember)
+        logger.info { "새 회원 저장 성공" }
+        val primaryId = extractDigits(requestDTO.primaryFormattedId)
+        logger.info { "추출된 primaryAreaId: $primaryId" }
+        // 활동지역 db에 저장
+        // 1. 주 지역은 반드시 존재하므로 그냥 저장
+        val primaryArea = ActivityArea(
+            id = ActivityArea.ActivityId(
+                memberId = newMember.memberId ?: throw CommonException(ErrorCode.NOT_FOUND_USER_ID),
+                emdAreasId = primaryId,
+            ),
+            areaType = AreaType.PRIMARY,
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now(),
+        )
+        logger.info { "새로 생성된 주 활동 지역: $primaryArea" }
+        activityAreaRepository.save(primaryArea)
+        logger.info { "주 활동 지역 저장 성공" }
+        // 2. 직장 근처는 let을 통해 저장
+        requestDTO.workplaceFormattedId?.let { secondaryId ->
+            logger.info { "직장 근처 활동 지역 저장 시작, secondaryId: $secondaryId" }
+            if (secondaryId == requestDTO.primaryFormattedId) {
+                logger.error { "주 활동 지역과 직장 근처 활동 지역이 같은 종류로 등록되는 에러 발생, secondaryId: $secondaryId" }
+                throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
+            }
+            val workplaceArea = ActivityArea(
+                id = ActivityArea.ActivityId(
+                    memberId = newMember.memberId ?: throw CommonException(ErrorCode.NOT_FOUND_USER_ID),
+                    emdAreasId = extractDigits(secondaryId),
+                ),
+                areaType = AreaType.WORKPLACE,
+                createdAt = LocalDateTime.now(),
+                updatedAt = LocalDateTime.now(),
+            )
+            logger.info { "새로 생성된 직장 근처 활동 지역: $workplaceArea" }
+            activityAreaRepository.save(workplaceArea)
+            logger.info { "직장 근처 활동 지역 저장 성공" }
+        }
+        logger.info { "회원 테이블에 새 회원 등록 성공" }
+        tempMemberRepository.delete(redisId)
+        logger.info { "redis에 저장된 임시 회원 삭제 성공 - redisId: $redisId" }
+        logger.info { "회원 가입 종료 - 회원 가입 성공" }
+    }
+
+    fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
 }

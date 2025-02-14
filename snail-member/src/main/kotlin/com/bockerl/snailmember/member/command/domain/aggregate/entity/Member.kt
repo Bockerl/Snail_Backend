@@ -34,7 +34,7 @@ data class Member(
         sequenceName = "mem", // db seq 이름
         allocationSize = 1, // seq 증가량 (추후에 성능에 따라 변경해야 할지도 모름)
     )
-    val memberId: Long? = null,
+    var memberId: Long? = null,
     @Column(name = "member_email", length = 255, nullable = false, unique = true)
     var memberEmail: String,
     @Column(name = "member_phone_number", nullable = false, length = 255, unique = true)

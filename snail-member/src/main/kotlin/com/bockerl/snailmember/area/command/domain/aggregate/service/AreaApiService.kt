@@ -3,9 +3,9 @@ package com.bockerl.snailmember.area.command.domain.aggregate.service
 import com.bockerl.snailmember.area.command.domain.aggregate.entity.EmdArea
 import com.bockerl.snailmember.area.command.domain.aggregate.entity.SidoArea
 import com.bockerl.snailmember.area.command.domain.aggregate.entity.SiggArea
-import com.bockerl.snailmember.area.command.domain.repository.EmdAreasRepository
-import com.bockerl.snailmember.area.command.domain.repository.SidoAreasRepository
-import com.bockerl.snailmember.area.command.domain.repository.SiggAreasRepository
+import com.bockerl.snailmember.area.command.domain.repository.EmdAreaRepository
+import com.bockerl.snailmember.area.command.domain.repository.SidoAreaRepository
+import com.bockerl.snailmember.area.command.domain.repository.SiggAreaRepository
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -22,9 +22,9 @@ import java.net.URLEncoder
 
 @Service
 class AreaApiService(
-    private val sidoAreasRepository: SidoAreasRepository,
-    private val siggAreasRepository: SiggAreasRepository,
-    private val emdAreasRepository: EmdAreasRepository,
+    private val sidoAreasRepository: SidoAreaRepository,
+    private val siggAreasRepository: SiggAreaRepository,
+    private val emdAreasRepository: EmdAreaRepository,
     private val objectMapper: ObjectMapper,
     @Value("\${AREA_API_KEY}")
     private val key: String,

@@ -22,19 +22,35 @@ class CommandBoardLikeServiceImpl(
         // 설명. 집합으로 각 인덱스 관리. cold data 분리를 위해 expire 설정(1일) -> 호출될 때 마다 갱신됨
 
         // 설명. 1. board pk 기준 인덱스
-        redisTemplate.opsForSet().add("board-like:${commandBoardLikeRequestVO.boardId}", commandBoardLikeRequestVO.memberId)
+        redisTemplate
+            .opsForSet()
+            .add("board-like:${commandBoardLikeRequestVO.boardId}", commandBoardLikeRequestVO.memberId)
         redisTemplate.expire("board-like:${commandBoardLikeRequestVO.boardId}", java.time.Duration.ofDays(1))
         // 설명. 2. member pk 기준 인덱스 (역 인덱스)
-        redisTemplate.opsForSet().add("board-like:${commandBoardLikeRequestVO.memberId}", commandBoardLikeRequestVO.boardId)
+        redisTemplate
+            .opsForSet()
+            .add("board-like:${commandBoardLikeRequestVO.memberId}", commandBoardLikeRequestVO.boardId)
         redisTemplate.expire("board-like:${commandBoardLikeRequestVO.memberId}", java.time.Duration.ofDays(1))
+
+        // Kafka에 이벤트 발행
+//        val event = LikeEvent(memberId, boardId, ActionType.LIKE)
+//        kafkaTemplate.send("board-like-events", event)
     }
 
     override fun deleteBoardLike(commandBoardLikeRequestVO: CommandBoardLikeRequestVO) {
         // 설명. 1. board pk 기준 인덱스
-        redisTemplate.opsForSet().remove("board-like:${commandBoardLikeRequestVO.boardId}", commandBoardLikeRequestVO.memberId)
+        redisTemplate
+            .opsForSet()
+            .remove("board-like:${commandBoardLikeRequestVO.boardId}", commandBoardLikeRequestVO.memberId)
 
         // 설명. 2. member pk 기준 인덱스 (역 인덱스)
-        redisTemplate.opsForSet().remove("board-like:${commandBoardLikeRequestVO.memberId}", commandBoardLikeRequestVO.boardId)
+        redisTemplate
+            .opsForSet()
+            .remove("board-like:${commandBoardLikeRequestVO.memberId}", commandBoardLikeRequestVO.boardId)
+
+        // Kafka에 이벤트 발행
+//        val event = LikeEvent(memberId, boardId, ActionType.UNLIKE)
+//        kafkaTemplate.send("board-like-events", event)
     }
 
     override fun readBoardLike(boardId: String): List<CommandBoardLikeMemberIdsResponseVO> {
@@ -84,7 +100,8 @@ class CommandBoardLikeServiceImpl(
 
     override fun readBoardIdsByMemberId(memberId: String): List<QueryBoardResponseVO> {
         // 설명. 유저가 좋아요한 게시글들 모아보는 함수
-        val recentBoardIds = redisTemplate.opsForSet().members("board-like:$memberId")?.map { it as String } ?: emptyList()
+        val recentBoardIds =
+            redisTemplate.opsForSet().members("board-like:$memberId")?.map { it as String } ?: emptyList()
 
         return if (needAdditionalMember(memberId, recentBoardIds.size.toLong())) {
             // 설명. 둘 다 조회해야 할 때

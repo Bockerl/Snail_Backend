@@ -43,7 +43,7 @@ class QueryBoardController(
     )
     @GetMapping("/detail/{boardId}")
     fun getBoardByBoardId(
-        @PathVariable boardId: Long,
+        @PathVariable boardId: String,
         // 궁금. 와일드 카드로 *를 쓸 것인지?
     ): ResponseDTO<*> {
         val queryBoardResponseVO: QueryBoardResponseVO = queryBoardService.readBoardByBoardId(boardId)

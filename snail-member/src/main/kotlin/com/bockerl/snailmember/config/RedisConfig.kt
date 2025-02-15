@@ -27,6 +27,7 @@ class RedisConfig(
     @Value("\${REDIS_PORT1}") private val redisPort1: String,
     @Value("\${REDIS_PORT2}") private val redisPort2: String,
     @Value("\${REDIS_PORT3}") private val redisPort3: String,
+    @Value("\${DB_PASSWORD}") private val redisPassword: String,
 ) {
     @Bean
     fun redisConnectionFactory(): RedisConnectionFactory {
@@ -40,6 +41,7 @@ class RedisConfig(
                 sentinel(host2, port2)
                 val (host3, port3) = parseHostPort(redisPort3)
                 sentinel(host3, port3)
+                setPassword(redisPassword)
             }
         return LettuceConnectionFactory(sentinelConfig)
 
@@ -55,8 +57,8 @@ class RedisConfig(
     }
 
     @Bean
-    fun redisTemplate(redisConnectionFactory: RedisConnectionFactory): RedisTemplate<String, String> =
-        RedisTemplate<String, String>().apply {
+    fun redisTemplate(redisConnectionFactory: RedisConnectionFactory): RedisTemplate<String, Any> =
+        RedisTemplate<String, Any>().apply {
             this.connectionFactory = redisConnectionFactory
             this.keySerializer = StringRedisSerializer()
             this.valueSerializer = StringRedisSerializer()

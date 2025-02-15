@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 
 data class QueryBoardResponseVO(
-    @field:Schema(description = "게시글 고유 번호(PK)", example = "1", type = "Long")
+    @field:Schema(description = "게시글 고유 번호(PK)", example = "BOA-00000001", type = "Long")
     val boardId: String? = null,
     @field:Schema(description = "게시글 내용", example = "달팽이 좋아요", type = "String")
     val boardContents: String? = null,

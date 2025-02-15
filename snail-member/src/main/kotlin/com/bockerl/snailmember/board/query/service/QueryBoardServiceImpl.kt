@@ -22,9 +22,11 @@ class QueryBoardServiceImpl(
 ) : QueryBoardService {
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    override fun readBoardByBoardId(boardId: Long): QueryBoardResponseVO {
+    override fun readBoardByBoardId(boardId: String): QueryBoardResponseVO {
+        val parsingBoardId = extractDigits(boardId)
+
         val board =
-            boardMapper.selectBoardByBoardId(boardId)
+            boardMapper.selectBoardByBoardId(parsingBoardId)
                 ?: throw CommonException(ErrorCode.NOT_FOUND_BOARD)
 
         return boardConverter.dtoToResponseVO(board)
@@ -51,4 +53,6 @@ class QueryBoardServiceImpl(
 
         return boardDTOList
     }
+
+    fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
 }

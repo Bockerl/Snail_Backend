@@ -3,12 +3,16 @@ package com.bockerl.snailmember.boardlike.command.domain.service
 import com.bockerl.snailmember.board.query.service.QueryBoardService
 import com.bockerl.snailmember.board.query.vo.QueryBoardResponseVO
 import com.bockerl.snailmember.boardlike.command.application.service.CommandBoardLikeService
+import com.bockerl.snailmember.boardlike.command.domain.aggregate.enum.ActionType
+import com.bockerl.snailmember.boardlike.command.domain.aggregate.event.BoardLikeEvent
 import com.bockerl.snailmember.boardlike.command.domain.repository.BoardLikeRepository
 import com.bockerl.snailmember.boardlike.command.domain.vo.request.CommandBoardLikeRequestVO
 import com.bockerl.snailmember.boardlike.command.domain.vo.response.CommandBoardLikeMemberIdsResponseVO
 import com.bockerl.snailmember.member.query.service.QueryMemberService
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
+import java.time.Duration
 
 @Service
 class CommandBoardLikeServiceImpl(
@@ -16,6 +20,9 @@ class CommandBoardLikeServiceImpl(
     private val boardLikeRepository: BoardLikeRepository,
     private val queryMemberService: QueryMemberService,
     private val queryBoardService: QueryBoardService,
+    private val kafkaBoardLikeTemplate: KafkaTemplate<String, BoardLikeEvent>,
+//    private val kafkaTemplate: KafkaTemplate<String, Any>,
+//    private val kafkaBoardLikeTemplate: KafkaTemplate<String, Any>,
 ) : CommandBoardLikeService {
     override fun createBoardLike(commandBoardLikeRequestVO: CommandBoardLikeRequestVO) {
         // 설명. redis에서 board pk 기준 인덱스 설정 및 member pk 기준 인덱스 설정 할 것
@@ -25,16 +32,30 @@ class CommandBoardLikeServiceImpl(
         redisTemplate
             .opsForSet()
             .add("board-like:${commandBoardLikeRequestVO.boardId}", commandBoardLikeRequestVO.memberId)
-        redisTemplate.expire("board-like:${commandBoardLikeRequestVO.boardId}", java.time.Duration.ofDays(1))
+        redisTemplate.expire("board-like:${commandBoardLikeRequestVO.boardId}", Duration.ofDays(1))
         // 설명. 2. member pk 기준 인덱스 (역 인덱스)
         redisTemplate
             .opsForSet()
             .add("board-like:${commandBoardLikeRequestVO.memberId}", commandBoardLikeRequestVO.boardId)
-        redisTemplate.expire("board-like:${commandBoardLikeRequestVO.memberId}", java.time.Duration.ofDays(1))
+        redisTemplate.expire("board-like:${commandBoardLikeRequestVO.memberId}", Duration.ofDays(1))
+
+//        boardLikeRepository.save(
+//            BoardLike(
+//                boardId = commandBoardLikeRequestVO.boardId,
+//                memberId = commandBoardLikeRequestVO.memberId,
+//            ),
+//        )
 
         // Kafka에 이벤트 발행
-//        val event = LikeEvent(memberId, boardId, ActionType.LIKE)
+        val event =
+            BoardLikeEvent(
+                boardId = commandBoardLikeRequestVO.boardId,
+                memberId = commandBoardLikeRequestVO.memberId,
+                actionType = ActionType.LIKE,
+            )
+
 //        kafkaTemplate.send("board-like-events", event)
+        kafkaBoardLikeTemplate.send("board-like-events", event)
     }
 
     override fun deleteBoardLike(commandBoardLikeRequestVO: CommandBoardLikeRequestVO) {
@@ -49,8 +70,15 @@ class CommandBoardLikeServiceImpl(
             .remove("board-like:${commandBoardLikeRequestVO.memberId}", commandBoardLikeRequestVO.boardId)
 
         // Kafka에 이벤트 발행
-//        val event = LikeEvent(memberId, boardId, ActionType.UNLIKE)
+        val event =
+            BoardLikeEvent(
+                boardId = commandBoardLikeRequestVO.boardId,
+                memberId = commandBoardLikeRequestVO.memberId,
+                actionType = ActionType.UNLIKE,
+            )
+
 //        kafkaTemplate.send("board-like-events", event)
+        kafkaBoardLikeTemplate.send("board-like-events", event)
     }
 
     override fun readBoardLike(boardId: String): List<CommandBoardLikeMemberIdsResponseVO> {
@@ -62,7 +90,7 @@ class CommandBoardLikeServiceImpl(
             val dbMemberIds = boardLikeRepository.findMemberIdsByBoardId(boardId).map { it.memberId }
             // 설명. 캐시에 저장 하기
             redisTemplate.opsForSet().add("board-like:$boardId", *dbMemberIds.toTypedArray())
-            redisTemplate.expire("board-like:$boardId", java.time.Duration.ofDays(1))
+            redisTemplate.expire("board-like:$boardId", Duration.ofDays(1))
             // 설명. memeberId를 통해서 member 정보들 list 뽑기
             val members = (dbMemberIds + recentLikes).map { queryMemberService.selectMemberByMemberId(it) }
             // 설명. ResponseVO에 담아주기(memebers list의 각 인덱스의 memberNickname, memberId, memberProfile를 넣은 vo list
@@ -108,7 +136,7 @@ class CommandBoardLikeServiceImpl(
             val dbBoardIds = boardLikeRepository.findBoardIdsByMemberId(memberId).map { it.boardId }
 
             redisTemplate.opsForSet().add("board-like:$memberId", *dbBoardIds.toTypedArray())
-            redisTemplate.expire("board-like:$memberId", java.time.Duration.ofDays(1))
+            redisTemplate.expire("board-like:$memberId", Duration.ofDays(1))
 
             (dbBoardIds + recentBoardIds).map { queryBoardService.readBoardByBoardId(it) }
         } else {

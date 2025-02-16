@@ -41,6 +41,10 @@ spring:
         multipart:
             max-file-size: 1MB
             max-request-size: 10MB
+    kafka:
+        bootstrap-servers: ${KAFKA_PORT}
+        consumer:
+            group-id: ${KAFKA_GROUP_ID}
     data:
         redis:
             sentinel:
@@ -53,6 +57,7 @@ spring:
             host: ${DATABASE_HOST}
             port: ${MONGO_DATABASE_PORT}
             database: ${MONGO_DATABASE_NAME}
+            auto-index-creation: true
 
 mybatis:
     mapper-locations: classpath:/com/bockerl/snailmember/mapper/**/*.xml
@@ -67,6 +72,8 @@ springdoc:
 spring.data.jpa.repositories.enabled: true
 logging:
     level:
+#        org.springframework.kafka: DEBUG
+#        org.apache.kafka: DEBUG
         com:
             bockerl:
                 snailmember: DEBUG

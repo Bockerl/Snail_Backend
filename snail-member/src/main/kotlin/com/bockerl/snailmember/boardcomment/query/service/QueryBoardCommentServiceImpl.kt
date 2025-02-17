@@ -28,9 +28,5 @@ class QueryBoardCommentServiceImpl : QueryBoardCommentService {
         ],
     )
     @GetMapping("/{boardId}")
-    fun getBoardCommentByBoardId() : ResponseDTO<*> {
-
-        return ResponseDTO.ok(null);
-    }
-
+    fun getBoardCommentByBoardId(): ResponseDTO<*> = ResponseDTO.ok(null)
 }

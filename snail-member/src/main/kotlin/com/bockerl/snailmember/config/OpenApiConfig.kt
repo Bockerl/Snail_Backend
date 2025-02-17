@@ -64,7 +64,6 @@ class OpenApiConfig {
             paths = arrayOf("/api/board-comment/**"),
         )
 
-
     @Bean
     @Profile("!Prod")
     fun gatheringApi(): GroupedOpenApi =

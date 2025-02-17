@@ -8,7 +8,10 @@ import org.springframework.web.multipart.MultipartFile
 interface CommandBoardCommentService {
     fun createBoardComment(commandBoardCommentCreateRequestVO: CommandBoardCommentCreateRequestVO)
 
-    fun createBoardCommentByGif(commandBoardCommentCreateByGifRequestVO: CommandBoardCommentCreateByGifRequestVO, file: MultipartFile)
+    fun createBoardCommentByGif(
+        commandBoardCommentCreateByGifRequestVO: CommandBoardCommentCreateByGifRequestVO,
+        file: MultipartFile,
+    )
 
     fun deleteBoardComment(commandBoardCommentDeleteRequestVO: CommandBoardCommentDeleteRequestVO)
 }

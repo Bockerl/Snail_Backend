@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.bockerl.snailmember.boardcomment.command.domain.aggregate.entity
 
 import jakarta.persistence.*
@@ -19,20 +21,15 @@ data class BoardComment(
         allocationSize = 1, // seq 증가량 (추후에 성능에 따라 변경해야 할지도 모름)
     )
     var boardCommentId: Long? = null,
-
-    @Column(name="board_comment_contents", columnDefinition = "TEXT")
+    @Column(name = "board_comment_contents", columnDefinition = "TEXT")
     var boardCommentContents: String? = null,
-
     @Column(name = "active", nullable = false)
     var active: Boolean = true,
-
     @Column(name = "member_id", nullable = false)
     var memberId: Long? = null,
-
     @Column(name = "board_id", nullable = false)
     var boardId: Long? = null,
-
-){
+) {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     lateinit var createdAt: LocalDateTime
@@ -43,5 +40,4 @@ data class BoardComment(
 
     val formattedId: String
         get() = "BOA-COM-${boardCommentId?.toString()?.padStart(8, '0') ?: "00000000"}"
-
 }

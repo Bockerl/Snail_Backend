@@ -26,9 +26,9 @@ data class BoardComment(
     @Column(name = "active", nullable = false)
     var active: Boolean = true,
     @Column(name = "member_id", nullable = false)
-    var memberId: Long? = null,
+    var memberId: Long,
     @Column(name = "board_id", nullable = false)
-    var boardId: Long? = null,
+    var boardId: Long,
 ) {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

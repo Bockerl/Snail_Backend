@@ -8,21 +8,24 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import io.lettuce.core.RedisURI.Builder.sentinel
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.redis.cache.RedisCacheConfiguration
+import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.connection.RedisSentinelConfiguration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
+import java.time.Duration
 
 @Configuration
+// 설명. 캐시 기능 활성화 어노테이션
+@EnableCaching
 class RedisConfig(
-//    @Value("\${REDIS_HOST}") private val host: String,
-//    @Value("\${REDIS_PORT}") private val port: Int,
     @Value("\${REDIS_MASTER}") private val redisMaster: String,
     @Value("\${REDIS_PORT1}") private val redisPort1: String,
     @Value("\${REDIS_PORT2}") private val redisPort2: String,
@@ -44,9 +47,6 @@ class RedisConfig(
                 setPassword(redisPassword)
             }
         return LettuceConnectionFactory(sentinelConfig)
-
-//        val redisConfig = RedisStandaloneConfiguration(host, port)
-//        return LettuceConnectionFactory(redisConfig)
     }
 
     // host:port 문자열을 분리하는 헬퍼 함수
@@ -101,4 +101,17 @@ class RedisConfig(
             this.hashKeySerializer = StringRedisSerializer()
             this.hashValueSerializer = jsonRedisSerializer
         }
+
+    // 설명. 캐시 매니저
+    @Bean
+    fun cacheManager(redisConnectionFactory: RedisConnectionFactory): RedisCacheManager {
+        val configuration =
+            RedisCacheConfiguration
+                .defaultCacheConfig()
+                .entryTtl(Duration.ofMinutes(5)) // 캐시 TTL 5분 설정
+        return RedisCacheManager
+            .builder(redisConnectionFactory)
+            .cacheDefaults(configuration)
+            .build()
+    }
 }

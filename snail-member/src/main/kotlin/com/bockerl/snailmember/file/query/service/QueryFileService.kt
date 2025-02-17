@@ -11,5 +11,5 @@ import com.bockerl.snailmember.file.query.vo.response.QueryFileResponseVO
 interface QueryFileService {
     fun readFilesByTarget(queryFileRequestVO: QueryFileRequestVO): List<QueryFileResponseVO>
 
-    fun readFilesByGatheringId(gatheringId: Long): List<QueryFileGatheringResponseVO>
+    fun readFilesByGatheringId(gatheringId: String): List<QueryFileGatheringResponseVO>
 }

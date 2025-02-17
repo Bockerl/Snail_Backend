@@ -58,6 +58,15 @@ class OpenApiConfig {
 
     @Bean
     @Profile("!Prod")
+    fun boardCommentApi(): GroupedOpenApi =
+        createGroupedOpenApi(
+            groupName = "게시글 댓글 관련 api",
+            paths = arrayOf("/api/board-comment/**"),
+        )
+
+
+    @Bean
+    @Profile("!Prod")
     fun gatheringApi(): GroupedOpenApi =
         createGroupedOpenApi(
             groupName = "모임 관련 api",

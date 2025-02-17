@@ -10,7 +10,7 @@ import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileWithG
 import org.springframework.web.multipart.MultipartFile
 
 interface CommandFileService {
-    fun uploadProfileImage(
+    fun uploadSingleFile(
         file: MultipartFile,
         commandFileRequestVO: CommandFileRequestVO,
     )

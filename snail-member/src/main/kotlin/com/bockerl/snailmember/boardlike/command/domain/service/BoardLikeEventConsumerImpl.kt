@@ -29,7 +29,6 @@ class BoardLikeEventConsumerImpl(
 
     @Transactional
     @KafkaListener(
-//        topics = ["board-like-events"],
         topics = ["board-like-events"],
         groupId = "snail-member",
         containerFactory = "kafkaListenerContainerFactory",

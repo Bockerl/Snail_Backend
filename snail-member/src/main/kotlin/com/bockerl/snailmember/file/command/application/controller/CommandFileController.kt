@@ -30,14 +30,14 @@ class CommandFileController(
     private val commandFileService: CommandFileService,
 ) {
     @Operation(
-        summary = "프로필 사진 등록",
-        description = "프로필 사진(1장)을 등록합니다. (회원, 모임)",
+        summary = "단일 파일 등록",
+        description = "파일 (1장)을 등록합니다. (회원, 모임, gif)",
     )
     @ApiResponses(
         value = [
             ApiResponse(
                 responseCode = "200",
-                description = "프로필 사진 등록 성공",
+                description = "단일 파일 등록 성공",
                 content = [
                     Content(mediaType = "application/json", schema = Schema(implementation = ResponseDTO::class)),
                 ],
@@ -45,7 +45,7 @@ class CommandFileController(
         ],
     )
     @OpenApiBody(
-        description = "회원 아이디를 등록합니다.",
+        description = "단일 파일을 등록합니다.",
         content = [
             Content(
                 encoding = [Encoding(name = "commandFileRequestVO", contentType = MediaType.APPLICATION_JSON_VALUE)],
@@ -53,12 +53,12 @@ class CommandFileController(
         ],
         required = true,
     )
-    @PostMapping("/profile", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun postProfileImage(
+    @PostMapping("/single", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun postSingleFile(
         @RequestPart("file") file: MultipartFile,
         @RequestPart("commandFileRequestVO") commandFileRequestVO: CommandFileRequestVO,
     ): ResponseDTO<Void> {
-        commandFileService.uploadProfileImage(file, commandFileRequestVO)
+        commandFileService.uploadSingleFile(file, commandFileRequestVO)
 
         return ResponseDTO.ok(null)
     }
@@ -87,7 +87,7 @@ class CommandFileController(
         ],
         required = true,
     )
-    @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @PostMapping("multi", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun postFiles(
         @RequestPart("files") files: List<MultipartFile>,
         @RequestPart("commandFileRequestVO")

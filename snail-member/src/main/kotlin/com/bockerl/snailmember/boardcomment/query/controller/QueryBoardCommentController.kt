@@ -7,7 +7,5 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/board-comment")
 class QueryBoardCommentController(
-    private val queryBoardCommentService: QueryBoardCommentService
-) {
-
-}
+    private val queryBoardCommentService: QueryBoardCommentService,
+)

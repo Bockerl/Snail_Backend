@@ -15,7 +15,6 @@ import com.bockerl.snailmember.file.command.domain.aggregate.entity.File
 import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileRequestVO
 import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileWithGatheringRequestVO
 import com.bockerl.snailmember.file.command.domain.repository.CommandFileRepository
-import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
@@ -28,9 +27,6 @@ class CommandFileServiceImpl(
     private val commandFileRepository: CommandFileRepository,
     private val gatheringFileService: CommandGatheringFileService,
 ) : CommandFileService {
-
-    private val logger = KotlinLogging.logger {}
-
     @Transactional
     override fun uploadSingleFile(
         file: MultipartFile,
@@ -318,5 +314,4 @@ class CommandFileServiceImpl(
     }
 
     fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
-
 }

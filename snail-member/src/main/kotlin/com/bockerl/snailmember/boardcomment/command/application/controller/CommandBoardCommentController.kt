@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.bockerl.snailmember.boardcomment.command.application.controller
 
 import com.bockerl.snailmember.boardcomment.command.application.service.CommandBoardCommentService
@@ -19,12 +21,12 @@ import org.springframework.web.multipart.MultipartFile
 @RestController
 @RequestMapping("/api/board-comment")
 class CommandBoardCommentController(
-    private val commandBoardCommentService : CommandBoardCommentService,
-){
+    private val commandBoardCommentService: CommandBoardCommentService,
+) {
     @Operation(
         summary = "게시글 댓글 등록(내용만)",
         description =
-        "입력된 게시글 댓글을 바탕으로 게시글을 등록합니다."
+            "입력된 게시글 댓글을 바탕으로 게시글을 등록합니다.",
     )
     @ApiResponses(
         value = [
@@ -40,8 +42,7 @@ class CommandBoardCommentController(
     @PostMapping("contents")
     fun postBoardComment(
         @RequestBody commandBoardCommentCreateRequestVO: CommandBoardCommentCreateRequestVO,
-        ) : ResponseDTO<*>{
-
+    ): ResponseDTO<*> {
         commandBoardCommentService.createBoardComment(commandBoardCommentCreateRequestVO)
 
         return ResponseDTO.ok(null)
@@ -50,7 +51,7 @@ class CommandBoardCommentController(
     @Operation(
         summary = "게시글 댓글 등록(gif)",
         description =
-        "입력된 게시글 댓글에 gif를 바탕으로 게시글을 등록합니다."
+            "입력된 게시글 댓글에 gif를 바탕으로 게시글을 등록합니다.",
     )
     @ApiResponses(
         value = [
@@ -77,10 +78,10 @@ class CommandBoardCommentController(
     )
     @PostMapping("gif", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun postBoardCommentByGif(
-        @RequestPart("commandBoardCommentCreateByGifRequestVO") commandBoardCommentCreateByGifRequestVO: CommandBoardCommentCreateByGifRequestVO,
+        @RequestPart("commandBoardCommentCreateByGifRequestVO") commandBoardCommentCreateByGifRequestVO:
+            CommandBoardCommentCreateByGifRequestVO,
         @RequestPart("file", required = true) file: MultipartFile,
-    ) : ResponseDTO<*>{
-
+    ): ResponseDTO<*> {
         commandBoardCommentService.createBoardCommentByGif(commandBoardCommentCreateByGifRequestVO, file)
 
         return ResponseDTO.ok(null)
@@ -89,7 +90,7 @@ class CommandBoardCommentController(
     @Operation(
         summary = "게시글 댓글 삭제",
         description =
-        "게시글 댓글을 삭제합니다."
+            "게시글 댓글을 삭제합니다.",
     )
     @ApiResponses(
         value = [
@@ -104,13 +105,10 @@ class CommandBoardCommentController(
     )
     @DeleteMapping("")
     fun deleteBoardComment(
-        @RequestBody commandBoardCommentDeleteRequestVO: CommandBoardCommentDeleteRequestVO
-    ) : ResponseDTO<*>{
-
+        @RequestBody commandBoardCommentDeleteRequestVO: CommandBoardCommentDeleteRequestVO,
+    ): ResponseDTO<*> {
         commandBoardCommentService.deleteBoardComment(commandBoardCommentDeleteRequestVO)
 
         return ResponseDTO.ok(null)
     }
-
-
 }

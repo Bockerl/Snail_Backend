@@ -3,6 +3,8 @@
 package com.bockerl.snailmember.boardlike.command.domain.aggregate.entity
 
 import jakarta.persistence.*
+import kotlinx.datetime.LocalDateTime
+import org.hibernate.annotations.CreationTimestamp
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
@@ -19,7 +21,7 @@ data class BoardLike(
     @Indexed
     val boardId: String,
 ) {
-//    @CreationTimestamp
-//    @Column(name = "created_at", nullable = false, updatable = false)
-//    lateinit var createdAt: LocalDateTime
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    lateinit var createdAt: LocalDateTime
 }

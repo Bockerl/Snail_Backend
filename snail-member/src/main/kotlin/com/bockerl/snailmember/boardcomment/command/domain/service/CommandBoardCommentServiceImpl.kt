@@ -18,9 +18,8 @@ import org.springframework.web.multipart.MultipartFile
 @Service
 class CommandBoardCommentServiceImpl(
     private val commandBoardCommentRepository: CommandBoardCommentRepository,
-    private val commandFileService: CommandFileService
+    private val commandFileService: CommandFileService,
 ) : CommandBoardCommentService {
-
     override fun createBoardComment(commandBoardCommentCreateRequestVO: CommandBoardCommentCreateRequestVO) {
         val boardComment =
             BoardComment(
@@ -34,7 +33,7 @@ class CommandBoardCommentServiceImpl(
 
     override fun createBoardCommentByGif(
         commandBoardCommentCreateByGifRequestVO: CommandBoardCommentCreateByGifRequestVO,
-        file: MultipartFile
+        file: MultipartFile,
     ) {
         val boardComment =
             BoardComment(
@@ -45,7 +44,7 @@ class CommandBoardCommentServiceImpl(
         val boardCommentEntity = commandBoardCommentRepository.save(boardComment)
 
         val commandFileRequestVO =
-            boardCommentEntity.boardCommentId?.let{
+            boardCommentEntity.boardCommentId?.let {
                 CommandFileRequestVO(
                     fileTargetType = FileTargetType.BOARD_COMMENT,
                     fileTargetId = it,
@@ -59,14 +58,17 @@ class CommandBoardCommentServiceImpl(
     @Transactional
     override fun deleteBoardComment(commandBoardCommentDeleteRequestVO: CommandBoardCommentDeleteRequestVO) {
         val boardCommentId = extractDigits(commandBoardCommentDeleteRequestVO.boardCommentId)
-        val boardComment = commandBoardCommentRepository.findById(boardCommentId).orElseThrow{ CommonException(ErrorCode.NOT_FOUND_BOARD_COMMENT) }
+        val boardComment =
+            commandBoardCommentRepository
+                .findById(
+                    boardCommentId,
+                ).orElseThrow { CommonException(ErrorCode.NOT_FOUND_BOARD_COMMENT) }
 
         boardComment.apply {
             active = false
         }
 
-
-        /* 설명. 내용이 비어있을 때, 파일 지우러 감 */
+        // 설명. 내용이 비어있을 때, 파일 지우러 감
         boardComment.boardCommentContents?.let {
             val commandFileRequestVO =
                 CommandFileRequestVO(
@@ -79,5 +81,4 @@ class CommandBoardCommentServiceImpl(
     }
 
     fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
-
 }

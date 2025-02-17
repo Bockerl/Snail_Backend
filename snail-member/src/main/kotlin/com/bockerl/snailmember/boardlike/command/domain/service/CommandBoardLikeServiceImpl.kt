@@ -21,8 +21,6 @@ class CommandBoardLikeServiceImpl(
     private val queryMemberService: QueryMemberService,
     private val queryBoardService: QueryBoardService,
     private val kafkaBoardLikeTemplate: KafkaTemplate<String, BoardLikeEvent>,
-//    private val kafkaTemplate: KafkaTemplate<String, Any>,
-//    private val kafkaBoardLikeTemplate: KafkaTemplate<String, Any>,
 ) : CommandBoardLikeService {
     override fun createBoardLike(commandBoardLikeRequestVO: CommandBoardLikeRequestVO) {
         // 설명. redis에서 board pk 기준 인덱스 설정 및 member pk 기준 인덱스 설정 할 것
@@ -38,13 +36,6 @@ class CommandBoardLikeServiceImpl(
             .opsForSet()
             .add("board-like:${commandBoardLikeRequestVO.memberId}", commandBoardLikeRequestVO.boardId)
         redisTemplate.expire("board-like:${commandBoardLikeRequestVO.memberId}", Duration.ofDays(1))
-
-//        boardLikeRepository.save(
-//            BoardLike(
-//                boardId = commandBoardLikeRequestVO.boardId,
-//                memberId = commandBoardLikeRequestVO.memberId,
-//            ),
-//        )
 
         // Kafka에 이벤트 발행
         val event =
@@ -77,7 +68,6 @@ class CommandBoardLikeServiceImpl(
                 actionType = ActionType.UNLIKE,
             )
 
-//        kafkaTemplate.send("board-like-events", event)
         kafkaBoardLikeTemplate.send("board-like-events", event)
     }
 

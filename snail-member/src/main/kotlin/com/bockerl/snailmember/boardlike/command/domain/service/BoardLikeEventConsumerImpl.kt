@@ -11,20 +11,19 @@ import com.mongodb.DuplicateKeyException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
 import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.kafka.annotation.TopicPartition
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.kafka.support.KafkaHeaders
+import org.springframework.messaging.handler.annotation.Header
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Service
-import retrofit2.http.Header
 
 @Service
 class BoardLikeEventConsumerImpl(
     private val boardLikeRepository: BoardLikeRepository,
 //    @Value("\${spring.kafka.consumer.group-id}") private val groupId: String,
 ) : BoardLikeEventConsumer {
-//    private val boardLikeBuffer = mutableListOf<BoardLike>()
-//    private val bufferSize = 4
+    private val boardLikeBuffer = mutableListOf<BoardLike>()
+    private val bufferSize = 100
     private val logger = KotlinLogging.logger {}
 
     @Transactional
@@ -35,24 +34,21 @@ class BoardLikeEventConsumerImpl(
     )
     fun consume(
         @Payload event: BoardLikeEvent,
-        @Header(KafkaHeaders.RECEIVED_PARTITION) partition: TopicPartition,
+        @Header(KafkaHeaders.RECEIVED_PARTITION) partition: Int,
         // 설명. 오프셋 커밋용
         acknowledgment: Acknowledgment,
     ) {
+        logger.info { "received header: $partition" }
         // 설명. 멱등성 보장을 위한 try-catch문
         try {
-            logger.info { "여기들어오긴 하냐?" }
             when (event.actionType) {
                 ActionType.LIKE -> {
                     val like = BoardLike(memberId = event.memberId, boardId = event.boardId)
-//                    boardLikeBuffer.add(like)
-//                    logger.info("boardLikeBufferSize: ${boardLikeBuffer.size}")
-//                    if (boardLikeBuffer.size >= bufferSize) {
-//                        logger.info("언제 들어와: ${boardLikeBuffer.size}")
-//                        boardLikeRepository.saveAll(boardLikeBuffer)
-//                        boardLikeBuffer.clear()
-//                    }
-                    boardLikeRepository.save(like)
+                    boardLikeBuffer.add(like)
+                    if (boardLikeBuffer.size >= bufferSize) {
+                        boardLikeRepository.saveAll(boardLikeBuffer)
+                        boardLikeBuffer.clear()
+                    }
                 }
 
                 ActionType.UNLIKE -> {

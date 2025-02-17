@@ -12,6 +12,7 @@ import com.bockerl.snailmember.file.command.application.service.CommandFileServi
 import com.bockerl.snailmember.file.command.domain.aggregate.enums.FileTargetType
 import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileRequestVO
 import jakarta.transaction.Transactional
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 
@@ -20,6 +21,9 @@ class CommandBoardCommentServiceImpl(
     private val commandBoardCommentRepository: CommandBoardCommentRepository,
     private val commandFileService: CommandFileService,
 ) : CommandBoardCommentService {
+    @Transactional
+    // 설명. 데이터 변경 시 캐시 무효화
+    @CacheEvict(value = ["/boardComment/{commandBoardCommentCreateRequestVO.boardId}"], allEntries = true)
     override fun createBoardComment(commandBoardCommentCreateRequestVO: CommandBoardCommentCreateRequestVO) {
         val boardComment =
             BoardComment(
@@ -31,6 +35,8 @@ class CommandBoardCommentServiceImpl(
         commandBoardCommentRepository.save(boardComment)
     }
 
+    @Transactional
+    @CacheEvict(value = ["/boardComment/{commandBoardCommentCreateRequestVO.boardId}"], allEntries = true)
     override fun createBoardCommentByGif(
         commandBoardCommentCreateByGifRequestVO: CommandBoardCommentCreateByGifRequestVO,
         file: MultipartFile,
@@ -56,6 +62,7 @@ class CommandBoardCommentServiceImpl(
     }
 
     @Transactional
+    @CacheEvict(value = ["/boardComment/{boardComment.boardId}"], allEntries = true)
     override fun deleteBoardComment(commandBoardCommentDeleteRequestVO: CommandBoardCommentDeleteRequestVO) {
         val boardCommentId = extractDigits(commandBoardCommentDeleteRequestVO.boardCommentId)
         val boardComment =

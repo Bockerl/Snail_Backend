@@ -10,7 +10,6 @@ import org.apache.ibatis.annotations.Mapper
 
 @Mapper
 interface BoardMapper {
-    // 설명. boardDTO에는 long값 받는건 어떤지?
     fun selectBoardByBoardId(boardId: Long): QueryBoardDTO?
 
     fun selectBoardByBoardType(boardType: String): List<QueryBoardDTO>?

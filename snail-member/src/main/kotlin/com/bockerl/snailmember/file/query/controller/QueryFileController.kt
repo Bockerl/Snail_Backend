@@ -64,7 +64,7 @@ class QueryFileController(
     )
     @GetMapping("/gathering/{gatheringId}")
     fun getFilesByGatheringId(
-        @PathVariable("gatheringId") gatheringId: Long,
+        @PathVariable("gatheringId") gatheringId: String,
     ): ResponseDTO<*> {
         val fileList = queryFileService.readFilesByGatheringId(gatheringId)
 

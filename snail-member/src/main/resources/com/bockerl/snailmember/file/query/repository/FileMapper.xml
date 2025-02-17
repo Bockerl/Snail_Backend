@@ -45,7 +45,7 @@
           FROM
            file
          WHERE
-            file_target_type = #{queryFileRequestVO.fileTargetType} AND file_target_id = #{queryFileRequestVO.fileTargetId}
+            file_target_type = #{queryFileRequestDTO.fileTargetType} AND file_target_id = #{queryFileRequestDTO.fileTargetId}
     </select>
 
     <select id="selectFilesByGatheringId" resultMap="fileGatheringResultMap">

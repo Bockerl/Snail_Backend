@@ -32,4 +32,18 @@ data class QueryFileDTO(
 ) {
     val formattedId: String
         get() = "FIL-${fileId?.toString()?.padStart(8, '0') ?: "00000000"}"
+
+    val formattedMemberId: String
+        get() = "MEM-${memberId?.toString()?.padStart(8, '0') ?: "00000000"}"
+
+    val formattedFileTargetId: String
+        get() {
+            val prefix =
+                fileTargetType
+                    ?.name
+                    ?.split("_") // _를 기준으로 분리
+                    ?.joinToString("-") { it.take(3) } // 각 부분에서 최대 3글자씩 취함
+
+            return "$prefix-${fileTargetId?.toString()?.padStart(8, '0') ?: "00000000"}"
+        }
 }

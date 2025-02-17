@@ -59,20 +59,4 @@ data class Board(
 
     val formattedId: String
         get() = "BOA-${boardId?.toString()?.padStart(8, '0') ?: "00000000"}"
-
-    // 설명. 게시글 업데이트 시
-    fun updateBoardContents(
-        contents: String?,
-        type: BoardType,
-        accessLevel: String,
-    ) {
-        this.boardContents = contents
-        this.boardType = type
-        this.boardAccessLevel = accessLevel
-    }
-
-    // 설명. 게시글 삭제 시
-    fun deleteBoardContents() {
-        this.active = false
-    }
 }

@@ -37,7 +37,7 @@ class CommandBoardServiceImpl(
                 boardTag = commandBoardCreateRequestVO.boardTag,
                 boardLocation = commandBoardCreateRequestVO.boardLocation,
                 boardAccessLevel = commandBoardCreateRequestVO.boardAccessLevel,
-                memberId = commandBoardCreateRequestVO.memberId,
+                memberId = extractDigits(commandBoardCreateRequestVO.memberId),
             )
 
         val boardEntity = commandBoardRepository.save(board)
@@ -48,7 +48,7 @@ class CommandBoardServiceImpl(
                     CommandFileRequestVO(
                         fileTargetType = FileTargetType.BOARD,
                         fileTargetId = it,
-                        memberId = commandBoardCreateRequestVO.memberId,
+                        memberId = extractDigits(commandBoardCreateRequestVO.memberId),
                     )
                 }
 
@@ -70,7 +70,7 @@ class CommandBoardServiceImpl(
             boardTag = commandBoardUpdateRequestVO.boardTag
             boardLocation = commandBoardUpdateRequestVO.boardLocation
             boardAccessLevel = commandBoardUpdateRequestVO.boardAccessLevel
-            memberId = commandBoardUpdateRequestVO.memberId
+            memberId = extractDigits(commandBoardUpdateRequestVO.memberId)
         }
 
         val boardEntity = commandBoardRepository.save(board)
@@ -81,7 +81,7 @@ class CommandBoardServiceImpl(
                     CommandFileRequestVO(
                         fileTargetType = FileTargetType.BOARD,
                         fileTargetId = it,
-                        memberId = commandBoardUpdateRequestVO.memberId,
+                        memberId = extractDigits(commandBoardUpdateRequestVO.memberId),
                     )
                 }
 
@@ -102,7 +102,7 @@ class CommandBoardServiceImpl(
             CommandFileRequestVO(
                 fileTargetType = FileTargetType.BOARD,
                 fileTargetId = boardId,
-                memberId = commandBoardDeleteRequestVO.memberId,
+                memberId = extractDigits(commandBoardDeleteRequestVO.memberId),
             )
 
         commandFileService.deleteFile(commandFileRequestVO)

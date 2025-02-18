@@ -11,4 +11,10 @@ interface BoardCommentMapper {
         @Param("lastId") lastId: Long?,
         @Param("pageSize") pageSize: Int,
     ): List<QueryBoardCommentDTO>
+
+    fun selectBoardCommentsByMemberId(
+        @Param("memberId") memberId: Long,
+        @Param("lastId") lastId: Long?,
+        @Param("pageSize") pageSize: Int,
+    ): List<QueryBoardCommentDTO>
 }

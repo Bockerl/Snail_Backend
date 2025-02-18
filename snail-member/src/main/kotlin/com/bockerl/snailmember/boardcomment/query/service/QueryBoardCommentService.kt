@@ -8,4 +8,10 @@ interface QueryBoardCommentService {
         lastId: Long?,
         pageSize: Int,
     ): List<QueryBoardCommentResponseVO?>
+
+    fun getBoardCommentByMemberId(
+        memberId: String,
+        lastId: Long?,
+        pageSize: Int,
+    ): List<QueryBoardCommentResponseVO?>
 }

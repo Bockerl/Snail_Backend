@@ -4,8 +4,6 @@
  */
 package com.bockerl.snailmember.file.query.service
 
-import com.bockerl.snailmember.common.exception.CommonException
-import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.file.query.dto.QueryFileDTO
 import com.bockerl.snailmember.file.query.dto.QueryFileGatheringDTO
 import com.bockerl.snailmember.file.query.dto.QueryFileRequestDTO
@@ -13,12 +11,15 @@ import com.bockerl.snailmember.file.query.repository.FileMapper
 import com.bockerl.snailmember.file.query.vo.request.QueryFileRequestVO
 import com.bockerl.snailmember.file.query.vo.response.QueryFileGatheringResponseVO
 import com.bockerl.snailmember.file.query.vo.response.QueryFileResponseVO
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 
 @Service
 class QueryFileServiceImpl(
     private val fileMapper: FileMapper,
 ) : QueryFileService {
+    private val logger = KotlinLogging.logger {}
+
     override fun readFilesByTarget(queryFileRequestVO: QueryFileRequestVO): List<QueryFileResponseVO> {
         val requestDTO =
             QueryFileRequestDTO(
@@ -28,9 +29,10 @@ class QueryFileServiceImpl(
 
         val fileList: List<QueryFileDTO> =
             fileMapper.selectFilesByFileTarget(requestDTO)
-                ?: throw CommonException(ErrorCode.NOT_FOUND_FILE)
 
         val fileDTOList = fileList.map { file -> dtoToResponseVO(file) }
+
+        logger.info { "읽혔습니다:: $fileDTOList files read" }
 
         return fileDTOList
     }
@@ -38,7 +40,6 @@ class QueryFileServiceImpl(
     override fun readFilesByGatheringId(gatheringId: String): List<QueryFileGatheringResponseVO> {
         val fileList: List<QueryFileGatheringDTO> =
             fileMapper.selectFilesByGatheringId(extractDigits(gatheringId))
-                ?: throw CommonException(ErrorCode.NOT_FOUND_FILE)
 
         val fileDTOList = fileList.map { file -> gatheringDTOToResponseVO(file) }
 

@@ -13,7 +13,7 @@ import com.bockerl.snailmember.board.command.domain.aggregate.vo.request.Command
 import com.bockerl.snailmember.board.command.domain.aggregate.vo.request.CommandBoardUpdateRequestVO
 // import com.bockerl.snailmember.board.command.domain.aggregate.vo.response.BoardResponseVO
 import com.bockerl.snailmember.common.ResponseDTO
-import com.bockerl.snailmember.config.OpenApiBody
+import com.bockerl.snailmember.infrastructure.config.OpenApiBody
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Encoding

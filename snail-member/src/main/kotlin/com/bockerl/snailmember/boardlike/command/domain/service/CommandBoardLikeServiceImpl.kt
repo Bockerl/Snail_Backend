@@ -3,11 +3,12 @@ package com.bockerl.snailmember.boardlike.command.domain.service
 import com.bockerl.snailmember.board.query.service.QueryBoardService
 import com.bockerl.snailmember.board.query.vo.QueryBoardResponseVO
 import com.bockerl.snailmember.boardlike.command.application.service.CommandBoardLikeService
+import com.bockerl.snailmember.boardlike.command.domain.aggregate.entity.BoardLike
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.enum.BoardLikeActionType
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.event.BoardLikeEvent
+import com.bockerl.snailmember.boardlike.command.domain.aggregate.vo.request.CommandBoardLikeRequestVO
+import com.bockerl.snailmember.boardlike.command.domain.aggregate.vo.response.CommandBoardLikeMemberIdsResponseVO
 import com.bockerl.snailmember.boardlike.command.domain.repository.BoardLikeRepository
-import com.bockerl.snailmember.boardlike.command.domain.vo.request.CommandBoardLikeRequestVO
-import com.bockerl.snailmember.boardlike.command.domain.vo.response.CommandBoardLikeMemberIdsResponseVO
 import com.bockerl.snailmember.member.query.service.QueryMemberService
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.kafka.core.KafkaTemplate
@@ -49,6 +50,10 @@ class CommandBoardLikeServiceImpl(
         kafkaBoardLikeTemplate.send("board-like-events", event)
     }
 
+    override fun createBoardLikeEventList(boardLikeList: List<BoardLike>) {
+        boardLikeRepository.saveAll(boardLikeList)
+    }
+
     override fun deleteBoardLike(commandBoardLikeRequestVO: CommandBoardLikeRequestVO) {
         // 설명. 1. board pk 기준 인덱스
         redisTemplate
@@ -69,6 +74,10 @@ class CommandBoardLikeServiceImpl(
             )
 
         kafkaBoardLikeTemplate.send("board-like-events", event)
+    }
+
+    override fun deleteBoardLikeEvent(boardLike: BoardLike) {
+        boardLikeRepository.deleteByMemberIdAndBoardId(boardLike.memberId, boardLike.boardId)
     }
 
     override fun readBoardLike(boardId: String): List<CommandBoardLikeMemberIdsResponseVO> {

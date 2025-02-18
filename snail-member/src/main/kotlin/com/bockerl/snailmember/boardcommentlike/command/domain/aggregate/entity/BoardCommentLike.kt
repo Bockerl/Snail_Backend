@@ -4,7 +4,7 @@ package com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.entity
 
 import jakarta.persistence.*
 import kotlinx.datetime.LocalDateTime
-import org.hibernate.annotations.CreationTimestamp
+import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
@@ -22,7 +22,6 @@ data class BoardCommentLike(
     @Indexed
     val boardCommentId: String,
 ) {
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @CreatedDate
     lateinit var createdAt: LocalDateTime
 }

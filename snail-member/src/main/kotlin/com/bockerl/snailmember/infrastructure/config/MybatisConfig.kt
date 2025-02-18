@@ -2,7 +2,7 @@
  * Copyright 2025 Bockerl
  * SPDX-License-Identifier: MIT
  */
-package com.bockerl.snailmember.config
+package com.bockerl.snailmember.infrastructure.config
 
 import com.bockerl.snailmember.area.query.config.JsonTypeHandler
 import com.fasterxml.jackson.databind.DeserializationFeature

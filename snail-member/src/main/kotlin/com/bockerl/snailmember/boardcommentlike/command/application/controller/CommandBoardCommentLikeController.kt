@@ -7,7 +7,7 @@
 package com.bockerl.snailmember.boardcommentlike.command.application.controller
 
 import com.bockerl.snailmember.boardcommentlike.command.application.service.CommandBoardCommentLikeService
-import com.bockerl.snailmember.boardcommentlike.command.domain.vo.request.CommandBoardCommentLikeRequestVO
+import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.vo.request.CommandBoardCommentLikeRequestVO
 import com.bockerl.snailmember.common.ResponseDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -37,7 +37,7 @@ class CommandBoardCommentLikeController(
         ],
     )
     @PostMapping("")
-    fun postBoardLike(
+    fun postBoardCommentLike(
         @RequestBody commandBoardCommentLikeRequestVO: CommandBoardCommentLikeRequestVO,
     ): ResponseDTO<*> {
         commandBoardCommentLikeService.createBoardCommentLike(commandBoardCommentLikeRequestVO)
@@ -61,7 +61,7 @@ class CommandBoardCommentLikeController(
         ],
     )
     @DeleteMapping("")
-    fun deleteBoardLike(
+    fun deleteBoardCommentLike(
         @RequestBody commandBoardCommentLikeRequestVO: CommandBoardCommentLikeRequestVO,
     ): ResponseDTO<*> {
         commandBoardCommentLikeService.deleteBoardCommentLike(commandBoardCommentLikeRequestVO)
@@ -86,7 +86,7 @@ class CommandBoardCommentLikeController(
         ],
     )
     @GetMapping("count/{boardId}")
-    fun getBoardLikeCount(
+    fun getBoardCommentLikeCount(
         @PathVariable boardId: String,
     ): ResponseDTO<*> = ResponseDTO.ok(commandBoardCommentLikeService.readBoardCommentLikeCount(boardId))
 }

@@ -15,9 +15,9 @@ interface BoardCommentLikeRepository : MongoRepository<BoardCommentLike, String>
         boardId: String,
     ): BoardCommentLike?
 
-    fun deleteByMemberIdAndBoardId(
+    fun deleteByMemberIdAndBoardCommentId(
         memberId: String,
-        boardId: String,
+        boardCommentId: String,
     )
 
     fun countByBoardId(boardId: String): Long

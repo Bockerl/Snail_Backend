@@ -1,3 +1,0 @@
-package com.bockerl.snailmember.boardcommentlike.command.application.service
-
-interface BoardCommentLikeEventConsumer

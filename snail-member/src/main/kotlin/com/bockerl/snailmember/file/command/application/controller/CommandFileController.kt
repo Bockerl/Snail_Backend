@@ -8,10 +8,10 @@
 package com.bockerl.snailmember.file.command.application.controller
 
 import com.bockerl.snailmember.common.ResponseDTO
-import com.bockerl.snailmember.config.OpenApiBody
 import com.bockerl.snailmember.file.command.application.service.CommandFileService
 import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileRequestVO
 import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileWithGatheringRequestVO
+import com.bockerl.snailmember.infrastructure.config.OpenApiBody
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Encoding

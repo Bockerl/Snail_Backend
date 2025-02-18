@@ -2,7 +2,7 @@
  * Copyright 2025 Bockerl
  * SPDX-License-Identifier: MIT
  */
-package com.bockerl.snailmember.config
+package com.bockerl.snailmember.infrastructure.config
 
 import com.azure.storage.blob.BlobContainerClient
 import com.azure.storage.blob.BlobServiceClient

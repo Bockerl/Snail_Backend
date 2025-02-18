@@ -2,7 +2,7 @@
  * Copyright 2025 Bockerl
  * SPDX-License-Identifier: MIT
  */
-package com.bockerl.snailmember.config
+package com.bockerl.snailmember.infrastructure.config
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition
 import io.swagger.v3.oas.annotations.info.Info
@@ -62,6 +62,14 @@ class OpenApiConfig {
         createGroupedOpenApi(
             groupName = "게시글 댓글 관련 api",
             paths = arrayOf("/api/board-comment/**"),
+        )
+
+    @Bean
+    @Profile("!Prod")
+    fun boardCommentLikeApi(): GroupedOpenApi =
+        createGroupedOpenApi(
+            groupName = "게시글 댓글 좋아요 관련 api",
+            paths = arrayOf("/api/board-comment-like/**"),
         )
 
     @Bean

@@ -1,6 +1,6 @@
 @file:Suppress("ktlint:standard:no-wildcard-imports")
 
-package com.bockerl.snailmember.config
+package com.bockerl.snailmember.infrastructure.config
 
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.event.BoardLikeEvent
 import io.github.oshai.kotlinlogging.KotlinLogging

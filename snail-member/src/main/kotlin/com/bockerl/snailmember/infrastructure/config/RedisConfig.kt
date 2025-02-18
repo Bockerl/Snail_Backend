@@ -1,4 +1,4 @@
-package com.bockerl.snailmember.config
+package com.bockerl.snailmember.infrastructure.config
 
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.TempMember
 import com.fasterxml.jackson.annotation.JsonInclude

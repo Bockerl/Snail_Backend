@@ -1,4 +1,4 @@
-package com.bockerl.snailmember.config
+package com.bockerl.snailmember.infrastructure.config
 
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.event.BoardCommentLikeEvent
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.event.BoardLikeEvent
@@ -24,7 +24,7 @@ class KafkaProducerConfig(
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServers,
                 ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
                 ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to JsonSerializer::class.java,
-                // 설명. 멱등성 설정은 고민해볼 필요가 있음 (좋아요에는 해당이 안됨)
+                // 설명. 멱등성 설정은 고민해볼 필요가 있음
                 ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to true,
                 // 설명. 모든 래풀라카의 확인을 받는 것은 tradeoff 사항
                 ProducerConfig.ACKS_CONFIG to "all",
@@ -50,6 +50,8 @@ class KafkaProducerConfig(
                 ProducerConfig.RETRIES_CONFIG to 10,
                 ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION to 5,
                 ProducerConfig.COMPRESSION_TYPE_CONFIG to "snappy",
+                // 설명. 멱등성 설정은 고민해볼 필요가 있음 -> DLQ로 보내야함
+                ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to true,
             )
         return DefaultKafkaProducerFactory(configProps)
     }

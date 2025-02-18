@@ -2,11 +2,12 @@ package com.bockerl.snailmember.boardcommentlike.command.domain.service
 
 import com.bockerl.snailmember.board.query.service.QueryBoardService
 import com.bockerl.snailmember.boardcommentlike.command.application.service.CommandBoardCommentLikeService
+import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.entity.BoardCommentLike
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.enum.BoardCommentLikeActionType
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.event.BoardCommentLikeEvent
+import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.vo.request.CommandBoardCommentLikeRequestVO
+import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.vo.response.CommandBoardCommentLikeMemberIdsResponseVO
 import com.bockerl.snailmember.boardcommentlike.command.domain.repository.BoardCommentLikeRepository
-import com.bockerl.snailmember.boardcommentlike.command.domain.vo.request.CommandBoardCommentLikeRequestVO
-import com.bockerl.snailmember.boardcommentlike.command.domain.vo.response.CommandBoardCommentLikeMemberIdsResponseVO
 import com.bockerl.snailmember.member.query.service.QueryMemberService
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.kafka.core.KafkaTemplate
@@ -49,6 +50,10 @@ class CommandBoardCommentLikeServiceImpl(
         kafkaBoardCommentLikeTemplate.send("board-comment-like-events", event)
     }
 
+    override fun createBoardCommentLikeEventList(boardCommentLikeList: List<BoardCommentLike>) {
+        boardCommentLikeRepository.saveAll(boardCommentLikeList)
+    }
+
     override fun deleteBoardCommentLike(commandBoardCommentLikeRequestVO: CommandBoardCommentLikeRequestVO) {
         // 설명. 1. board pk 기준 인덱스
         redisTemplate
@@ -70,6 +75,10 @@ class CommandBoardCommentLikeServiceImpl(
             )
 
         kafkaBoardCommentLikeTemplate.send("board-comment-like-events", event)
+    }
+
+    override fun deleteBoardCommentLikeEvent(boardCommentLike: BoardCommentLike) {
+        boardCommentLikeRepository.deleteByMemberIdAndBoardCommentId(boardCommentLike.memberId, boardCommentLike.boardCommentId)
     }
 
     override fun readBoardCommentLike(boardCommentId: String): List<CommandBoardCommentLikeMemberIdsResponseVO> {

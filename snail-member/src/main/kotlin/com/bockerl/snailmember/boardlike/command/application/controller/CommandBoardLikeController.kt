@@ -7,7 +7,7 @@
 package com.bockerl.snailmember.boardlike.command.application.controller
 
 import com.bockerl.snailmember.boardlike.command.application.service.CommandBoardLikeService
-import com.bockerl.snailmember.boardlike.command.domain.vo.request.CommandBoardLikeRequestVO
+import com.bockerl.snailmember.boardlike.command.domain.aggregate.vo.request.CommandBoardLikeRequestVO
 import com.bockerl.snailmember.common.ResponseDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content

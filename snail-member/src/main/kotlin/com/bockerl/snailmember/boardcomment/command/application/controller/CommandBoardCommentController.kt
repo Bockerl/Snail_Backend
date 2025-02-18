@@ -7,7 +7,7 @@ import com.bockerl.snailmember.boardcomment.command.domain.aggregate.vo.request.
 import com.bockerl.snailmember.boardcomment.command.domain.aggregate.vo.request.CommandBoardCommentCreateRequestVO
 import com.bockerl.snailmember.boardcomment.command.domain.aggregate.vo.request.CommandBoardCommentDeleteRequestVO
 import com.bockerl.snailmember.common.ResponseDTO
-import com.bockerl.snailmember.config.OpenApiBody
+import com.bockerl.snailmember.infrastructure.config.OpenApiBody
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Encoding

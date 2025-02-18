@@ -1,4 +1,4 @@
-package com.bockerl.snailmember.boardlike.command.domain.vo.response
+package com.bockerl.snailmember.boardlike.command.domain.aggregate.vo.response
 
 import io.swagger.v3.oas.annotations.media.Schema
 

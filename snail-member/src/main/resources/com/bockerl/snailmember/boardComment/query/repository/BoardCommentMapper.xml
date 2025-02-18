@@ -35,4 +35,26 @@
          LIMIT #{pageSize}
     </select>
 
+    <select id="selectBoardCommentsByMemberId" resultMap="boardCommentResultMap">
+        SELECT
+        board_comment_id,
+        board_comment_contents,
+        member_id,
+        board_id,
+        active,
+        created_at,
+        updated_at
+        FROM
+        board_comment
+        <where>
+            <if test="lastId != null">
+                board_comment_id &lt; #{lastId} and
+            </if>
+            board_id = #{memberId} and
+            active = true
+        </where>
+        ORDER BY board_comment_id DESC
+        LIMIT #{pageSize}
+    </select>
+
 </mapper>

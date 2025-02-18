@@ -61,7 +61,35 @@ class RedisConfig(
         RedisTemplate<String, Any>().apply {
             this.connectionFactory = redisConnectionFactory
             this.keySerializer = StringRedisSerializer()
-            this.valueSerializer = StringRedisSerializer()
+            // ObjectMapper 설정
+            val objectMapper =
+                ObjectMapper().apply {
+                    // Kotlin 클래스 처리를 위한 설정
+                    registerModule(KotlinModule.Builder().build())
+                    // 타입 정보를 포함하도록 설정
+                    activateDefaultTyping(
+                        BasicPolymorphicTypeValidator
+                            .builder()
+                            .allowIfBaseType(Any::class.java)
+                            .build(),
+                        ObjectMapper.DefaultTyping.EVERYTHING,
+                    )
+                    // Java 8 날짜/시간 모듈 추가
+                    registerModule(JavaTimeModule())
+                    // 날짜/시간을 timestamp가 아닌 ISO-8601 형식의 문자열로 직렬화
+                    disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                    // null 필드 처리
+                    setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                    // 알 수 없는 프로퍼티 무시
+                    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                }
+            // GenericJackson2JsonRedisSerializer 사용
+            val jsonRedisSerializer = GenericJackson2JsonRedisSerializer(objectMapper)
+            // 값 직렬화 설정
+            this.valueSerializer = jsonRedisSerializer
+            // Hash 작업을 위한 직렬화 설정
+            this.hashKeySerializer = StringRedisSerializer()
+            this.hashValueSerializer = jsonRedisSerializer
         }
 
     @Bean

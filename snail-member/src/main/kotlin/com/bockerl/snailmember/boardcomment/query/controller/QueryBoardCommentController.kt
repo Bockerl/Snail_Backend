@@ -32,13 +32,39 @@ class QueryBoardCommentController(
             ),
         ],
     )
-    @GetMapping("/{boardId}")
+    @GetMapping("board/{boardId}")
     fun getBoardCommentByBoardId(
         @PathVariable boardId: String,
         @RequestParam(required = false) lastId: Long? = null,
         @RequestParam(defaultValue = "10") pageSize: Int,
     ): ResponseDTO<*> {
         val boardCommentList = queryBoardCommentService.getBoardCommentByBoardId(boardId, lastId, pageSize)
+
+        return ResponseDTO.ok(boardCommentList)
+    }
+
+    @Operation(
+        summary = "내 댓글 목록 조회",
+        description = "회원 pk로 내 댓글들 List<ResponseVO>를 조회합니다.",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "내 댓글 목록 조회 성공",
+                content = [
+                    Content(mediaType = "application/json", schema = Schema(implementation = QueryBoardCommentResponseVO::class)),
+                ],
+            ),
+        ],
+    )
+    @GetMapping("member/{memberId}")
+    fun getBoardCommentByMemberId(
+        @PathVariable memberId: String,
+        @RequestParam(required = false) lastId: Long? = null,
+        @RequestParam(defaultValue = "10") pageSize: Int,
+    ): ResponseDTO<*> {
+        val boardCommentList = queryBoardCommentService.getBoardCommentByMemberId(memberId, lastId, pageSize)
 
         return ResponseDTO.ok(boardCommentList)
     }

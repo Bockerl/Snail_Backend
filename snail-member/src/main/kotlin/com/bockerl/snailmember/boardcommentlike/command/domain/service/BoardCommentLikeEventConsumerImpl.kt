@@ -1,10 +1,10 @@
-package com.bockerl.snailmember.boardlike.command.domain.service
+package com.bockerl.snailmember.boardcommentlike.command.domain.service
 
-import com.bockerl.snailmember.boardlike.command.application.service.BoardLikeEventConsumer
-import com.bockerl.snailmember.boardlike.command.domain.aggregate.entity.BoardLike
-import com.bockerl.snailmember.boardlike.command.domain.aggregate.enum.BoardLikeActionType
-import com.bockerl.snailmember.boardlike.command.domain.aggregate.event.BoardLikeEvent
-import com.bockerl.snailmember.boardlike.command.domain.repository.BoardLikeRepository
+import com.bockerl.snailmember.boardcommentlike.command.application.service.BoardCommentLikeEventConsumer
+import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.entity.BoardCommentLike
+import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.enum.BoardCommentLikeActionType
+import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.event.BoardCommentLikeEvent
+import com.bockerl.snailmember.boardcommentlike.command.domain.repository.BoardCommentLikeRepository
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.mongodb.DuplicateKeyException
@@ -18,23 +18,22 @@ import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Service
 
 @Service
-class BoardLikeEventConsumerImpl(
-    private val boardLikeRepository: BoardLikeRepository,
+class BoardCommentLikeEventConsumerImpl(
+    private val boardCommentLikeRepository: BoardCommentLikeRepository,
 //    @Value("\${spring.kafka.consumer.group-id}") private val groupId: String,
-) : BoardLikeEventConsumer {
-    private val boardLikeBuffer = mutableListOf<BoardLike>()
+) : BoardCommentLikeEventConsumer {
+    private val boardCommentLikeBuffer = mutableListOf<BoardCommentLike>()
     private val bufferSize = 100
     private val logger = KotlinLogging.logger {}
 
     @Transactional
     @KafkaListener(
-        // 설명. 이 토픽에서 좋아요 이벤트는 다 받게할 것
         topics = ["board-like-events"],
         groupId = "snail-member",
         containerFactory = "kafkaListenerContainerFactory",
     )
     fun consume(
-        @Payload event: BoardLikeEvent,
+        @Payload event: BoardCommentLikeEvent,
         @Header(KafkaHeaders.RECEIVED_PARTITION) partition: Int,
         // 설명. 오프셋 커밋용
         acknowledgment: Acknowledgment,
@@ -42,18 +41,18 @@ class BoardLikeEventConsumerImpl(
         logger.info { "received header: $partition" }
         // 설명. 멱등성 보장을 위한 try-catch문
         try {
-            when (event.boardLikeActionType) {
-                BoardLikeActionType.LIKE -> {
-                    val like = BoardLike(memberId = event.memberId, boardId = event.boardId)
-                    boardLikeBuffer.add(like)
-                    if (boardLikeBuffer.size >= bufferSize) {
-                        boardLikeRepository.saveAll(boardLikeBuffer)
-                        boardLikeBuffer.clear()
+            when (event.boardCommentLikeActionType) {
+                BoardCommentLikeActionType.LIKE -> {
+                    val like = BoardCommentLike(memberId = event.memberId, boardId = event.boardId, boardCommentId = event.boardCommentId)
+                    boardCommentLikeBuffer.add(like)
+                    if (boardCommentLikeBuffer.size >= bufferSize) {
+                        boardCommentLikeRepository.saveAll(boardCommentLikeBuffer)
+                        boardCommentLikeBuffer.clear()
                     }
                 }
 
-                BoardLikeActionType.UNLIKE -> {
-                    boardLikeRepository.deleteByMemberIdAndBoardId(event.memberId, event.boardId)
+                BoardCommentLikeActionType.UNLIKE -> {
+                    boardCommentLikeRepository.deleteByMemberIdAndBoardId(event.memberId, event.boardId)
                 }
             }
             // 설명. 오프셋 수동 커밋

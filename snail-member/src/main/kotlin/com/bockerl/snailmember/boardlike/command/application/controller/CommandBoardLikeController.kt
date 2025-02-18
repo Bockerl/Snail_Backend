@@ -38,9 +38,9 @@ class CommandBoardLikeController(
     )
     @PostMapping("")
     fun postBoardLike(
-        @RequestBody commandBoardLikeRequestVO: CommandBoardLikeRequestVO,
+        @RequestBody commandBoardCommentLikeRequestVO: CommandBoardLikeRequestVO,
     ): ResponseDTO<*> {
-        commandBoardLikeService.createBoardLike(commandBoardLikeRequestVO)
+        commandBoardLikeService.createBoardLike(commandBoardCommentLikeRequestVO)
 
         return ResponseDTO.ok(null)
     }
@@ -62,9 +62,9 @@ class CommandBoardLikeController(
     )
     @DeleteMapping("")
     fun deleteBoardLike(
-        @RequestBody commandBoardLikeRequestVO: CommandBoardLikeRequestVO,
+        @RequestBody commandBoardCommentLikeRequestVO: CommandBoardLikeRequestVO,
     ): ResponseDTO<*> {
-        commandBoardLikeService.deleteBoardLike(commandBoardLikeRequestVO)
+        commandBoardLikeService.deleteBoardLike(commandBoardCommentLikeRequestVO)
 
         return ResponseDTO.ok(null)
     }
@@ -131,6 +131,7 @@ class CommandBoardLikeController(
             ),
         ],
     )
+    @GetMapping("member/{memberId}")
     fun getBoardIdsByMemberId(
         @PathVariable memberId: String,
     ): ResponseDTO<*> = ResponseDTO.ok(commandBoardLikeService.readBoardIdsByMemberId(memberId))

@@ -3,7 +3,7 @@ package com.bockerl.snailmember.boardlike.command.domain.service
 import com.bockerl.snailmember.board.query.service.QueryBoardService
 import com.bockerl.snailmember.board.query.vo.QueryBoardResponseVO
 import com.bockerl.snailmember.boardlike.command.application.service.CommandBoardLikeService
-import com.bockerl.snailmember.boardlike.command.domain.aggregate.enum.ActionType
+import com.bockerl.snailmember.boardlike.command.domain.aggregate.enum.BoardLikeActionType
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.event.BoardLikeEvent
 import com.bockerl.snailmember.boardlike.command.domain.repository.BoardLikeRepository
 import com.bockerl.snailmember.boardlike.command.domain.vo.request.CommandBoardLikeRequestVO
@@ -42,7 +42,7 @@ class CommandBoardLikeServiceImpl(
             BoardLikeEvent(
                 boardId = commandBoardLikeRequestVO.boardId,
                 memberId = commandBoardLikeRequestVO.memberId,
-                actionType = ActionType.LIKE,
+                boardLikeActionType = BoardLikeActionType.LIKE,
             )
 
 //        kafkaTemplate.send("board-like-events", event)
@@ -65,7 +65,7 @@ class CommandBoardLikeServiceImpl(
             BoardLikeEvent(
                 boardId = commandBoardLikeRequestVO.boardId,
                 memberId = commandBoardLikeRequestVO.memberId,
-                actionType = ActionType.UNLIKE,
+                boardLikeActionType = BoardLikeActionType.UNLIKE,
             )
 
         kafkaBoardLikeTemplate.send("board-like-events", event)

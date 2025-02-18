@@ -1,6 +1,6 @@
 package com.bockerl.snailmember.boardlike.command.domain.aggregate.enum
 
-enum class ActionType {
+enum class BoardLikeActionType {
     LIKE,
     UNLIKE,
 }

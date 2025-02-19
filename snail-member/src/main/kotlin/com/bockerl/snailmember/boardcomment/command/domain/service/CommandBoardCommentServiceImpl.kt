@@ -53,8 +53,8 @@ class CommandBoardCommentServiceImpl(
             boardCommentEntity.boardCommentId?.let {
                 CommandFileRequestVO(
                     fileTargetType = FileTargetType.BOARD_COMMENT,
-                    fileTargetId = it,
-                    memberId = extractDigits(commandBoardCommentCreateByGifRequestVO.memberId),
+                    fileTargetId = formattedBoardCommentId(it),
+                    memberId = commandBoardCommentCreateByGifRequestVO.memberId,
                 )
             }
 
@@ -82,8 +82,8 @@ class CommandBoardCommentServiceImpl(
             val commandFileRequestVO =
                 CommandFileRequestVO(
                     fileTargetType = FileTargetType.BOARD_COMMENT,
-                    fileTargetId = boardCommentId,
-                    memberId = extractDigits(commandBoardCommentDeleteRequestVO.memberId),
+                    fileTargetId = formattedBoardCommentId(boardCommentId),
+                    memberId = commandBoardCommentDeleteRequestVO.memberId,
                 )
             commandFileService.deleteFile(commandFileRequestVO)
         }
@@ -92,4 +92,6 @@ class CommandBoardCommentServiceImpl(
     }
 
     fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
+
+    fun formattedBoardCommentId(boardId: Long): String = "BOA-COM-${boardId.toString().padStart(8, '0') ?: "00000000"}"
 }

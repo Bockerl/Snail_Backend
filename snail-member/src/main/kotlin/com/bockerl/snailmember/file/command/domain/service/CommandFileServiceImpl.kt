@@ -15,6 +15,7 @@ import com.bockerl.snailmember.file.command.domain.aggregate.entity.File
 import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileRequestVO
 import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileWithGatheringRequestVO
 import com.bockerl.snailmember.file.command.domain.repository.CommandFileRepository
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
@@ -27,6 +28,9 @@ class CommandFileServiceImpl(
     private val commandFileRepository: CommandFileRepository,
     private val gatheringFileService: CommandGatheringFileService,
 ) : CommandFileService {
+
+    private val logger = KotlinLogging.logger {}
+
     @Transactional
     override fun uploadSingleFile(
         file: MultipartFile,
@@ -43,8 +47,8 @@ class CommandFileServiceImpl(
                 fileType = file.contentType ?: "unknown",
                 fileUrl = fileUrl,
                 fileTargetType = commandFileRequestVO.fileTargetType,
-                fileTargetId = commandFileRequestVO.fileTargetId,
-                memberId = commandFileRequestVO.memberId,
+                fileTargetId = extractDigits(commandFileRequestVO.fileTargetId),
+                memberId = extractDigits(commandFileRequestVO.memberId),
             )
 
         commandFileRepository.save(fileEntity)
@@ -74,8 +78,8 @@ class CommandFileServiceImpl(
                     fileType = file.contentType ?: "unknown",
                     fileUrl = fileUrl,
                     fileTargetType = commandFileRequestVO.fileTargetType,
-                    fileTargetId = commandFileRequestVO.fileTargetId,
-                    memberId = commandFileRequestVO.memberId,
+                    fileTargetId = extractDigits(commandFileRequestVO.fileTargetId),
+                    memberId = extractDigits(commandFileRequestVO.memberId),
                 )
             fileEntities.add(fileEntity)
         }
@@ -109,8 +113,8 @@ class CommandFileServiceImpl(
                     fileType = file.contentType ?: "unknown",
                     fileUrl = fileUrl,
                     fileTargetType = commandFileWithGatheringRequestVO.fileTargetType,
-                    fileTargetId = commandFileWithGatheringRequestVO.fileTargetId,
-                    memberId = commandFileWithGatheringRequestVO.memberId,
+                    fileTargetId = extractDigits(commandFileWithGatheringRequestVO.fileTargetId),
+                    memberId = extractDigits(commandFileWithGatheringRequestVO.memberId),
                 )
             fileEntities.add(fileEntity)
         }
@@ -120,7 +124,7 @@ class CommandFileServiceImpl(
 
         // fileId와 gatheringId를 이용해 GatheringFile 저장
         savedFiles.forEach { file ->
-            gatheringFileService.createGatheringFile(file.fileId!!, commandFileWithGatheringRequestVO.gatheringId, file)
+            gatheringFileService.createGatheringFile(file.fileId!!, extractDigits(commandFileWithGatheringRequestVO.gatheringId), file)
         }
     }
 
@@ -136,13 +140,16 @@ class CommandFileServiceImpl(
         val existingFile =
             commandFileRepository.findByFileTargetTypeAndFileTargetId(
                 commandFileRequestVO.fileTargetType,
-                commandFileRequestVO.fileTargetId,
+                extractDigits(commandFileRequestVO.fileTargetId),
             )
 
         val blobClient = blobContainerClient.getBlobClient(existingFile[0].fileName)
         blobClient.delete()
 
-        commandFileRepository.delete(existingFile[0])
+//        commandFileRepository.delete(existingFile[0])
+        commandFileRepository.updateActiveAndFileUrlByFileId(existingFile[0].fileId)
+
+
 
         val fileName = generateUniqueFileName(file.originalFilename)
         blobContainerClient.getBlobClient(fileName)
@@ -155,8 +162,8 @@ class CommandFileServiceImpl(
                 fileType = file.contentType ?: "unknown",
                 fileUrl = fileUrl,
                 fileTargetType = commandFileRequestVO.fileTargetType,
-                fileTargetId = commandFileRequestVO.fileTargetId,
-                memberId = commandFileRequestVO.memberId,
+                fileTargetId = extractDigits(commandFileRequestVO.fileTargetId),
+                memberId = extractDigits(commandFileRequestVO.memberId),
             )
 
         commandFileRepository.save(fileEntity)
@@ -172,7 +179,7 @@ class CommandFileServiceImpl(
         val existingFiles =
             commandFileRepository.findByFileTargetTypeAndFileTargetId(
                 commandFileRequestVO.fileTargetType,
-                commandFileRequestVO.fileTargetId,
+                extractDigits(commandFileRequestVO.fileTargetId),
             )
 
         // 삭제할 파일만 삭제
@@ -182,7 +189,8 @@ class CommandFileServiceImpl(
                 val blobClient = blobContainerClient.getBlobClient(file.fileName)
                 blobClient.delete()
             }
-            commandFileRepository.deleteAll(filesToDelete)
+
+            commandFileRepository.updateActiveAndFileUrlByDeletedFileIds(deletedFileIds)
         }
 
         // 기존 파일 중 유지할 파일 리스트 (삭제되지 않은 파일들)
@@ -200,8 +208,8 @@ class CommandFileServiceImpl(
                     fileType = file.contentType ?: "unknown",
                     fileUrl = blobClient.blobUrl,
                     fileTargetType = commandFileRequestVO.fileTargetType,
-                    fileTargetId = commandFileRequestVO.fileTargetId,
-                    memberId = commandFileRequestVO.memberId,
+                    fileTargetId = extractDigits(commandFileRequestVO.fileTargetId),
+                    memberId = extractDigits(commandFileRequestVO.memberId),
                 )
             }
 
@@ -224,7 +232,7 @@ class CommandFileServiceImpl(
         val existingFiles =
             commandFileRepository.findByFileTargetTypeAndFileTargetId(
                 commandFileWithGatheringRequestVO.fileTargetType,
-                commandFileWithGatheringRequestVO.fileTargetId,
+                extractDigits(commandFileWithGatheringRequestVO.fileTargetId),
             )
 
         // 삭제할 파일만 삭제
@@ -234,7 +242,7 @@ class CommandFileServiceImpl(
                 val blobClient = blobContainerClient.getBlobClient(file.fileName)
                 blobClient.delete()
             }
-            commandFileRepository.deleteAll(filesToDelete)
+            commandFileRepository.updateActiveAndFileUrlByDeletedFileIds(deletedFileIds)
             // 설명. cascade 설정으로 해당 gatheringFile도 같이 삭제
         }
 
@@ -253,8 +261,8 @@ class CommandFileServiceImpl(
                     fileType = file.contentType ?: "unknown",
                     fileUrl = blobClient.blobUrl,
                     fileTargetType = commandFileWithGatheringRequestVO.fileTargetType,
-                    fileTargetId = commandFileWithGatheringRequestVO.fileTargetId,
-                    memberId = commandFileWithGatheringRequestVO.memberId,
+                    fileTargetId = extractDigits(commandFileWithGatheringRequestVO.fileTargetId),
+                    memberId = extractDigits(commandFileWithGatheringRequestVO.memberId),
                 )
             }
 
@@ -268,7 +276,7 @@ class CommandFileServiceImpl(
 
         // fileId와 gatheringId를 이용해 GatheringFile 저장
         savedFiles.forEach { file ->
-            gatheringFileService.createGatheringFile(file.fileId!!, commandFileWithGatheringRequestVO.gatheringId, file)
+            gatheringFileService.createGatheringFile(file.fileId!!, extractDigits(commandFileWithGatheringRequestVO.gatheringId), file)
         }
     }
 
@@ -280,16 +288,20 @@ class CommandFileServiceImpl(
         val files =
             commandFileRepository.findByFileTargetTypeAndFileTargetId(
                 commandFileRequestVO.fileTargetType,
-                commandFileRequestVO.fileTargetId,
+                extractDigits(commandFileRequestVO.fileTargetId),
             )
 
+        logger.info { files + "어떻게 나오냐고!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}
+
         if (files.isNotEmpty()) {
+            logger.info {"한번 보자: " + commandFileRequestVO.fileTargetType}
+
+            commandFileRepository.updateActiveAndFileUrlByFileTargetIdAndFileTargetType(extractDigits(commandFileRequestVO.fileTargetId), commandFileRequestVO.fileTargetType)
+
             for (file in files) {
                 val blobClient = blobContainerClient.getBlobClient(file.fileName)
                 blobClient.delete()
             }
-
-            commandFileRepository.deleteAll(files)
         }
     }
 

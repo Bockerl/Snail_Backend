@@ -47,8 +47,8 @@ class CommandBoardServiceImpl(
                 boardEntity.boardId?.let {
                     CommandFileRequestVO(
                         fileTargetType = FileTargetType.BOARD,
-                        fileTargetId = it,
-                        memberId = extractDigits(commandBoardCreateRequestVO.memberId),
+                        fileTargetId = formattedBoardId(it),
+                        memberId = commandBoardCreateRequestVO.memberId,
                     )
                 }
 
@@ -80,8 +80,8 @@ class CommandBoardServiceImpl(
                 boardEntity.boardId?.let {
                     CommandFileRequestVO(
                         fileTargetType = FileTargetType.BOARD,
-                        fileTargetId = it,
-                        memberId = extractDigits(commandBoardUpdateRequestVO.memberId),
+                        fileTargetId = formattedBoardId(it),
+                        memberId = commandBoardUpdateRequestVO.memberId,
                     )
                 }
 
@@ -101,12 +101,14 @@ class CommandBoardServiceImpl(
         val commandFileRequestVO =
             CommandFileRequestVO(
                 fileTargetType = FileTargetType.BOARD,
-                fileTargetId = boardId,
-                memberId = extractDigits(commandBoardDeleteRequestVO.memberId),
+                fileTargetId = formattedBoardId(boardId),
+                memberId = commandBoardDeleteRequestVO.memberId,
             )
 
         commandFileService.deleteFile(commandFileRequestVO)
     }
 
     fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
+
+    fun formattedBoardId(boardId: Long): String = "BOA-${boardId.toString().padStart(8, '0') ?: "00000000"}"
 }

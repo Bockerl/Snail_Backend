@@ -114,10 +114,10 @@ class CommandFileController(
         ],
     )
     @OpenApiBody(
-        description = "추가로 모임 id를 등록합니다.",
+        description = "다중 파일 등록에 추가로 모임 id를 등록합니다.",
         content = [
             Content(
-                encoding = [Encoding(name = "commandFileRequestVO", contentType = MediaType.APPLICATION_JSON_VALUE)],
+                encoding = [Encoding(name = "commandFileWithGatheringRequestVO", contentType = MediaType.APPLICATION_JSON_VALUE)],
             ),
         ],
         required = true,

@@ -5,6 +5,8 @@ package com.bockerl.snailchat.config
 import com.bockerl.snailchat.testConfig.TestSupport
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.messaging.converter.StringMessageConverter
@@ -36,25 +38,31 @@ class StompWebSocketConfigTest : TestSupport() {
         }
     }
 
-    @Test
-    fun `올바른 URL로 WebSocket 연결 테스트`() {
-        val futureSession: CompletableFuture<StompSession> =
-            stompClient.connectAsync("ws://localhost:$port/chat", object : StompSessionHandlerAdapter() {})
+    @Nested
+    @DisplayName("Websocket 연결 성공/실패 테스트")
+    inner class WebsocketVerification {
+        @Test
+        @DisplayName("Websocket 연결 성공 테스트")
+        fun `올바른 URL로 WebSocket 연결 테스트`() {
+            val futureSession: CompletableFuture<StompSession> =
+                stompClient.connectAsync("ws://localhost:$port/chat", object : StompSessionHandlerAdapter() {})
 
-        val session = futureSession.get(5, TimeUnit.SECONDS)
+            val session = futureSession.get(5, TimeUnit.SECONDS)
 
-        assertThat(session.isConnected).isTrue()
-    }
+            assertThat(session.isConnected).isTrue()
+        }
 
-    @Test
-    fun `잘못된 URL로 WebSocket 연결 테스트`() {
-        val futureSession: CompletableFuture<StompSession> =
-            stompClient.connectAsync("ws://localhost:$port/invalid", object : StompSessionHandlerAdapter() {})
+        @Test
+        @DisplayName("Websocket 연결 실패 테스트")
+        fun `잘못된 URL로 WebSocket 연결 테스트`() {
+            val futureSession: CompletableFuture<StompSession> =
+                stompClient.connectAsync("ws://localhost:$port/invalid", object : StompSessionHandlerAdapter() {})
 
-        try {
-            futureSession.get(3, TimeUnit.SECONDS)
-        } catch (e: Exception) {
-            assertThat(e).isInstanceOf(Exception::class.java)
+            try {
+                futureSession.get(3, TimeUnit.SECONDS)
+            } catch (e: Exception) {
+                assertThat(e).isInstanceOf(Exception::class.java)
+            }
         }
     }
 }

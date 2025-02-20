@@ -1,3 +1,10 @@
 package com.bockerl.snailchat.chat.command.application.service
 
-interface CommandChatMessageService
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDto
+
+interface CommandChatMessageService {
+    fun sendMessage(
+        roomId: String,
+        updateMessageDto: CommandChatMessageRequestDto,
+    )
+}

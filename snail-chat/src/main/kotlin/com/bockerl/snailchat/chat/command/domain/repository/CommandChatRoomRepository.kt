@@ -1,4 +1,6 @@
 package com.bockerl.snailchat.chat.command.domain.repository
 
-interface CommandChatRoomRepository {
-}
+import org.springframework.stereotype.Repository
+
+@Repository
+interface CommandChatRoomRepository

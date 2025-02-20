@@ -1,4 +1,6 @@
 package com.bockerl.snailchat.chat.command.domain.service
 
-class CommandChatRoomServiceImpl {
-}
+import org.springframework.stereotype.Service
+
+@Service
+class CommandChatRoomServiceImpl

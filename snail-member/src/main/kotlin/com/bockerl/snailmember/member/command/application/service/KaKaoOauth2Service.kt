@@ -1,5 +1,5 @@
 package com.bockerl.snailmember.member.command.application.service
 
-interface Oauth2Service {
-    fun getKaKaoToken(code: String): String
+interface KaKaoOauth2Service {
+    fun kakaoLogin(code: String): String
 }

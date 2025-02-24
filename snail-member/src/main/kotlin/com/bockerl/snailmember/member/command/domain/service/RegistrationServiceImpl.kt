@@ -1,6 +1,6 @@
 @file:Suppress("ktlint:standard:no-wildcard-imports")
 
-package com.bockerl.snailmember.member.command.application.service
+package com.bockerl.snailmember.member.command.domain.service
 
 import com.bockerl.snailmember.area.command.domain.aggregate.entity.ActivityArea
 import com.bockerl.snailmember.area.command.domain.aggregate.entity.AreaType
@@ -8,10 +8,9 @@ import com.bockerl.snailmember.area.command.domain.repository.ActivityAreaReposi
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.dto.request.*
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.Gender
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.Language
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.Member
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.MemberStatus
+import com.bockerl.snailmember.member.command.application.service.AuthService
+import com.bockerl.snailmember.member.command.application.service.RegistrationService
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.*
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.SignUpStep
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.TempMember
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.VerificationType
@@ -58,6 +57,7 @@ class RegistrationServiceImpl(
         val tempMember =
             tempMemberRepository.find(redisId)
                 ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
+        // 회원가입 단계 유효성 검사
         if (tempMember.signUpStep != SignUpStep.INITIAL) {
             logger.error { "이메일 인증 순서가 아닌 상태에서 인증 요청이 날라온 에러 발생 - redisId: $redisId" }
             throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
@@ -194,7 +194,7 @@ class RegistrationServiceImpl(
             logger.error { "활동지역 등록 순서가 아닌 상태에서 등록 요청이 날라온 에러 발생 - redisId: $redisId" }
             throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
         }
-        // 실제 회원 생성 후 등록
+        // 실제 회원 생성 후 등록(비밀번호 암호화는 로그인 구현 후, 추가할 예정)
         val newMember = Member(
             memberEmail = tempMember.email,
             memberNickName = tempMember.nickName,
@@ -207,6 +207,7 @@ class RegistrationServiceImpl(
             memberLanguage = Language.KOR,
             memberRegion = "",
             memberStatus = MemberStatus.USER,
+            signupPath = SignUpPath.EMAIL,
             selfIntroduction = "",
         )
         logger.info { "새로 생성된 회원 정보: $newMember" }

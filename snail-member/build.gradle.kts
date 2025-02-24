@@ -10,16 +10,14 @@ plugins {
 }
 
 ktlint {
-    version.set("1.2.1")
+    version.set("1.5.0")
     verbose.set(true)
     android.set(false)
     outputToConsole.set(true)
     enableExperimentalRules.set(true)
     filter {
-        exclude("**/generated/**")
         exclude("**/test/**") // 테스트 소스 제외
         exclude("**/*.kts") // Kotlin 스크립트 파일 제외
-        include("**/kotlin/**")
     }
     reporters {
         reporter(ReporterType.JSON)
@@ -62,10 +60,14 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.4")
+    testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.springframework.security:spring-security-test")
     "developmentOnly"("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("org.postgresql:postgresql")
@@ -82,13 +84,22 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     // hibernate(Json 저장을 위한)
     implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
-
     // redis sentinel 가용을 위한
     implementation("io.lettuce:lettuce-core") // Redis Sentinel 지원을 위해 Lettuce 클라이언트 사용
+    // feign client - Jackson encoder/decoder
+    implementation("io.github.openfeign:feign-jackson")
+    // jwt 토큰 라이브러리 추가
+    // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+    // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl
+    implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
+    // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-jackson
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 }
 dependencyManagement {
     imports {
         mavenBom("com.azure.spring:spring-cloud-azure-dependencies:$springCloudAzureVersion")
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2023.0.0") // Spring Cloud의 버전을 명시적으로 지정
     }
 }
 

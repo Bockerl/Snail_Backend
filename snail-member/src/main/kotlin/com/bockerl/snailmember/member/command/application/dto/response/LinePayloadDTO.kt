@@ -1,4 +1,3 @@
 package com.bockerl.snailmember.member.command.application.dto.response
 
-class LinePayloadDTO {
-}
+data class LinePayloadDTO(val id: String, val name: String?)

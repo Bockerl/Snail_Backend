@@ -7,6 +7,7 @@ import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.config.TestConfiguration
 import com.bockerl.snailmember.config.TestSupport
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.VerificationType
+import com.bockerl.snailmember.member.command.domain.service.AuthServiceImpl
 import org.junit.jupiter.api.*
 import org.mockito.Mockito.*
 import org.mockito.kotlin.whenever

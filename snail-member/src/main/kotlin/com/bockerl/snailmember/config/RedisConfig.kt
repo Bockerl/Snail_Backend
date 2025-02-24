@@ -3,7 +3,6 @@ package com.bockerl.snailmember.config
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.TempMember
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.lettuce.core.RedisURI.Builder.sentinel
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -72,7 +71,8 @@ class RedisConfig(
             // 키는 문자열로 저장
             this.keySerializer = StringRedisSerializer()
             // Jackson2JsonRedisSerializer 사용
-            val jsonRedisSerializer = Jackson2JsonRedisSerializer(objectMapper, TempMember::class.java)
+            val jsonRedisSerializer =
+                Jackson2JsonRedisSerializer(objectMapper, TempMember::class.java)
             // 값 직렬화 설정
             this.valueSerializer = jsonRedisSerializer
             // Hash 작업을 위한 직렬화 설정

@@ -2,35 +2,52 @@
 
 package com.bockerl.snailmember.member.command.application.service
 
+import com.bockerl.snailmember.area.command.domain.aggregate.entity.ActivityArea
+import com.bockerl.snailmember.area.command.domain.aggregate.entity.AreaType
+import com.bockerl.snailmember.area.command.domain.repository.ActivityAreaRepository
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.config.TestConfiguration
 import com.bockerl.snailmember.config.TestSupport
 import com.bockerl.snailmember.member.command.application.dto.request.*
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.Member
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.SignUpStep
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.TempMember
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.VerificationType
+import com.bockerl.snailmember.member.command.domain.repository.MemberRepository
 import com.bockerl.snailmember.member.command.domain.repository.TempMemberRepository
+import com.bockerl.snailmember.member.command.domain.service.RegistrationServiceImpl
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import org.mockito.kotlin.*
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.Import
-import java.time.LocalDate
+import java.sql.Timestamp
 
 @Import(TestConfiguration::class)
-class RegistrationServiceImplTests : TestSupport() {
-    @Autowired
+class RegistrationServiceImplMockBeanTests : TestSupport() {
+    @MockBean
     private lateinit var tempMemberRepository: TempMemberRepository
 
-    @Autowired
+    @MockBean
     private lateinit var authService: AuthService
+
+    @MockBean
+    private lateinit var memberRepository: MemberRepository
+
+    @MockBean
+    private lateinit var activityAreaRepository: ActivityAreaRepository
 
     private lateinit var registrationService: RegistrationService
 
     @BeforeEach
     fun setUp() {
-        registrationService = RegistrationServiceImpl(authService, tempMemberRepository)
+        registrationService = RegistrationServiceImpl(
+            authService,
+            tempMemberRepository,
+            memberRepository,
+            activityAreaRepository,
+        )
     }
 
     companion object {
@@ -40,7 +57,9 @@ class RegistrationServiceImplTests : TestSupport() {
         private const val TEST_PASSWORD = "Password123!"
         private const val TEST_REDIS_ID = "test-redis-id"
         private const val VERIFICATION_CODE = "12345"
-        private val TEST_BIRTH = LocalDate.now()
+        private val TEST_BIRTH = Timestamp(1708300800000)
+        private const val TEST_PRIMARY_AREA = "Emd-00000001"
+        private const val TEST_WORKPLACE_AREA = "Emd-00000002"
     }
 
     @Nested
@@ -372,6 +391,70 @@ class RegistrationServiceImplTests : TestSupport() {
                         updatedMember.signUpStep == SignUpStep.PASSWORD_VERIFIED
                 },
             )
+        }
+    }
+
+    @Nested
+    @DisplayName("활동지역 설정 관련 테스트")
+    inner class ActivityAreaVerification {
+        @Test
+        @DisplayName("활동지역 설정 성공 - 이메일 회원 가입 성공")
+        fun activityAreaVerification_success() {
+            // given
+            val request = ActivityAreaRequestDTO(
+                redisId = TEST_REDIS_ID,
+                primaryFormattedId = TEST_PRIMARY_AREA,
+                workplaceFormattedId = TEST_WORKPLACE_AREA,
+            )
+            val tempMember =
+                TempMember(
+                    redisId = TEST_REDIS_ID,
+                    email = TEST_EMAIL,
+                    nickName = TEST_NICKNAME,
+                    birth = TEST_BIRTH,
+                    phoneNumber = TEST_PHONE,
+                    password = TEST_PASSWORD,
+                    signUpStep = SignUpStep.PASSWORD_VERIFIED,
+                )
+            whenever(tempMemberRepository.find(TEST_REDIS_ID)).thenReturn(tempMember)
+            whenever(memberRepository.save(any<Member>())).thenAnswer { invocation ->
+                val newMember = invocation.getArgument<Member>(0)
+                newMember.apply { memberId = 1L }
+            }
+            whenever(activityAreaRepository.save(any<ActivityArea>())).thenAnswer { invocation ->
+                val newActivityArea = invocation.getArgument<ActivityArea>(0)
+                newActivityArea
+            }
+
+            // when
+            registrationService.postActivityArea(request)
+
+            // then
+            verify(memberRepository).save(
+                argThat { newMember ->
+                    newMember.memberId == 1L &&
+                        newMember.memberEmail == TEST_EMAIL &&
+                        newMember.memberBirth == TEST_BIRTH.toLocalDateTime().toLocalDate() &&
+                        newMember.memberNickName == TEST_NICKNAME &&
+                        newMember.memberPassword == TEST_PASSWORD &&
+                        newMember.memberPhoneNumber == TEST_PHONE
+                },
+            )
+            verify(activityAreaRepository).save(
+                argThat { primaryArea ->
+                    primaryArea.areaType == AreaType.PRIMARY &&
+                        primaryArea.id?.memberId == 1L &&
+                        primaryArea.id?.emdAreasId == 1L
+                },
+            )
+            verify(activityAreaRepository).save(
+                argThat { workplaceArea ->
+                    workplaceArea.areaType == AreaType.WORKPLACE &&
+                        workplaceArea.id?.memberId == 1L &&
+                        workplaceArea.id?.emdAreasId == 2L
+                },
+            )
+            verify(tempMemberRepository).delete(TEST_REDIS_ID)
         }
     }
 }

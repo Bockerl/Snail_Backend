@@ -7,6 +7,8 @@ data class KaKaoTokenResponseDTO(
     val tokenType: String,
     @JsonProperty("access_token")
     val accessToken: String,
+    @JsonProperty("id_token")
+    val idToken: String,
     @JsonProperty("expires_in")
     val expiresIn: Int,
     @JsonProperty("refresh_token")

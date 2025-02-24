@@ -20,6 +20,7 @@ enum class ErrorCode(val code: Int, val httpStatus: HttpStatus, val message: Str
     NULL_BLANK_SEARCH_KEYWORD(40017, HttpStatus.BAD_REQUEST, "검색어가 null이거나 공백입니다."),
     OVERSIZE_KEYWORD_LENGTH(40018, HttpStatus.BAD_REQUEST, "검색어가 최대 글자 수 제한을 넘었습니다."),
     SQL_INJECTION_DETECTED(40019, HttpStatus.BAD_REQUEST, "SQL INJECTION이 탐지되었습니다."),
+    OAUTH2_API_CLIENT_ERROR(40020, HttpStatus.BAD_REQUEST, "Oauth2 Api 요청에 실패했습니다."),
 
     // 401: 인증 실패 (Unauthorized)
     INVALID_HEADER_VALUE(40100, HttpStatus.UNAUTHORIZED, "올바르지 않은 헤더값입니다."),
@@ -39,6 +40,9 @@ enum class ErrorCode(val code: Int, val httpStatus: HttpStatus, val message: Str
     EXPIRED_CODE(40114, HttpStatus.UNAUTHORIZED, "만료된 코드입니다."),
     INVALID_AUTHENTICATION_OBJECT(40115, HttpStatus.UNAUTHORIZED, "Authentication 객체가 CustomUserDetails 타입이 아닙니다."),
     INVALID_CODE(40116, HttpStatus.UNAUTHORIZED, "유효하지 않은 코드입니다."),
+    KAKAO_AUTH_ERROR(40117, HttpStatus.UNAUTHORIZED, "카카오 로그인 중 오류가 발생했습니다."),
+    GOOGLE_AUTH_ERROR(40118, HttpStatus.UNAUTHORIZED, "구글 로그인 중 오류가 발생했습니다."),
+    LINE_AUTH_ERROR(40118, HttpStatus.UNAUTHORIZED, "라인 로그인 중 오류가 발생했습니다."),
 
     // 403: 권한 부족 (Forbidden)
     FORBIDDEN_ROLE(40300, HttpStatus.FORBIDDEN, "요청한 리소스에 대한 권한이 없습니다."),
@@ -55,6 +59,9 @@ enum class ErrorCode(val code: Int, val httpStatus: HttpStatus, val message: Str
     NOT_FOUND_REPLY(40414, HttpStatus.NOT_FOUND, "해당 대댓글이 존재하지 않습니다"),
     NOT_FOUND_BOARD(40415, HttpStatus.NOT_FOUND, "해당 게시글이 존재하지 않습니다"),
     NOT_FOUND_FILE(40415, HttpStatus.NOT_FOUND, "해당 파일이 존재하지 않습니다"),
+    NOT_FOUND_KAKAO_REDIRECT(40416, HttpStatus.NOT_FOUND, "카카오 redirect Uri가 존재하지 않습니다."),
+    NOT_FOUND_KAKAO_CLIENT_ID(40417, HttpStatus.NOT_FOUND, "카카오 client id가 존재하지 않습니다."),
+    NOT_FOUND_KAKAO_CLIENT_SECRET(40418, HttpStatus.NOT_FOUND, "카카오 client secret이 존재하지 않습니다."),
 
     // 429: 요청 과다 (Too Many Requests)
     TOO_MANY_REQUESTS(42900, HttpStatus.TOO_MANY_REQUESTS, "요청 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요."),

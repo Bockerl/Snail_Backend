@@ -59,6 +59,9 @@ data class Member(
     var memberRegion: String,
     @Column(name = "member_birth", nullable = false)
     var memberBirth: LocalDate,
+    @Column(name = "signup_path", nullable = false)
+    @Enumerated(EnumType.STRING)
+    val signupPath: SignUpPath,
     @Column(name = "self_introduction", length = 330, nullable = true)
     var selfIntroduction: String,
 ) {

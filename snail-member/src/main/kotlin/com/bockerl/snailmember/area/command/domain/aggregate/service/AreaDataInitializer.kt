@@ -1,4 +1,4 @@
-package com.bockerl.snailmember.area.command.domain.service
+package com.bockerl.snailmember.area.command.domain.aggregate.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.boot.ApplicationArguments

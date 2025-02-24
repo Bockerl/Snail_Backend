@@ -1,6 +1,9 @@
 package com.bockerl.snailmember.config
 
+import com.bockerl.snailmember.area.command.domain.repository.ActivityAreaRepository
 import com.bockerl.snailmember.member.command.application.service.AuthService
+import com.bockerl.snailmember.member.command.application.service.KaKaoOauth2Service
+import com.bockerl.snailmember.member.command.domain.repository.MemberRepository
 import com.bockerl.snailmember.member.command.domain.repository.TempMemberRepository
 import org.mockito.Mockito.mock
 import org.springframework.boot.test.context.TestConfiguration
@@ -28,4 +31,23 @@ class TestConfiguration {
     @Primary
     @Bean
     fun mockTempMemberRepository() = mock(TempMemberRepository::class.java)!!
+
+    @Primary
+    @Bean
+    fun mockMemberRepository() = mock(MemberRepository::class.java)!!
+
+    @Primary
+    @Bean
+    fun mockActivityAreaRepository() = mock(ActivityAreaRepository::class.java)!!
+
+    @Primary
+    @Bean
+    fun mockKaKaoOauth2Service() = mock(KaKaoOauth2Service::class.java)!!
+
+//    @Primary
+//    @Bean
+//    fun mockLoginProperties() = Oauth2LoginProperties(
+//        kakaoRedirectUri = "test-redirect-uri",
+//        kakaoClientId = "test-client-id",
+//    )
 }

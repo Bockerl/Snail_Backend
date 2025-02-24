@@ -6,15 +6,15 @@ import feign.Logger
 import feign.RequestInterceptor
 import feign.Response
 import feign.codec.Encoder
-import feign.codec.ErrorDecoder
 import feign.form.FormEncoder
 import feign.jackson.JacksonEncoder
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import java.nio.charset.Charset
 
 @Configuration
-class KakaoFeignConfig {
+class Oauth2FeignConfig {
     private val logger = KotlinLogging.logger {}
 
     // Feign Client loggin level 설정(가장 디테일한 full)
@@ -26,7 +26,11 @@ class KakaoFeignConfig {
         logger.info { "Feign request URL: ${template.url()}" }
         logger.info { "Feign request method: ${template.method()}" }
         logger.info { "Feign request headers: ${template.headers()}" }
-        logger.info { "Feign request body: ${template.body()}" }
+        // 바이트 배열을 문자열로 변환하여 로깅
+        template.body()?.let { body ->
+            val bodyContent = String(body, Charset.forName("UTF-8"))
+            logger.info { "Feign request body content: $bodyContent" }
+        }
     }
 
     // Content-Type 헤더를 'application/x-www-form-urlencoded'로 설정
@@ -38,18 +42,18 @@ class KakaoFeignConfig {
 
     // HTTP 오류 응답을 자바/코틀린 예외로 변환
     @Bean
-    fun errorDecoder(): ErrorDecoder = KakaoErrorDecoder()
-}
+    fun errorDecoder(): ErrorDecoder = ErrorDecoder()
 
-class KakaoErrorDecoder : ErrorDecoder {
-    private val log = KotlinLogging.logger {}
-    private val defaultErrorDecoder = ErrorDecoder.Default()
+    class ErrorDecoder : feign.codec.ErrorDecoder {
+        private val log = KotlinLogging.logger {}
+        private val defaultErrorDecoder = feign.codec.ErrorDecoder.Default()
 
-    override fun decode(methodKey: String, response: Response): Exception {
-        if (response.status() >= 400) {
-            log.error { "Kakao API error: ${response.body()?.asReader()?.readText()}" }
-            return CommonException(ErrorCode.KAKAO_AUTH_ERROR)
+        override fun decode(methodKey: String, response: Response): Exception {
+            if (response.status() >= 400) {
+                log.error { "Oauth2 API error: ${response.body()?.asReader()?.readText()}" }
+                return CommonException(ErrorCode.OAUTH2_API_CLIENT_ERROR)
+            }
+            return defaultErrorDecoder.decode(methodKey, response)
         }
-        return defaultErrorDecoder.decode(methodKey, response)
     }
 }

@@ -3,14 +3,12 @@ package com.bockerl.snailmember.member.command.domain.repository
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.TempMember
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Repository
 import java.time.Duration
 
 @Repository
 class TempMemberRepository(private val redisTemplate: RedisTemplate<String, TempMember>) {
-    private val logger = KotlinLogging.logger {}
 
     companion object {
         private const val EXPIRE_MINUTES = 30L

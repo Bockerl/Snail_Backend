@@ -1,10 +1,10 @@
 package com.bockerl.snailmember.boardcomment.command.domain.service
 
+import com.bockerl.snailmember.boardcomment.command.application.dto.CommandBoardCommentCreateByGifDTO
+import com.bockerl.snailmember.boardcomment.command.application.dto.CommandBoardCommentCreateDTO
+import com.bockerl.snailmember.boardcomment.command.application.dto.CommandBoardCommentDeleteDTO
 import com.bockerl.snailmember.boardcomment.command.application.service.CommandBoardCommentService
 import com.bockerl.snailmember.boardcomment.command.domain.aggregate.entity.BoardComment
-import com.bockerl.snailmember.boardcomment.command.domain.aggregate.vo.request.CommandBoardCommentCreateByGifRequestVO
-import com.bockerl.snailmember.boardcomment.command.domain.aggregate.vo.request.CommandBoardCommentCreateRequestVO
-import com.bockerl.snailmember.boardcomment.command.domain.aggregate.vo.request.CommandBoardCommentDeleteRequestVO
 import com.bockerl.snailmember.boardcomment.command.domain.repository.CommandBoardCommentRepository
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
@@ -23,28 +23,28 @@ class CommandBoardCommentServiceImpl(
     private val cacheManager: RedisCacheManager,
 ) : CommandBoardCommentService {
     @Transactional
-    override fun createBoardComment(commandBoardCommentCreateRequestVO: CommandBoardCommentCreateRequestVO) {
+    override fun createBoardComment(commandBoardCommentCreateDTO: CommandBoardCommentCreateDTO) {
         val boardComment =
             BoardComment(
-                boardCommentContents = commandBoardCommentCreateRequestVO.boardCommentContents,
-                boardId = extractDigits(commandBoardCommentCreateRequestVO.boardId),
-                memberId = extractDigits(commandBoardCommentCreateRequestVO.memberId),
+                boardCommentContents = commandBoardCommentCreateDTO.boardCommentContents,
+                boardId = extractDigits(commandBoardCommentCreateDTO.boardId),
+                memberId = extractDigits(commandBoardCommentCreateDTO.memberId),
             )
 
         commandBoardCommentRepository.save(boardComment)
         // 설명. 데이터 변경시 해당하는 해당 게시글 댓글들 캐시 초기화
-        cacheManager.getCache("boardComments/${commandBoardCommentCreateRequestVO.boardId}")?.clear()
+        cacheManager.getCache("boardComments/${commandBoardCommentCreateDTO.boardId}")?.clear()
     }
 
     @Transactional
     override fun createBoardCommentByGif(
-        commandBoardCommentCreateByGifRequestVO: CommandBoardCommentCreateByGifRequestVO,
+        commandBoardCommentCreateByGifDTO: CommandBoardCommentCreateByGifDTO,
         file: MultipartFile,
     ) {
         val boardComment =
             BoardComment(
-                boardId = extractDigits(commandBoardCommentCreateByGifRequestVO.boardId),
-                memberId = extractDigits(commandBoardCommentCreateByGifRequestVO.memberId),
+                boardId = extractDigits(commandBoardCommentCreateByGifDTO.boardId),
+                memberId = extractDigits(commandBoardCommentCreateByGifDTO.memberId),
             )
 
         val boardCommentEntity = commandBoardCommentRepository.save(boardComment)
@@ -54,19 +54,19 @@ class CommandBoardCommentServiceImpl(
                 CommandFileRequestVO(
                     fileTargetType = FileTargetType.BOARD_COMMENT,
                     fileTargetId = formattedBoardCommentId(it),
-                    memberId = commandBoardCommentCreateByGifRequestVO.memberId,
+                    memberId = commandBoardCommentCreateByGifDTO.memberId,
                 )
             }
 
         commandFileRequestVO?.let { commandFileService.uploadSingleFile(file, commandFileRequestVO) }
 
-        cacheManager.getCache("boardComments/${commandBoardCommentCreateByGifRequestVO.boardId}")?.clear()
+        cacheManager.getCache("boardComments/${commandBoardCommentCreateByGifDTO.boardId}")?.clear()
     }
 
     @Transactional
 //    @CacheEvict(value = ["/boardComment/{boardComment.boardId}"], allEntries = true)
-    override fun deleteBoardComment(commandBoardCommentDeleteRequestVO: CommandBoardCommentDeleteRequestVO) {
-        val boardCommentId = extractDigits(commandBoardCommentDeleteRequestVO.boardCommentId)
+    override fun deleteBoardComment(commandBoardCommentDeleteDTO: CommandBoardCommentDeleteDTO) {
+        val boardCommentId = extractDigits(commandBoardCommentDeleteDTO.boardCommentId)
         val boardComment =
             commandBoardCommentRepository
                 .findById(
@@ -83,12 +83,12 @@ class CommandBoardCommentServiceImpl(
                 CommandFileRequestVO(
                     fileTargetType = FileTargetType.BOARD_COMMENT,
                     fileTargetId = formattedBoardCommentId(boardCommentId),
-                    memberId = commandBoardCommentDeleteRequestVO.memberId,
+                    memberId = commandBoardCommentDeleteDTO.memberId,
                 )
             commandFileService.deleteFile(commandFileRequestVO)
         }
 
-        cacheManager.getCache("boardComments/${commandBoardCommentDeleteRequestVO.boardId}")?.clear()
+        cacheManager.getCache("boardComments/${commandBoardCommentDeleteDTO.boardId}")?.clear()
     }
 
     fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()

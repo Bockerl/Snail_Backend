@@ -1,3 +1,7 @@
 package com.bockerl.snailmember.boardcommentlike.command.application.dto
 
-class CommandBoardCommentLikeDTO
+class CommandBoardCommentLikeDTO(
+    val boardCommentId: String,
+    val boardId: String,
+    val memberId: String,
+)

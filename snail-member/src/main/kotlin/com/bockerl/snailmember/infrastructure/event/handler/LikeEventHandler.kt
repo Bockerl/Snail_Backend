@@ -58,7 +58,7 @@ class LikeEventHandler(
                             boardCommentLikeBuffer.clear()
                         }
                     }
-                }
+
                     BoardCommentLikeActionType.UNLIKE -> {
                         commandBoardCommentLikeService.deleteBoardCommentLikeEvent(
                             BoardCommentLike(memberId = event.memberId, boardCommentId = event.boardCommentId, boardId = event.boardId),

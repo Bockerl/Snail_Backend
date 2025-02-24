@@ -6,6 +6,7 @@
 
 package com.bockerl.snailmember.boardlike.command.application.controller
 
+import com.bockerl.snailmember.boardlike.command.application.dto.CommandBoardLikeDTO
 import com.bockerl.snailmember.boardlike.command.application.service.CommandBoardLikeService
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.vo.request.CommandBoardLikeRequestVO
 import com.bockerl.snailmember.common.ResponseDTO
@@ -40,7 +41,13 @@ class CommandBoardLikeController(
     fun postBoardLike(
         @RequestBody commandBoardCommentLikeRequestVO: CommandBoardLikeRequestVO,
     ): ResponseDTO<*> {
-        commandBoardLikeService.createBoardLike(commandBoardCommentLikeRequestVO)
+        val commandBoardLikeDTO =
+            CommandBoardLikeDTO(
+                boardId = commandBoardCommentLikeRequestVO.boardId,
+                memberId = commandBoardCommentLikeRequestVO.memberId,
+            )
+
+        commandBoardLikeService.createBoardLike(commandBoardLikeDTO)
 
         return ResponseDTO.ok(null)
     }
@@ -64,7 +71,12 @@ class CommandBoardLikeController(
     fun deleteBoardLike(
         @RequestBody commandBoardCommentLikeRequestVO: CommandBoardLikeRequestVO,
     ): ResponseDTO<*> {
-        commandBoardLikeService.deleteBoardLike(commandBoardCommentLikeRequestVO)
+        val commandBoardLikeDTO =
+            CommandBoardLikeDTO(
+                boardId = commandBoardCommentLikeRequestVO.boardId,
+                memberId = commandBoardCommentLikeRequestVO.memberId,
+            )
+        commandBoardLikeService.deleteBoardLike(commandBoardLikeDTO)
 
         return ResponseDTO.ok(null)
     }

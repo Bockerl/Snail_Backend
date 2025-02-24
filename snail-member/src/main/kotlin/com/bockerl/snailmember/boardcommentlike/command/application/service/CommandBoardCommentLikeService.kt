@@ -1,15 +1,15 @@
 package com.bockerl.snailmember.boardcommentlike.command.application.service
 
+import com.bockerl.snailmember.boardcommentlike.command.application.dto.CommandBoardCommentLikeDTO
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.entity.BoardCommentLike
-import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.vo.request.CommandBoardCommentLikeRequestVO
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.vo.response.CommandBoardCommentLikeMemberIdsResponseVO
 
 interface CommandBoardCommentLikeService {
-    fun createBoardCommentLike(commandBoardCommentLikeRequestVO: CommandBoardCommentLikeRequestVO)
+    fun createBoardCommentLike(commandBoardCommentLikeDTO: CommandBoardCommentLikeDTO)
 
     fun createBoardCommentLikeEventList(boardCommentLikeList: List<BoardCommentLike>)
 
-    fun deleteBoardCommentLike(commandBoardCommentLikeRequestVO: CommandBoardCommentLikeRequestVO)
+    fun deleteBoardCommentLike(commandBoardCommentLikeDTO: CommandBoardCommentLikeDTO)
 
     fun deleteBoardCommentLikeEvent(boardCommentLike: BoardCommentLike)
 

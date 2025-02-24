@@ -1,17 +1,17 @@
 package com.bockerl.snailmember.boardcomment.command.application.service
 
-import com.bockerl.snailmember.boardcomment.command.domain.aggregate.vo.request.CommandBoardCommentCreateByGifRequestVO
-import com.bockerl.snailmember.boardcomment.command.domain.aggregate.vo.request.CommandBoardCommentCreateRequestVO
-import com.bockerl.snailmember.boardcomment.command.domain.aggregate.vo.request.CommandBoardCommentDeleteRequestVO
+import com.bockerl.snailmember.boardcomment.command.application.dto.CommandBoardCommentCreateByGifDTO
+import com.bockerl.snailmember.boardcomment.command.application.dto.CommandBoardCommentCreateDTO
+import com.bockerl.snailmember.boardcomment.command.application.dto.CommandBoardCommentDeleteDTO
 import org.springframework.web.multipart.MultipartFile
 
 interface CommandBoardCommentService {
-    fun createBoardComment(commandBoardCommentCreateRequestVO: CommandBoardCommentCreateRequestVO)
+    fun createBoardComment(commandBoardCommentCreateDTO: CommandBoardCommentCreateDTO)
 
     fun createBoardCommentByGif(
-        commandBoardCommentCreateByGifRequestVO: CommandBoardCommentCreateByGifRequestVO,
+        commandBoardCommentCreateByGifDTO: CommandBoardCommentCreateByGifDTO,
         file: MultipartFile,
     )
 
-    fun deleteBoardComment(commandBoardCommentDeleteRequestVO: CommandBoardCommentDeleteRequestVO)
+    fun deleteBoardComment(commandBoardCommentDeleteDTO: CommandBoardCommentDeleteDTO)
 }

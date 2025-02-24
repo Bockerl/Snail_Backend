@@ -1,11 +1,11 @@
 package com.bockerl.snailmember.boardcommentlike.command.domain.service
 
 import com.bockerl.snailmember.board.query.service.QueryBoardService
+import com.bockerl.snailmember.boardcommentlike.command.application.dto.CommandBoardCommentLikeDTO
 import com.bockerl.snailmember.boardcommentlike.command.application.service.CommandBoardCommentLikeService
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.entity.BoardCommentLike
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.enum.BoardCommentLikeActionType
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.event.BoardCommentLikeEvent
-import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.vo.request.CommandBoardCommentLikeRequestVO
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.vo.response.CommandBoardCommentLikeMemberIdsResponseVO
 import com.bockerl.snailmember.boardcommentlike.command.domain.repository.BoardCommentLikeRepository
 import com.bockerl.snailmember.member.query.service.QueryMemberService
@@ -22,27 +22,27 @@ class CommandBoardCommentLikeServiceImpl(
     private val queryBoardService: QueryBoardService,
     private val kafkaBoardCommentLikeTemplate: KafkaTemplate<String, BoardCommentLikeEvent>,
 ) : CommandBoardCommentLikeService {
-    override fun createBoardCommentLike(commandBoardCommentLikeRequestVO: CommandBoardCommentLikeRequestVO) {
+    override fun createBoardCommentLike(commandBoardCommentLikeDTO: CommandBoardCommentLikeDTO) {
         // 설명. redis에서 board pk 기준 인덱스 설정 및 member pk 기준 인덱스 설정 할 것
         // 설명. 집합으로 각 인덱스 관리. cold data 분리를 위해 expire 설정(1일) -> 호출될 때 마다 갱신됨
 
         // 설명. 1. board-comment pk 기준 인덱스
         redisTemplate
             .opsForSet()
-            .add("board-comment-like:${commandBoardCommentLikeRequestVO.boardCommentId}", commandBoardCommentLikeRequestVO.memberId)
-        redisTemplate.expire("board-comment-like:${commandBoardCommentLikeRequestVO.boardCommentId}", Duration.ofDays(1))
+            .add("board-comment-like:${commandBoardCommentLikeDTO.boardCommentId}", commandBoardCommentLikeDTO.memberId)
+        redisTemplate.expire("board-comment-like:${commandBoardCommentLikeDTO.boardCommentId}", Duration.ofDays(1))
         // 설명. 2. member pk 기준 인덱스 (역 인덱스)
         redisTemplate
             .opsForSet()
-            .add("board-comment-like:${commandBoardCommentLikeRequestVO.memberId}", commandBoardCommentLikeRequestVO.boardCommentId)
-        redisTemplate.expire("board-comment-like:${commandBoardCommentLikeRequestVO.memberId}", Duration.ofDays(1))
+            .add("board-comment-like:${commandBoardCommentLikeDTO.memberId}", commandBoardCommentLikeDTO.boardCommentId)
+        redisTemplate.expire("board-comment-like:${commandBoardCommentLikeDTO.memberId}", Duration.ofDays(1))
 
         // Kafka에 이벤트 발행(게시글 pk 포함해서 보내주기)
         val event =
             BoardCommentLikeEvent(
-                boardId = commandBoardCommentLikeRequestVO.boardId,
-                memberId = commandBoardCommentLikeRequestVO.memberId,
-                boardCommentId = commandBoardCommentLikeRequestVO.boardCommentId,
+                boardId = commandBoardCommentLikeDTO.boardId,
+                memberId = commandBoardCommentLikeDTO.memberId,
+                boardCommentId = commandBoardCommentLikeDTO.boardCommentId,
                 boardCommentLikeActionType = BoardCommentLikeActionType.LIKE,
             )
 
@@ -54,23 +54,23 @@ class CommandBoardCommentLikeServiceImpl(
         boardCommentLikeRepository.saveAll(boardCommentLikeList)
     }
 
-    override fun deleteBoardCommentLike(commandBoardCommentLikeRequestVO: CommandBoardCommentLikeRequestVO) {
+    override fun deleteBoardCommentLike(commandBoardCommentLikeDTO: CommandBoardCommentLikeDTO) {
         // 설명. 1. board pk 기준 인덱스
         redisTemplate
             .opsForSet()
-            .remove("board-comment-like:${commandBoardCommentLikeRequestVO.boardCommentId}", commandBoardCommentLikeRequestVO.memberId)
+            .remove("board-comment-like:${commandBoardCommentLikeDTO.boardCommentId}", commandBoardCommentLikeDTO.memberId)
 
         // 설명. 2. member pk 기준 인덱스 (역 인덱스)
         redisTemplate
             .opsForSet()
-            .remove("board-comment-like:${commandBoardCommentLikeRequestVO.memberId}", commandBoardCommentLikeRequestVO.boardCommentId)
+            .remove("board-comment-like:${commandBoardCommentLikeDTO.memberId}", commandBoardCommentLikeDTO.boardCommentId)
 
         // Kafka에 이벤트 발행
         val event =
             BoardCommentLikeEvent(
-                boardId = commandBoardCommentLikeRequestVO.boardId,
-                memberId = commandBoardCommentLikeRequestVO.memberId,
-                boardCommentId = commandBoardCommentLikeRequestVO.boardCommentId,
+                boardId = commandBoardCommentLikeDTO.boardId,
+                memberId = commandBoardCommentLikeDTO.memberId,
+                boardCommentId = commandBoardCommentLikeDTO.boardCommentId,
                 boardCommentLikeActionType = BoardCommentLikeActionType.UNLIKE,
             )
 

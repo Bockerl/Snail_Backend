@@ -2,6 +2,9 @@
 
 package com.bockerl.snailmember.boardcomment.command.application.controller
 
+import com.bockerl.snailmember.boardcomment.command.application.dto.CommandBoardCommentCreateByGifDTO
+import com.bockerl.snailmember.boardcomment.command.application.dto.CommandBoardCommentCreateDTO
+import com.bockerl.snailmember.boardcomment.command.application.dto.CommandBoardCommentDeleteDTO
 import com.bockerl.snailmember.boardcomment.command.application.service.CommandBoardCommentService
 import com.bockerl.snailmember.boardcomment.command.domain.aggregate.vo.request.CommandBoardCommentCreateByGifRequestVO
 import com.bockerl.snailmember.boardcomment.command.domain.aggregate.vo.request.CommandBoardCommentCreateRequestVO
@@ -43,7 +46,13 @@ class CommandBoardCommentController(
     fun postBoardComment(
         @RequestBody commandBoardCommentCreateRequestVO: CommandBoardCommentCreateRequestVO,
     ): ResponseDTO<*> {
-        commandBoardCommentService.createBoardComment(commandBoardCommentCreateRequestVO)
+        val commandBoardCommentCreateDTO =
+            CommandBoardCommentCreateDTO(
+                boardCommentContents = commandBoardCommentCreateRequestVO.boardCommentContents,
+                memberId = commandBoardCommentCreateRequestVO.memberId,
+                boardId = commandBoardCommentCreateRequestVO.boardId,
+            )
+        commandBoardCommentService.createBoardComment(commandBoardCommentCreateDTO)
 
         return ResponseDTO.ok(null)
     }
@@ -82,7 +91,13 @@ class CommandBoardCommentController(
             CommandBoardCommentCreateByGifRequestVO,
         @RequestPart("file", required = true) file: MultipartFile,
     ): ResponseDTO<*> {
-        commandBoardCommentService.createBoardCommentByGif(commandBoardCommentCreateByGifRequestVO, file)
+        val commandBoardCommentCreateByGifDTO =
+            CommandBoardCommentCreateByGifDTO(
+                memberId = commandBoardCommentCreateByGifRequestVO.memberId,
+                boardId = commandBoardCommentCreateByGifRequestVO.boardId,
+            )
+
+        commandBoardCommentService.createBoardCommentByGif(commandBoardCommentCreateByGifDTO, file)
 
         return ResponseDTO.ok(null)
     }
@@ -107,7 +122,13 @@ class CommandBoardCommentController(
     fun deleteBoardComment(
         @RequestBody commandBoardCommentDeleteRequestVO: CommandBoardCommentDeleteRequestVO,
     ): ResponseDTO<*> {
-        commandBoardCommentService.deleteBoardComment(commandBoardCommentDeleteRequestVO)
+        val commandBoardCommentDeleteDTO =
+            CommandBoardCommentDeleteDTO(
+                boardCommentId = commandBoardCommentDeleteRequestVO.boardCommentId,
+                memberId = commandBoardCommentDeleteRequestVO.memberId,
+                boardId = commandBoardCommentDeleteRequestVO.boardId,
+            )
+        commandBoardCommentService.deleteBoardComment(commandBoardCommentDeleteDTO)
 
         return ResponseDTO.ok(null)
     }

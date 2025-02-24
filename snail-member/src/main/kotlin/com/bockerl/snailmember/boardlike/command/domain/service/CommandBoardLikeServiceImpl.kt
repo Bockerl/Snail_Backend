@@ -2,11 +2,11 @@ package com.bockerl.snailmember.boardlike.command.domain.service
 
 import com.bockerl.snailmember.board.query.service.QueryBoardService
 import com.bockerl.snailmember.board.query.vo.QueryBoardResponseVO
+import com.bockerl.snailmember.boardlike.command.application.dto.CommandBoardLikeDTO
 import com.bockerl.snailmember.boardlike.command.application.service.CommandBoardLikeService
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.entity.BoardLike
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.enum.BoardLikeActionType
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.event.BoardLikeEvent
-import com.bockerl.snailmember.boardlike.command.domain.aggregate.vo.request.CommandBoardLikeRequestVO
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.vo.response.CommandBoardLikeMemberIdsResponseVO
 import com.bockerl.snailmember.boardlike.command.domain.repository.BoardLikeRepository
 import com.bockerl.snailmember.member.query.service.QueryMemberService
@@ -23,26 +23,26 @@ class CommandBoardLikeServiceImpl(
     private val queryBoardService: QueryBoardService,
     private val kafkaBoardLikeTemplate: KafkaTemplate<String, BoardLikeEvent>,
 ) : CommandBoardLikeService {
-    override fun createBoardLike(commandBoardLikeRequestVO: CommandBoardLikeRequestVO) {
+    override fun createBoardLike(commandBoardLikeDTO: CommandBoardLikeDTO) {
         // 설명. redis에서 board pk 기준 인덱스 설정 및 member pk 기준 인덱스 설정 할 것
         // 설명. 집합으로 각 인덱스 관리. cold data 분리를 위해 expire 설정(1일) -> 호출될 때 마다 갱신됨
 
         // 설명. 1. board pk 기준 인덱스
         redisTemplate
             .opsForSet()
-            .add("board-like:${commandBoardLikeRequestVO.boardId}", commandBoardLikeRequestVO.memberId)
-        redisTemplate.expire("board-like:${commandBoardLikeRequestVO.boardId}", Duration.ofDays(1))
+            .add("board-like:${commandBoardLikeDTO.boardId}", commandBoardLikeDTO.memberId)
+        redisTemplate.expire("board-like:${commandBoardLikeDTO.boardId}", Duration.ofDays(1))
         // 설명. 2. member pk 기준 인덱스 (역 인덱스)
         redisTemplate
             .opsForSet()
-            .add("board-like:${commandBoardLikeRequestVO.memberId}", commandBoardLikeRequestVO.boardId)
-        redisTemplate.expire("board-like:${commandBoardLikeRequestVO.memberId}", Duration.ofDays(1))
+            .add("board-like:${commandBoardLikeDTO.memberId}", commandBoardLikeDTO.boardId)
+        redisTemplate.expire("board-like:${commandBoardLikeDTO.memberId}", Duration.ofDays(1))
 
         // Kafka에 이벤트 발행
         val event =
             BoardLikeEvent(
-                boardId = commandBoardLikeRequestVO.boardId,
-                memberId = commandBoardLikeRequestVO.memberId,
+                boardId = commandBoardLikeDTO.boardId,
+                memberId = commandBoardLikeDTO.memberId,
                 boardLikeActionType = BoardLikeActionType.LIKE,
             )
 
@@ -54,22 +54,22 @@ class CommandBoardLikeServiceImpl(
         boardLikeRepository.saveAll(boardLikeList)
     }
 
-    override fun deleteBoardLike(commandBoardLikeRequestVO: CommandBoardLikeRequestVO) {
+    override fun deleteBoardLike(commandBoardLikeDTO: CommandBoardLikeDTO) {
         // 설명. 1. board pk 기준 인덱스
         redisTemplate
             .opsForSet()
-            .remove("board-like:${commandBoardLikeRequestVO.boardId}", commandBoardLikeRequestVO.memberId)
+            .remove("board-like:${commandBoardLikeDTO.boardId}", commandBoardLikeDTO.memberId)
 
         // 설명. 2. member pk 기준 인덱스 (역 인덱스)
         redisTemplate
             .opsForSet()
-            .remove("board-like:${commandBoardLikeRequestVO.memberId}", commandBoardLikeRequestVO.boardId)
+            .remove("board-like:${commandBoardLikeDTO.memberId}", commandBoardLikeDTO.boardId)
 
         // Kafka에 이벤트 발행
         val event =
             BoardLikeEvent(
-                boardId = commandBoardLikeRequestVO.boardId,
-                memberId = commandBoardLikeRequestVO.memberId,
+                boardId = commandBoardLikeDTO.boardId,
+                memberId = commandBoardLikeDTO.memberId,
                 boardLikeActionType = BoardLikeActionType.UNLIKE,
             )
 

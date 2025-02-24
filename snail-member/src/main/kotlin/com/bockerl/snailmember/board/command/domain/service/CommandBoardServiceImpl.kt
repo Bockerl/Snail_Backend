@@ -5,11 +5,11 @@
 
 package com.bockerl.snailmember.board.command.domain.service
 
+import com.bockerl.snailmember.board.command.application.dto.CommandBoardCreateDTO
+import com.bockerl.snailmember.board.command.application.dto.CommandBoardDeleteDTO
+import com.bockerl.snailmember.board.command.application.dto.CommandBoardUpdateDTO
 import com.bockerl.snailmember.board.command.application.service.CommandBoardService
 import com.bockerl.snailmember.board.command.domain.aggregate.entity.Board
-import com.bockerl.snailmember.board.command.domain.aggregate.vo.request.CommandBoardCreateRequestVO
-import com.bockerl.snailmember.board.command.domain.aggregate.vo.request.CommandBoardDeleteRequestVO
-import com.bockerl.snailmember.board.command.domain.aggregate.vo.request.CommandBoardUpdateRequestVO
 import com.bockerl.snailmember.board.command.domain.repository.CommandBoardRepository
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
@@ -27,17 +27,17 @@ class CommandBoardServiceImpl(
 ) : CommandBoardService {
     @Transactional
     override fun createBoard(
-        commandBoardCreateRequestVO: CommandBoardCreateRequestVO,
+        commandBoardCreateDTO: CommandBoardCreateDTO,
         files: List<MultipartFile>,
     ) {
         val board =
             Board(
-                boardContents = commandBoardCreateRequestVO.boardContents,
-                boardType = commandBoardCreateRequestVO.boardType,
-                boardTag = commandBoardCreateRequestVO.boardTag,
-                boardLocation = commandBoardCreateRequestVO.boardLocation,
-                boardAccessLevel = commandBoardCreateRequestVO.boardAccessLevel,
-                memberId = extractDigits(commandBoardCreateRequestVO.memberId),
+                boardContents = commandBoardCreateDTO.boardContents,
+                boardType = commandBoardCreateDTO.boardType,
+                boardTag = commandBoardCreateDTO.boardTag,
+                boardLocation = commandBoardCreateDTO.boardLocation,
+                boardAccessLevel = commandBoardCreateDTO.boardAccessLevel,
+                memberId = extractDigits(commandBoardCreateDTO.memberId),
             )
 
         val boardEntity = commandBoardRepository.save(board)
@@ -48,7 +48,7 @@ class CommandBoardServiceImpl(
                     CommandFileRequestVO(
                         fileTargetType = FileTargetType.BOARD,
                         fileTargetId = formattedBoardId(it),
-                        memberId = commandBoardCreateRequestVO.memberId,
+                        memberId = commandBoardCreateDTO.memberId,
                     )
                 }
 
@@ -57,20 +57,20 @@ class CommandBoardServiceImpl(
     }
 
     override fun updateBoard(
-        commandBoardUpdateRequestVO: CommandBoardUpdateRequestVO,
+        commandBoardUpdateDTO: CommandBoardUpdateDTO,
         files: List<MultipartFile>,
     ) {
-        val boardId = extractDigits(commandBoardUpdateRequestVO.boardId)
+        val boardId = extractDigits(commandBoardUpdateDTO.boardId)
 
         val board = commandBoardRepository.findById(boardId).orElseThrow { CommonException(ErrorCode.NOT_FOUND_BOARD) }
 
         board.apply {
-            boardContents = commandBoardUpdateRequestVO.boardContents
-            boardType = commandBoardUpdateRequestVO.boardType
-            boardTag = commandBoardUpdateRequestVO.boardTag
-            boardLocation = commandBoardUpdateRequestVO.boardLocation
-            boardAccessLevel = commandBoardUpdateRequestVO.boardAccessLevel
-            memberId = extractDigits(commandBoardUpdateRequestVO.memberId)
+            boardContents = commandBoardUpdateDTO.boardContents
+            boardType = commandBoardUpdateDTO.boardType
+            boardTag = commandBoardUpdateDTO.boardTag
+            boardLocation = commandBoardUpdateDTO.boardLocation
+            boardAccessLevel = commandBoardUpdateDTO.boardAccessLevel
+            memberId = extractDigits(commandBoardUpdateDTO.memberId)
         }
 
         val boardEntity = commandBoardRepository.save(board)
@@ -81,17 +81,17 @@ class CommandBoardServiceImpl(
                     CommandFileRequestVO(
                         fileTargetType = FileTargetType.BOARD,
                         fileTargetId = formattedBoardId(it),
-                        memberId = commandBoardUpdateRequestVO.memberId,
+                        memberId = commandBoardUpdateDTO.memberId,
                     )
                 }
 
-            commandFileRequestVO?.let { commandFileService.updateFiles(it, commandBoardUpdateRequestVO.deleteFilesIds, files) }
+            commandFileRequestVO?.let { commandFileService.updateFiles(it, commandBoardUpdateDTO.deleteFilesIds, files) }
         }
     }
 
     // 설명. soft delete로 바꾸기
-    override fun deleteBoard(commandBoardDeleteRequestVO: CommandBoardDeleteRequestVO) {
-        val boardId = extractDigits(commandBoardDeleteRequestVO.boardId)
+    override fun deleteBoard(commandBoardDeleteDTO: CommandBoardDeleteDTO) {
+        val boardId = extractDigits(commandBoardDeleteDTO.boardId)
         val board = commandBoardRepository.findById(boardId).orElseThrow { CommonException(ErrorCode.NOT_FOUND_BOARD) }
 
         board.apply {
@@ -102,7 +102,7 @@ class CommandBoardServiceImpl(
             CommandFileRequestVO(
                 fileTargetType = FileTargetType.BOARD,
                 fileTargetId = formattedBoardId(boardId),
-                memberId = commandBoardDeleteRequestVO.memberId,
+                memberId = commandBoardDeleteDTO.memberId,
             )
 
         commandFileService.deleteFile(commandFileRequestVO)

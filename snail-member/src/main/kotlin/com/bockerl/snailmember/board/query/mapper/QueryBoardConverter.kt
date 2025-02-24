@@ -1,5 +1,9 @@
-package com.bockerl.snailmember.board.query.mapper
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
 
+package com.bockerl.snailmember.board.query.mapper
 
 import com.bockerl.snailmember.board.query.dto.QueryBoardDTO
 import com.bockerl.snailmember.board.query.vo.QueryBoardResponseVO
@@ -19,6 +23,6 @@ class QueryBoardConverter {
             createdAt = dto.createdAt,
             updatedAt = dto.updatedAt,
             active = dto.active,
-            memberId = dto.memberId,
+            memberId = dto.formatedMemberId,
         )
 }

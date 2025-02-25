@@ -150,4 +150,13 @@ class CommandChatMessageServiceImplTest : TestSupport() {
             assertNull(receiveMessage, "메시지가 잘못된 경로로 인해 수신되지 않아야 합니다.")
         }
     }
+
+    @Nested
+    @DisplayName("전송된 메시지 MongoDB에 저장 테스트")
+    inner class MongoDBVertification {
+        @Test
+        @DisplayName("메시지 MongoDB에 저장 테스트")
+        fun `전송하기 전 메시지 MongoDB에 저장 성공`() {
+        }
+    }
 }

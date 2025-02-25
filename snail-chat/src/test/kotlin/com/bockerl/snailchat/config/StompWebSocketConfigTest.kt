@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Nested
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.messaging.converter.StringMessageConverter
+import org.springframework.messaging.simp.stomp.StompHeaders
 import org.springframework.messaging.simp.stomp.StompSession
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
@@ -23,7 +24,7 @@ import kotlin.test.Test
 
 // 어플리케이션 컨텍스트를 로드하여 실제 내장 서버를 실행 (Websocket 연결 테스트는 실제 서버 실행 필요)
 // 무작위 포트를 배정하여, 실제 실행된 서버의 포트와 충돌 방지
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class StompWebSocketConfigTest : TestSupport() {
     // Server_port 번호 할당
     @LocalServerPort
@@ -34,7 +35,28 @@ class StompWebSocketConfigTest : TestSupport() {
         val transports: List<Transport> = listOf(WebSocketTransport(StandardWebSocketClient()))
         val sockJsClient = SockJsClient(transports)
         WebSocketStompClient(sockJsClient).apply {
+            // 단순 Websocket 연결 테스트 임으로, String 메시지 전송
             messageConverter = StringMessageConverter() // stomp 기반 Websocket으로 메세지 -> String을 위한 설정
+        }
+    }
+
+    // Websocket을 처리하는 이벤트 핸들러
+    private class WebsocketHandlerImpl : StompSessionHandlerAdapter() {
+        // Websocket 메시지 오류 발생시 실행
+        override fun handleFrame(
+            headers: StompHeaders,
+            payload: Any?,
+        ) {
+            println("오류 발생: $payload")
+        }
+
+        // Websocket 전송 오류 발생시 실행
+        override fun handleTransportError(
+            session: StompSession,
+            exception: Throwable,
+        ) {
+            println("Transport 오류 발생: ${exception.message}")
+            throw exception
         }
     }
 

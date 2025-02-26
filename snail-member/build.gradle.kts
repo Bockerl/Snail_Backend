@@ -95,6 +95,11 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
     // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-jackson
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+    // mockk 추가
+    testImplementation("io.mockk:mockk:1.13.16")
+    // kotest 추가
+    testImplementation("io.kotest:kotest-runner-junit5:5.9.0")
+    testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
 }
 dependencyManagement {
     imports {
@@ -109,6 +114,6 @@ kotlin {
     }
 }
 
-tasks.withType<Test> {
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }

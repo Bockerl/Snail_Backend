@@ -129,7 +129,7 @@ class RegistrationServiceImpl(
             throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
         }
         logger.info { "redis에서 저장된 tempMember: $tempMember" }
-        authService.createPhoneVerificationCode(tempMember.phoneNumber)
+        val code = authService.createPhoneVerificationCode(tempMember.phoneNumber)
     }
 
     // 4. 휴대폰 인증 요청

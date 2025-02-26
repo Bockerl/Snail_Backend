@@ -7,7 +7,7 @@ import org.hibernate.annotations.CreationTimestamp
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "Board_like")
+@Table(name = "Board-like")
 data class BoardLike(
     @Id
     @GeneratedValue(

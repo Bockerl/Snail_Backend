@@ -11,7 +11,6 @@ import com.bockerl.snailmember.member.command.domain.service.AuthServiceImpl
 import org.junit.jupiter.api.*
 import org.mockito.Mockito.*
 import org.mockito.kotlin.whenever
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.core.ValueOperations
@@ -22,13 +21,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @Import(TestConfiguration::class)
-class AuthServiceImplTests : TestSupport() {
-    @Autowired
-    private lateinit var redisTemplate: RedisTemplate<String, String>
-
-    @Autowired
-    private lateinit var mailSender: JavaMailSender
-
+class AuthServiceImplTests(
+    private val redisTemplate: RedisTemplate<String, String>,
+    private val mailSender: JavaMailSender,
+) : TestSupport() {
     private lateinit var authService: AuthService
 
     @BeforeEach

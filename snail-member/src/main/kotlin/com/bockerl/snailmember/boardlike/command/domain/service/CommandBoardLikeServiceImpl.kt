@@ -10,6 +10,9 @@ import com.bockerl.snailmember.boardlike.command.domain.aggregate.event.BoardLik
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.vo.response.CommandBoardLikeMemberIdsResponseVO
 import com.bockerl.snailmember.boardlike.command.domain.repository.BoardLikeRepository
 import com.bockerl.snailmember.member.query.service.QueryMemberService
+import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.transaction.Transactional
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
@@ -23,6 +26,8 @@ class CommandBoardLikeServiceImpl(
     private val queryBoardService: QueryBoardService,
     private val kafkaBoardLikeTemplate: KafkaTemplate<String, BoardLikeEvent>,
 ) : CommandBoardLikeService {
+    private val logger = KotlinLogging.logger {}
+
     override fun createBoardLike(commandBoardLikeDTO: CommandBoardLikeDTO) {
         // 설명. redis에서 board pk 기준 인덱스 설정 및 member pk 기준 인덱스 설정 할 것
         // 설명. 집합으로 각 인덱스 관리. cold data 분리를 위해 expire 설정(1일) -> 호출될 때 마다 갱신됨
@@ -50,8 +55,24 @@ class CommandBoardLikeServiceImpl(
         kafkaBoardLikeTemplate.send("board-like-events", event)
     }
 
+    @Transactional
     override fun createBoardLikeEventList(boardLikeList: List<BoardLike>) {
-        boardLikeRepository.saveAll(boardLikeList)
+        try {
+            boardLikeRepository.saveAll(boardLikeList)
+        } catch (ex: DataIntegrityViolationException) {
+            logger.error("Bulk insert 실패: ${ex.message}. 개별 처리 시도합니다.")
+            boardLikeList.forEach { event ->
+                try {
+                    boardLikeRepository.save(event)
+                } catch (innerEx: DataIntegrityViolationException) {
+                    // 무시해도 됨
+                    logger.error { "개별 처리 실패(duplicate key 처리): $event, $innerEx" }
+                } catch (otherEx: Exception) {
+                    logger.error { "개별 처리 실패: $event, $otherEx" }
+                    // 설명. 기타 에러에 대해서는 재시도 하지 않고 별도 로직을 수행
+                }
+            }
+        }
     }
 
     override fun deleteBoardLike(commandBoardLikeDTO: CommandBoardLikeDTO) {

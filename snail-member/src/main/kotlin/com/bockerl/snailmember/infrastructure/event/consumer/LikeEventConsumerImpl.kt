@@ -2,10 +2,7 @@ package com.bockerl.snailmember.infrastructure.event.consumer
 
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.event.BoardLikeEvent
 import com.bockerl.snailmember.boardlike.command.domain.repository.BoardLikeRepository
-import com.bockerl.snailmember.common.exception.CommonException
-import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.infrastructure.event.handler.LikeEventHandler
-import com.mongodb.DuplicateKeyException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
 import org.springframework.kafka.annotation.KafkaListener
@@ -42,9 +39,6 @@ class LikeEventConsumerImpl(
             likeEventHandler.handle(event)
             // 설명. 오프셋 수동 커밋
             acknowledgment.acknowledge()
-        } catch (e: DuplicateKeyException) {
-            logger.error(e) { "Duplicate key exception: $e.message" }
-            throw CommonException(ErrorCode.DATA_INTEGRITY_VIOLATION)
         } catch (e: Exception) {
             // 설명. 재시도 로직 or DLQ(Dead Letter Queue) 추가 예정
             logger.error(e) { "예외 발생: ${e.message}" }

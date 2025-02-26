@@ -9,6 +9,7 @@ import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.dto.MemberDTO
 import com.bockerl.snailmember.member.command.application.mapper.MemberConverter
 import com.bockerl.snailmember.member.query.repository.MemberMapper
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 
 @Service
@@ -20,5 +21,9 @@ class QueryMemberServiceImpl(private val memberMapper: MemberMapper, private val
                 ?: throw CommonException(ErrorCode.NOT_FOUND_MEMBER)
         // Elvis 연산자로 왼쪽 값이 null일 경우 오른쪽 표현식 실행
         return memberConverter.entityToDTO(member)
+    }
+
+    override fun loadUserByUsername(username: String?): UserDetails {
+        TODO("Not yet implemented")
     }
 }

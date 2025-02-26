@@ -54,7 +54,6 @@ data class Member(
     @Column(name = "member_gender", nullable = true)
     @Enumerated(EnumType.STRING)
     var memberGender: Gender,
-    // 지역 테이블에서 fk로 받아서 저장할 것
     @Column(name = "member_region", nullable = false)
     var memberRegion: String,
     @Column(name = "member_birth", nullable = false)

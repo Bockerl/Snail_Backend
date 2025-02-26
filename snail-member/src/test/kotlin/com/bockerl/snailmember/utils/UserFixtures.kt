@@ -19,6 +19,9 @@ const val VERIFICATION_CODE = "12345"
 val TEST_BIRTH = Timestamp(1708300800000)
 const val TEST_PRIMARY_AREA = "Emd-00000001"
 const val TEST_WORKPLACE_AREA = "Emd-00000002"
+const val EMAIL_PREFIX = "verification:email:"
+const val PHONE_PREFIX = "verification:phone:"
+const val VERIFICATION_TTL = 5L
 
 fun createTempMember(
     redisId: String = TEST_REDIS_ID,

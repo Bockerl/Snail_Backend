@@ -126,7 +126,6 @@ class AuthServiceImpl(
     private fun generateCode(): String = Random.nextInt(10000, 99999).toString()
 
     // redis에 이미 존재하는 코드 삭제하는 공통 메서드
-    @Transactional
     fun deleteExVerificationCode(redisId: String, type: VerificationType) {
         val key =
             when (type) {

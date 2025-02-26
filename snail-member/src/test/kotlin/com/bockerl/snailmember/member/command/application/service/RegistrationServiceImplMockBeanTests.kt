@@ -20,11 +20,13 @@ import com.bockerl.snailmember.member.command.domain.service.RegistrationService
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import org.mockito.kotlin.*
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.Import
 import java.sql.Timestamp
 
 @Import(TestConfiguration::class)
+@SpringBootTest
 class RegistrationServiceImplMockBeanTests : TestSupport() {
     @MockBean
     private lateinit var tempMemberRepository: TempMemberRepository

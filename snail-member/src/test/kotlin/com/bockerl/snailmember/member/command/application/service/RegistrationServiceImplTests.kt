@@ -20,7 +20,7 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.*
 
-class RegistrationServiceImplBeanTests :
+class RegistrationServiceImplTests :
     BehaviorSpec({
         // mock 설정
         val authService = mockk<AuthService>()

@@ -4,203 +4,175 @@ package com.bockerl.snailmember.member.command.application.service
 
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
-import com.bockerl.snailmember.config.TestConfiguration
-import com.bockerl.snailmember.config.TestSupport
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.VerificationType
 import com.bockerl.snailmember.member.command.domain.service.AuthServiceImpl
-import org.junit.jupiter.api.*
-import org.mockito.Mockito.*
-import org.mockito.kotlin.whenever
-import org.springframework.context.annotation.Import
+import com.bockerl.snailmember.utils.*
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.shouldBe
+import io.mockk.*
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.core.ValueOperations
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import java.time.Duration
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
-@Import(TestConfiguration::class)
-class AuthServiceImplTests(
-    private val redisTemplate: RedisTemplate<String, String>,
-    private val mailSender: JavaMailSender,
-) : TestSupport() {
-    private lateinit var authService: AuthService
+class AuthServiceImplTests :
+    BehaviorSpec({
+        val logger = KotlinLogging.logger {}
+        // mock
+        val mailSender = mockk<JavaMailSender>()
+        val redisTemplate = mockk<RedisTemplate<String, String>>()
+        // test 구현체
+        val authService = AuthServiceImpl(
+            redisTemplate,
+            mailSender,
+        )
 
-    @BeforeEach
-    fun setUp() {
-        // 모든 의존성이 주입된 후에 authService 생성
-        authService = AuthServiceImpl(redisTemplate, mailSender)
-    }
-
-    companion object {
-        private const val EMAIL_PREFIX = "verification:email:"
-        private const val PHONE_PREFIX = "verification:phone:"
-        private const val TEST_EMAIL = "test@test.com"
-        private const val TEST_PHONE = "01012345678"
-        private const val VERIFICATION_CODE = "12345"
-        private const val VERIFICATION_TTL = 5L
-    }
-
-    @Nested
-    @DisplayName("이메일 인증 관련 테스트")
-    inner class EmailVerification {
-        @Test
-        @DisplayName("이메일 인증 코드 발급 성공 테스트")
-        fun emailVerification_create_success() {
-            // given
-            val valOps: ValueOperations<String, String> = mock()
-            whenever(redisTemplate.opsForValue()).thenReturn(valOps)
-            doNothing().`when`(valOps).set(any(), any())
-            whenever(redisTemplate.expire(any(), any())).thenReturn(true)
-            doNothing().`when`(mailSender).send(any<SimpleMailMessage>())
-
-            // when
-            authService.createEmailVerificationCode(TEST_EMAIL)
-
-            // then
-            // 혹시 있을 키 삭제 검증
-            verify(redisTemplate).delete("$EMAIL_PREFIX$TEST_EMAIL")
-            // key에 5자리 숫자로 구성된 코드 등록 검증
-            verify(valOps).set(
-                eq("$EMAIL_PREFIX$TEST_EMAIL"),
-                argThat { it.length == 5 && it.all { c -> c.isDigit() } },
-            )
-            // TTL 검증
-            verify(redisTemplate).expire(
-                eq("$EMAIL_PREFIX$TEST_EMAIL"),
-                eq(Duration.ofMinutes(VERIFICATION_TTL)),
-            )
-            // 메일 전송 검증
-            verify(mailSender).send(any<SimpleMailMessage>())
+        afterTest {
+            val valOps = mockk<ValueOperations<String, String>>()
+            every { redisTemplate.opsForValue() } returns valOps
         }
 
-        @Test
-        @DisplayName("이메일 인증 요청 성공 테스트")
-        fun emailVerification_success() {
-            // given
-            val valOps: ValueOperations<String, String> = mock()
-            whenever(redisTemplate.opsForValue()).thenReturn(valOps)
-            whenever(valOps.get("$EMAIL_PREFIX$TEST_EMAIL")).thenReturn(VERIFICATION_CODE)
+        // 이메일 인증코드 생성 요청 테스트
+        Given("이메일 회원가입 사용자가") {
+            val email = TEST_EMAIL
+            every { redisTemplate.delete(any<String>()) } returns true
+            every { redisTemplate.expire(any(), any()) } returns true
+            every { redisTemplate.opsForValue().set(any(), any()) } just Runs
+            every { mailSender.send(any<SimpleMailMessage>()) } just Runs
 
-            // when & then
-            assertDoesNotThrow {
-                authService.verifyCode(TEST_EMAIL, VERIFICATION_CODE, VerificationType.EMAIL)
+            When("이메일 인증 코드 생성을 요청하면") {
+                authService.createEmailVerificationCode(email)
+
+                Then("존재할지 모르는 이메일 인증 코드가 삭제된다.") {
+                    verify { redisTemplate.delete("$EMAIL_PREFIX$email") }
+                }
+
+                Then("5자리 숫자로된 코드가 Redis에 등록된다.") {
+                    verify {
+                        redisTemplate.opsForValue().set(
+                            eq("$EMAIL_PREFIX$email"),
+                            match { it.length == 5 && it.all { c -> c.isDigit() } },
+                        )
+                    }
+                }
+
+                Then("인증 코드의 유효시간은 5분이다.") {
+                    verify {
+                        redisTemplate.expire(
+                            "$EMAIL_PREFIX$email",
+                            Duration.ofMinutes(VERIFICATION_TTL),
+                        )
+                    }
+                }
+
+                Then("인증코드가 메일로 발송된다.") {
+                    verify { mailSender.send(any<SimpleMailMessage>()) }
+                }
             }
-            verify(redisTemplate).delete("$EMAIL_PREFIX$TEST_EMAIL")
         }
 
-        @Test
-        @DisplayName("이메일 인증 실패 - 만료된 코드")
-        fun emailVerification_failure_expire() {
-            // given
-            val valOps: ValueOperations<String, String> = mock()
-            whenever(redisTemplate.opsForValue()).thenReturn(valOps)
-            // Redis에 저장된 코드가 없다고 가정(만료)
-            whenever(valOps.get("$EMAIL_PREFIX$TEST_EMAIL")).thenReturn(null)
+        Given("이메일 인증 요청한 사용자가") {
+            val email = TEST_EMAIL
+            val code = VERIFICATION_CODE
+            every { redisTemplate.delete(any<String>()) } returns true
+            every { redisTemplate.opsForValue().get("$EMAIL_PREFIX$email") } returns code
 
-            // when $ then
-            val exception =
-                assertThrows<CommonException> {
-                    authService.verifyCode(TEST_EMAIL, VERIFICATION_CODE, VerificationType.EMAIL)
+            When("이메일 인증을 성공하면") {
+                authService.verifyCode(email, code, VerificationType.EMAIL)
+
+                Then("Redis에 저정된 이메일 인증 코드가 삭제된다.") {
+                    verify { redisTemplate.delete("$EMAIL_PREFIX$email") }
                 }
-            assertEquals(exception.errorCode, ErrorCode.EXPIRED_CODE)
-        }
-
-        @Test
-        @DisplayName("이메일 인증 실패 - 잘못된 코드")
-        fun emailVerification_failure_invalid() {
-            // given
-            val valOps: ValueOperations<String, String> = mock()
-            whenever(redisTemplate.opsForValue()).thenReturn(valOps)
-            // Redis에 저장된 코드와 사용자 코드가 일치하지 않음
-            whenever(valOps.get("$EMAIL_PREFIX$TEST_EMAIL")).thenReturn(VERIFICATION_CODE)
-
-            // when & then
-            val exception =
-                assertThrows<CommonException> {
-                    authService.verifyCode(TEST_EMAIL, "wrong_code", VerificationType.EMAIL)
-                }
-            assertEquals(exception.errorCode, ErrorCode.INVALID_CODE)
-        }
-    }
-
-    @Nested
-    @DisplayName("휴대폰 인증 관련 테스트")
-    inner class PhoneVerification {
-        @Test
-        @DisplayName("휴대폰 인증 코드 생성 성공 테스트")
-        fun phoneVerification_create_success() {
-            // given
-            val valOps: ValueOperations<String, String> = mock()
-            whenever(redisTemplate.opsForValue()).thenReturn(valOps)
-            doNothing().`when`(valOps).set(any(), any())
-            whenever(redisTemplate.expire(any(), any())).thenReturn(true)
-
-            // when
-            val result = authService.createPhoneVerificationCode(TEST_PHONE)
-
-            // then
-            // 생성한 인증 코드가 5자리 숫자인지 검증
-            assertTrue(result.length == 5 && result.all { c -> c.isDigit() })
-            // 혹시 모를 키 삭제 검증
-            verify(redisTemplate).delete("$PHONE_PREFIX$TEST_PHONE")
-            // Redis 등록 검증
-            verify(valOps).set(
-                eq("$PHONE_PREFIX$TEST_PHONE"),
-                argThat { it.length == 5 && it.all { c -> c.isDigit() } },
-            )
-            // TTL 검증
-            verify(redisTemplate).expire(
-                eq("$PHONE_PREFIX$TEST_PHONE"),
-                eq(Duration.ofMinutes(VERIFICATION_TTL)),
-            )
-        }
-
-        @Test
-        @DisplayName("휴대폰 인증 요청 성공 테스트")
-        fun phoneVerification_success() {
-            // given
-            val valOps: ValueOperations<String, String> = mock()
-            whenever(redisTemplate.opsForValue()).thenReturn(valOps)
-            whenever(valOps.get("$PHONE_PREFIX$TEST_PHONE")).thenReturn(VERIFICATION_CODE)
-
-            // when & then
-            assertDoesNotThrow {
-                authService.verifyCode(TEST_PHONE, VERIFICATION_CODE, VerificationType.PHONE)
             }
-            verify(redisTemplate).delete("$PHONE_PREFIX$TEST_PHONE")
-        }
 
-        @Test
-        @DisplayName("휴대폰 인증 실패 - 만료된 코드")
-        fun phoneVerification_failure_expire() {
-            // given
-            val valOps: ValueOperations<String, String> = mock()
-            whenever(redisTemplate.opsForValue()).thenReturn(valOps)
-            // Redis에 저장된 코드가 없다고 가정(만료)
-            whenever(valOps.get("$PHONE_PREFIX$TEST_PHONE")).thenReturn(null)
+            When("인증 시간이 만료되면") {
+                every { redisTemplate.opsForValue().get("$EMAIL_PREFIX$email") } returns null
 
-            // when & then
-            val exception =
-                assertThrows<CommonException> {
-                    authService.verifyCode(TEST_PHONE, "$PHONE_PREFIX$TEST_PHONE", VerificationType.PHONE)
+                Then("만료된 코드 예외가 발생한다.") {
+                    val exception = shouldThrow<CommonException> {
+                        authService.verifyCode(email, code, VerificationType.EMAIL)
+                    }
+                    exception.errorCode shouldBe ErrorCode.EXPIRED_CODE
                 }
-            assertEquals(exception.errorCode, ErrorCode.EXPIRED_CODE)
-        }
+            }
 
-        @Test
-        @DisplayName("휴대폰 인증 실패 - 잘못된 코드")
-        fun phoneVerification_failure_invalid() {
-            val valOps: ValueOperations<String, String> = mock()
-            whenever(redisTemplate.opsForValue()).thenReturn(valOps)
-            whenever(valOps.get("$PHONE_PREFIX$TEST_PHONE")).thenReturn(VERIFICATION_CODE)
+            When("이메일 인증에 실패하면") {
+                val wrongCode = "wrong"
+                every { redisTemplate.opsForValue().get("$EMAIL_PREFIX$email") } returns wrongCode
 
-            val exception =
-                assertThrows<CommonException> {
-                    authService.verifyCode(TEST_PHONE, "wrong_code", VerificationType.PHONE)
+                Then("유효하지 않은 코드 예외가 발생한다.") {
+                    val exception = shouldThrow<CommonException> {
+                        authService.verifyCode(email, code, VerificationType.EMAIL)
+                    }
+                    exception.errorCode shouldBe ErrorCode.INVALID_CODE
                 }
-            assertEquals(exception.errorCode, ErrorCode.INVALID_CODE)
+            }
         }
-    }
-}
+
+        // 휴대폰 인증 코드 생성 요청 테스트
+        Given("이메일을 인증한 사용자가") {
+            val phone = TEST_PHONE
+            every { redisTemplate.delete(any<String>()) } returns true
+            every { redisTemplate.opsForValue().set(any(), any()) } just Runs
+            every { redisTemplate.expire(any(), any()) } returns true
+
+            When("휴대폰 인증 코드 생성을 요청하면") {
+                authService.createPhoneVerificationCode(phone)
+
+                Then("존재할지 모르는 휴대폰 인증 코드가 삭제된다.") {
+                    verify { redisTemplate.delete("$PHONE_PREFIX$phone") }
+                }
+
+                Then("5자리 숫자로된 코드가 Redis에 등록된다.") {
+                    verify {
+                        redisTemplate.opsForValue().set(
+                            eq("$PHONE_PREFIX$phone"),
+                            match { it.length == 5 && it.all { c -> c.isDigit() } },
+                        )
+                    }
+                }
+            }
+        }
+
+        // 휴대폰 인증 요청 테스트
+        Given("휴대폰 인증 요청한 사용자가") {
+            val phone = TEST_PHONE
+            val code = VERIFICATION_CODE
+            every { redisTemplate.opsForValue().get("$PHONE_PREFIX$phone") } returns code
+            every { redisTemplate.delete(any<String>()) } returns true
+
+            When("휴대폰 인증을 성공하면") {
+                authService.verifyCode(phone, code, VerificationType.PHONE)
+
+                Then("Redis에 저정된 휴대폰 인증 코드가 삭제된다.") {
+                    verify { redisTemplate.delete("$PHONE_PREFIX$phone") }
+                }
+            }
+
+            When("인증 시간이 만료되면") {
+                every { redisTemplate.opsForValue().get("$PHONE_PREFIX$phone") } returns null
+
+                Then("만료된 코드 예외가 발생한다.") {
+                    val exception = shouldThrow<CommonException> {
+                        authService.verifyCode(phone, code, VerificationType.PHONE)
+                    }
+                    exception.errorCode shouldBe ErrorCode.EXPIRED_CODE
+                }
+            }
+
+            When("휴대폰 인증에 실패하면") {
+                val wrongCode = "wrong"
+                every { redisTemplate.opsForValue().get("$PHONE_PREFIX$phone") } returns wrongCode
+
+                Then("유효하지 않은 코드 예외가 발생한다.") {
+                    val exception = shouldThrow<CommonException> {
+                        authService.verifyCode(phone, code, VerificationType.PHONE)
+                    }
+                    exception.errorCode shouldBe ErrorCode.INVALID_CODE
+                }
+            }
+        }
+    })

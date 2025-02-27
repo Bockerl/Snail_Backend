@@ -57,7 +57,7 @@ class WebSecurity(
         .build()
 
     @Bean
-    fun passwordEncoder() = BCryptPasswordEncoder()
+    fun passwordEncoder() = BCryptPasswordEncoder(16)
 
     @Bean
     fun authenticationManager(

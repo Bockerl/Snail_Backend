@@ -9,6 +9,8 @@ import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.dto.MemberDTO
 import com.bockerl.snailmember.member.command.application.mapper.MemberConverter
 import com.bockerl.snailmember.member.query.repository.MemberMapper
+import com.bockerl.snailmember.security.CustomMember
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 
@@ -24,6 +26,11 @@ class QueryMemberServiceImpl(private val memberMapper: MemberMapper, private val
     }
 
     override fun loadUserByUsername(username: String?): UserDetails {
-        TODO("Not yet implemented")
+        val member =
+            memberMapper.selectMemberByMemberEmail(username)
+                ?: throw CommonException(ErrorCode.NOT_FOUND_MEMBER)
+        val role = listOf(SimpleGrantedAuthority(member.memberStatus.toString()))
+
+        return CustomMember(member, role)
     }
 }

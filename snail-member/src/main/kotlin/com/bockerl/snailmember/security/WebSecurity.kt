@@ -52,7 +52,7 @@ class WebSecurity(
         .sessionManagement { session ->
             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         }
-//        .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter::class.java) // JWT 인증 필터
+//        .addFilterBefore(AuthorizationFilter, UsernamePasswordAuthenticationFilter::class.java) // JWT 인증 필터
 //        .addFilterAt(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java) // 커스텀 인증 필터
         .build()
 

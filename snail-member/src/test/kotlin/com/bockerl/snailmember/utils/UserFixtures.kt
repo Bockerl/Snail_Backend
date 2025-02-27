@@ -6,6 +6,7 @@ import com.bockerl.snailmember.member.command.application.dto.request.EmailVerif
 import com.bockerl.snailmember.member.command.application.dto.request.PasswordRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.PhoneRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.PhoneVerifyRequestDTO
+import com.bockerl.snailmember.member.command.application.dto.response.KaKaoTokenResponseDTO
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.SignUpStep
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.TempMember
 import java.sql.Timestamp
@@ -22,6 +23,14 @@ const val TEST_WORKPLACE_AREA = "Emd-00000002"
 const val EMAIL_PREFIX = "verification:email:"
 const val PHONE_PREFIX = "verification:phone:"
 const val VERIFICATION_TTL = 5L
+const val TEST_CLIENT_ID = "test-client-id"
+const val TEST_CLIENT_SECRET = "test-client-secret"
+const val TEST_REDIRECT_URI = "test-redirect-uri"
+const val TEST_CODE = "test-code"
+const val TEST_TOKEN_TYPE = "test-token"
+const val TEST_ACCESS_TOKEN = "test-access-token"
+const val TEST_REFRESH_TOKEN = "test-refresh-token"
+const val TEST_ID_TOKEN = "test-id-token"
 
 fun createTempMember(
     redisId: String = TEST_REDIS_ID,
@@ -93,4 +102,20 @@ fun createActivityAreaRequestDTO(
     redisId = redisId,
     primaryFormattedId = primaryArea,
     workplaceFormattedId = workplaceArea,
+)
+
+fun createKaKaoTokenResponseDTO(
+    token: String = TEST_TOKEN_TYPE,
+    accessToken: String = TEST_ACCESS_TOKEN,
+    refreshToken: String = TEST_REFRESH_TOKEN,
+    idToken: String = TEST_ID_TOKEN,
+    expiresIn: Int = 0,
+    refreshExpiresIn: Int = 0,
+): KaKaoTokenResponseDTO = KaKaoTokenResponseDTO(
+    tokenType = token,
+    accessToken = accessToken,
+    refreshToken = refreshToken,
+    expiresIn = expiresIn,
+    refreshTokenExpiresIn = refreshExpiresIn,
+    idToken = idToken,
 )

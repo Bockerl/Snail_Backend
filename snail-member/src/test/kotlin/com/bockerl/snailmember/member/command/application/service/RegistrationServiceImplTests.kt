@@ -264,7 +264,7 @@ class RegistrationServiceImplTests :
         }
 
         // 휴대폰 인증 요청 테스트
-        Given("이메일을 인증한 사용자가") {
+        Given("휴대폰 인증 요청한 사용자가") {
             val request = createPhoneVerifyRequestDTO()
             val tempMember = createTempMember(
                 signUpStep = SignUpStep.EMAIL_VERIFIED,

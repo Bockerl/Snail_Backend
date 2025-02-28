@@ -29,7 +29,6 @@ class LikeEventHandler(
             is BoardLikeEvent -> {
                 when (event.boardLikeActionType) {
                     BoardLikeActionType.LIKE -> {
-                        // 설명. dto로 바꾸면 될듯?
                         val like = CommandBoardLikeDTO(memberId = event.memberId, boardId = event.boardId)
                         boardLikeBuffer.add(like)
                         if (boardLikeBuffer.size >= bufferSize) {
@@ -82,6 +81,4 @@ class LikeEventHandler(
             }
         }
     }
-
-    private fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
 }

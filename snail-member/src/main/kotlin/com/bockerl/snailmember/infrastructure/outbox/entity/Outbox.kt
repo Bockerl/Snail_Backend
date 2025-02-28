@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.bockerl.snailmember.infrastructure.outbox.entity
 
 import com.bockerl.snailmember.infrastructure.outbox.enums.EventType

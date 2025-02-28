@@ -1,8 +1,8 @@
-package com.bockerl.snailmember.boardlike.command.domain.aggregate.vo.response
+package com.bockerl.snailmember.boardcommentlike.query.vo
 
 import io.swagger.v3.oas.annotations.media.Schema
 
-data class CommandBoardLikeMemberIdsResponseVO(
+data class QueryBoardCommentLikeMemberIdsResponseVO(
     @field:Schema(description = "멤버 닉네임", example = "sindaebang1", type = "String")
     val memberNickname: String?,
     @field:Schema(description = "회원 번호", example = "MEM-00000001", type = "String")

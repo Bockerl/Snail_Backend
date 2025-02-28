@@ -1,11 +1,11 @@
 package com.bockerl.snailmember.infrastructure.event.handler
 
+import com.bockerl.snailmember.boardcommentlike.command.application.dto.CommandBoardCommentLikeDTO
 import com.bockerl.snailmember.boardcommentlike.command.application.service.CommandBoardCommentLikeService
-import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.entity.BoardCommentLike
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.enum.BoardCommentLikeActionType
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.event.BoardCommentLikeEvent
+import com.bockerl.snailmember.boardlike.command.application.dto.CommandBoardLikeDTO
 import com.bockerl.snailmember.boardlike.command.application.service.CommandBoardLikeService
-import com.bockerl.snailmember.boardlike.command.domain.aggregate.entity.BoardLike
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.enum.BoardLikeActionType
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.event.BoardLikeEvent
 import com.bockerl.snailmember.common.BaseLikeEvent
@@ -18,8 +18,8 @@ class LikeEventHandler(
     private val commandBoardLikeService: CommandBoardLikeService,
     private val commandBoardCommentLikeService: CommandBoardCommentLikeService,
 ) {
-    private val boardLikeBuffer = mutableListOf<BoardLike>()
-    private val boardCommentLikeBuffer = mutableListOf<BoardCommentLike>()
+    private val boardLikeBuffer = mutableListOf<CommandBoardLikeDTO>()
+    private val boardCommentLikeBuffer = mutableListOf<CommandBoardCommentLikeDTO>()
     private val bufferSize = 1
     private val logger = KotlinLogging.logger {}
 
@@ -29,7 +29,8 @@ class LikeEventHandler(
             is BoardLikeEvent -> {
                 when (event.boardLikeActionType) {
                     BoardLikeActionType.LIKE -> {
-                        val like = BoardLike(memberId = event.memberId, boardId = event.boardId)
+                        // 설명. dto로 바꾸면 될듯?
+                        val like = CommandBoardLikeDTO(memberId = event.memberId, boardId = event.boardId)
                         boardLikeBuffer.add(like)
                         if (boardLikeBuffer.size >= bufferSize) {
                             commandBoardLikeService.createBoardLikeEventList(boardLikeBuffer)
@@ -38,7 +39,12 @@ class LikeEventHandler(
                     }
 
                     BoardLikeActionType.UNLIKE -> {
-                        commandBoardLikeService.deleteBoardLikeEvent(BoardLike(memberId = event.memberId, boardId = event.boardId))
+                        commandBoardLikeService.deleteBoardLikeEvent(
+                            CommandBoardLikeDTO(
+                                memberId = event.memberId,
+                                boardId = event.boardId,
+                            ),
+                        )
                     }
                 }
             }
@@ -47,7 +53,7 @@ class LikeEventHandler(
                 when (event.boardCommentLikeActionType) {
                     BoardCommentLikeActionType.LIKE -> {
                         val like =
-                            BoardCommentLike(
+                            CommandBoardCommentLikeDTO(
                                 memberId = event.memberId,
                                 boardId = event.boardId,
                                 boardCommentId = event.boardCommentId,
@@ -61,7 +67,11 @@ class LikeEventHandler(
 
                     BoardCommentLikeActionType.UNLIKE -> {
                         commandBoardCommentLikeService.deleteBoardCommentLikeEvent(
-                            BoardCommentLike(memberId = event.memberId, boardCommentId = event.boardCommentId, boardId = event.boardId),
+                            CommandBoardCommentLikeDTO(
+                                memberId = event.memberId,
+                                boardCommentId = event.boardCommentId,
+                                boardId = event.boardId,
+                            ),
                         )
                     }
                 }
@@ -72,4 +82,6 @@ class LikeEventHandler(
             }
         }
     }
+
+    private fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
 }

@@ -50,7 +50,7 @@
             <if test="lastId != null">
                 board_comment_id &lt; #{lastId} and
             </if>
-            board_id = #{memberId} and
+            member_id = #{memberId} and
             active = true
         </where>
         ORDER BY board_comment_id DESC

@@ -28,7 +28,6 @@ class CommandFileServiceImpl(
     private val commandFileRepository: CommandFileRepository,
     private val gatheringFileService: CommandGatheringFileService,
 ) : CommandFileService {
-
     private val logger = KotlinLogging.logger {}
 
     @Transactional
@@ -148,8 +147,6 @@ class CommandFileServiceImpl(
 
 //        commandFileRepository.delete(existingFile[0])
         commandFileRepository.updateActiveAndFileUrlByFileId(existingFile[0].fileId)
-
-
 
         val fileName = generateUniqueFileName(file.originalFilename)
         blobContainerClient.getBlobClient(fileName)
@@ -291,12 +288,11 @@ class CommandFileServiceImpl(
                 extractDigits(commandFileRequestVO.fileTargetId),
             )
 
-        logger.info { files + "어떻게 나오냐고!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}
-
         if (files.isNotEmpty()) {
-            logger.info {"한번 보자: " + commandFileRequestVO.fileTargetType}
-
-            commandFileRepository.updateActiveAndFileUrlByFileTargetIdAndFileTargetType(extractDigits(commandFileRequestVO.fileTargetId), commandFileRequestVO.fileTargetType)
+            commandFileRepository.updateActiveAndFileUrlByFileTargetIdAndFileTargetType(
+                extractDigits(commandFileRequestVO.fileTargetId),
+                commandFileRequestVO.fileTargetType,
+            )
 
             for (file in files) {
                 val blobClient = blobContainerClient.getBlobClient(file.fileName)

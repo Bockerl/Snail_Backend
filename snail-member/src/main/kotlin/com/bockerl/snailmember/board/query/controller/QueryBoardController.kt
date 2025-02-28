@@ -70,8 +70,10 @@ class QueryBoardController(
     @GetMapping("/{boardType}")
     fun getBoardByType(
         @PathVariable boardType: String,
+        @RequestParam(required = false) lastId: Long? = null,
+        @RequestParam(defaultValue = "10") pageSize: Int,
     ): ResponseDTO<List<QueryBoardResponseVO>> {
-        val boardList: List<QueryBoardResponseVO> = queryBoardService.readBoardByBoardType(boardType)
+        val boardList: List<QueryBoardResponseVO> = queryBoardService.readBoardByBoardType(boardType, lastId, pageSize)
 
 //        return ResponseDTO.ok(boardConverter.dtoToResponseVO(boardList))
         return ResponseDTO.ok(boardList)
@@ -95,8 +97,10 @@ class QueryBoardController(
     @PostMapping("/tag")
     fun getBoardByTag(
         @RequestBody boardTagList: List<String>,
+        @RequestParam(required = false) lastId: Long? = null,
+        @RequestParam(defaultValue = "10") pageSize: Int,
     ): ResponseDTO<List<QueryBoardResponseVO>> {
-        val boardList: List<QueryBoardResponseVO> = queryBoardService.readBoardByBoardTag(boardTagList)
+        val boardList: List<QueryBoardResponseVO> = queryBoardService.readBoardByBoardTag(boardTagList, lastId, pageSize)
 
         return ResponseDTO.ok(boardList)
     }

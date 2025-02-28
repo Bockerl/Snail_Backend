@@ -1,26 +1,26 @@
 package com.bockerl.snailmember.boardcommentlike.command.domain.repository
 
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.entity.BoardCommentLike
-import org.springframework.data.mongodb.repository.MongoRepository
+import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface BoardCommentLikeRepository : MongoRepository<BoardCommentLike, String> {
-    fun findMemberIdsByBoardId(boardId: String): List<BoardCommentLike>
-
-    fun findBoardIdsByMemberId(memberId: String): List<BoardCommentLike>
-
-    fun findByMemberIdAndBoardId(
-        memberId: String,
-        boardId: String,
-    ): BoardCommentLike?
+interface BoardCommentLikeRepository : JpaRepository<BoardCommentLike, Long> {
+//    fun findMemberIdsByBoardId(boardId: String): List<BoardCommentLike>
+//
+//    fun findBoardIdsByMemberId(memberId: String): List<BoardCommentLike>
+//
+//    fun findByMemberIdAndBoardId(
+//        memberId: String,
+//        boardId: String,
+//    ): BoardCommentLike?
 
     fun deleteByMemberIdAndBoardCommentId(
-        memberId: String,
-        boardCommentId: String,
+        memberId: Long,
+        boardCommentId: Long,
     )
-
-    fun countByBoardId(boardId: String): Long
-
-    fun countByMemberId(memberId: String): Long
+//
+//    fun countByBoardId(boardId: String): Long
+//
+//    fun countByMemberId(memberId: String): Long
 }

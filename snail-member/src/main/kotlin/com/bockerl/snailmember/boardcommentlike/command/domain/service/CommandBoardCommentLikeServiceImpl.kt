@@ -6,9 +6,11 @@ import com.bockerl.snailmember.boardcommentlike.command.application.service.Comm
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.entity.BoardCommentLike
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.enum.BoardCommentLikeActionType
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.event.BoardCommentLikeEvent
-import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.vo.response.CommandBoardCommentLikeMemberIdsResponseVO
 import com.bockerl.snailmember.boardcommentlike.command.domain.repository.BoardCommentLikeRepository
 import com.bockerl.snailmember.member.query.service.QueryMemberService
+import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.transaction.Transactional
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
@@ -22,6 +24,9 @@ class CommandBoardCommentLikeServiceImpl(
     private val queryBoardService: QueryBoardService,
     private val kafkaBoardCommentLikeTemplate: KafkaTemplate<String, BoardCommentLikeEvent>,
 ) : CommandBoardCommentLikeService {
+    private val logger = KotlinLogging.logger {}
+
+    @Transactional
     override fun createBoardCommentLike(commandBoardCommentLikeDTO: CommandBoardCommentLikeDTO) {
         // 설명. redis에서 board pk 기준 인덱스 설정 및 member pk 기준 인덱스 설정 할 것
         // 설명. 집합으로 각 인덱스 관리. cold data 분리를 위해 expire 설정(1일) -> 호출될 때 마다 갱신됨
@@ -50,10 +55,41 @@ class CommandBoardCommentLikeServiceImpl(
         kafkaBoardCommentLikeTemplate.send("board-comment-like-events", event)
     }
 
-    override fun createBoardCommentLikeEventList(boardCommentLikeList: List<BoardCommentLike>) {
-        boardCommentLikeRepository.saveAll(boardCommentLikeList)
+    @Transactional
+    override fun createBoardCommentLikeEventList(boardCommentLikeList: List<CommandBoardCommentLikeDTO>) {
+        try {
+            // 설명. entity형으로 변환은 필요하다.
+            val boardCommentLikeListEntities =
+                boardCommentLikeList.map { boardLike ->
+                    BoardCommentLike(
+                        boardId = extractDigits(boardLike.boardId),
+                        memberId = extractDigits(boardLike.memberId),
+                        boardCommentId = extractDigits(boardLike.boardCommentId),
+                    )
+                }
+
+            boardCommentLikeRepository.saveAll(boardCommentLikeListEntities)
+        } catch (ex: DataIntegrityViolationException) {
+            logger.error("Bulk insert 실패: ${ex.message}. 개별 처리 시도합니다.")
+            boardCommentLikeList.forEach { event ->
+                val boardCommentLikeEntity =
+                    BoardCommentLike(
+                        boardId = extractDigits(event.boardId),
+                        memberId = extractDigits(event.memberId),
+                        boardCommentId = extractDigits(event.boardCommentId),
+                    )
+                try {
+                    boardCommentLikeRepository.save(boardCommentLikeEntity)
+                } catch (innerEx: DataIntegrityViolationException) {
+                    logger.error { "개별 처리 실패(duplicate key 처리): $event, $innerEx" }
+                } catch (otherEx: Exception) {
+                    logger.error { "개별 처리 실패: $event, $otherEx" }
+                }
+            }
+        }
     }
 
+    @Transactional
     override fun deleteBoardCommentLike(commandBoardCommentLikeDTO: CommandBoardCommentLikeDTO) {
         // 설명. 1. board pk 기준 인덱스
         redisTemplate
@@ -77,76 +113,82 @@ class CommandBoardCommentLikeServiceImpl(
         kafkaBoardCommentLikeTemplate.send("board-comment-like-events", event)
     }
 
-    override fun deleteBoardCommentLikeEvent(boardCommentLike: BoardCommentLike) {
-        boardCommentLikeRepository.deleteByMemberIdAndBoardCommentId(boardCommentLike.memberId, boardCommentLike.boardCommentId)
+    @Transactional
+    override fun deleteBoardCommentLikeEvent(commandBoardCommentLikeDTO: CommandBoardCommentLikeDTO) {
+        boardCommentLikeRepository.deleteByMemberIdAndBoardCommentId(
+            extractDigits(commandBoardCommentLikeDTO.memberId),
+            extractDigits(commandBoardCommentLikeDTO.boardCommentId),
+        )
     }
 
-    override fun readBoardCommentLike(boardCommentId: String): List<CommandBoardCommentLikeMemberIdsResponseVO> {
-        val recentLikes =
-            redisTemplate.opsForSet().members("board-comment-like:$boardCommentId")?.map { it as String } ?: emptyList()
-        // 설명. redis에 데이터가 충분하지 않을 경우 mongodb에서 추가 조회
-        return if (needAdditionalBoard(boardCommentId, recentLikes.size.toLong())) {
-            // 설명. memberId 명단 뽑기
-            val dbMemberIds = boardCommentLikeRepository.findMemberIdsByBoardId(boardCommentId).map { it.memberId }
-            // 설명. 캐시에 저장 하기
-            redisTemplate.opsForSet().add("board-commet-like:$boardCommentId", *dbMemberIds.toTypedArray())
-            redisTemplate.expire("board-comment-like:$boardCommentId", Duration.ofDays(1))
-            // 설명. memeberId를 통해서 member 정보들 list 뽑기
-            val members = (dbMemberIds + recentLikes).map { queryMemberService.selectMemberByMemberId(it) }
-            // 설명. ResponseVO에 담아주기(memebers list의 각 인덱스의 memberNickname, memberId, memberProfile를 넣은 vo list
-            members.map { member ->
-                CommandBoardCommentLikeMemberIdsResponseVO(
-                    memberNickname = member.memberNickName,
-                    memberId = member.memberId,
-                    memberPhoto = member.memberPhoto,
-                )
-            }
-        } else {
-            // 설명. redis에서의 데이터도 충분한 경우
-            val members = recentLikes.map { queryMemberService.selectMemberByMemberId(it) }
+//    override fun readBoardCommentLike(boardCommentId: String): List<CommandBoardCommentLikeMemberIdsResponseVO> {
+//        val recentLikes =
+//            redisTemplate.opsForSet().members("board-comment-like:$boardCommentId")?.map { it as String } ?: emptyList()
+//        // 설명. redis에 데이터가 충분하지 않을 경우 mongodb에서 추가 조회
+//        return if (needAdditionalBoard(boardCommentId, recentLikes.size.toLong())) {
+//            // 설명. memberId 명단 뽑기
+//            val dbMemberIds = boardCommentLikeRepository.findMemberIdsByBoardId(boardCommentId).map { it.memberId }
+//            // 설명. 캐시에 저장 하기
+//            redisTemplate.opsForSet().add("board-commet-like:$boardCommentId", *dbMemberIds.toTypedArray())
+//            redisTemplate.expire("board-comment-like:$boardCommentId", Duration.ofDays(1))
+//            // 설명. memeberId를 통해서 member 정보들 list 뽑기
+//            val members = (dbMemberIds + recentLikes).map { queryMemberService.selectMemberByMemberId(it) }
+//            // 설명. ResponseVO에 담아주기(memebers list의 각 인덱스의 memberNickname, memberId, memberProfile를 넣은 vo list
+//            members.map { member ->
+//                CommandBoardCommentLikeMemberIdsResponseVO(
+//                    memberNickname = member.memberNickName,
+//                    memberId = member.memberId,
+//                    memberPhoto = member.memberPhoto,
+//                )
+//            }
+//        } else {
+//            // 설명. redis에서의 데이터도 충분한 경우
+//            val members = recentLikes.map { queryMemberService.selectMemberByMemberId(it) }
+//
+//            members.map { member ->
+//                CommandBoardCommentLikeMemberIdsResponseVO(
+//                    memberNickname = member.memberNickName,
+//                    memberId = member.memberId,
+//                    memberPhoto = member.memberPhoto,
+//                )
+//            }
+//        }
+//    }
+//
+//    override fun readBoardCommentLikeCount(boardCommentId: String): Long {
+//        // 설명. 스크롤 할 때 보일 총 좋아요 수..
+//        val redisCount = redisTemplate.opsForSet().size("board-comment-like:$boardCommentId") ?: 0
+//
+//        return if (needAdditionalBoard(boardCommentId, redisCount)) {
+//            redisCount + readDBLikeCountByBoardId(boardCommentId)
+//        } else {
+//            redisCount
+//        }
+//    }
 
-            members.map { member ->
-                CommandBoardCommentLikeMemberIdsResponseVO(
-                    memberNickname = member.memberNickName,
-                    memberId = member.memberId,
-                    memberPhoto = member.memberPhoto,
-                )
-            }
-        }
-    }
+//    private fun needAdditionalBoard(
+//        boardId: String,
+//        redisDataSize: Long,
+//    ): Boolean {
+//        val totalLikeCount = readDBLikeCountByBoardId(boardId)
+//        val threshold = totalLikeCount * 0.9
+//
+//        return redisDataSize <= threshold
+//    }
+//
+//    private fun needAdditionalMember(
+//        memberId: String,
+//        redisDataSize: Long,
+//    ): Boolean {
+//        val totalLikeCount = readDBLikeCountByMemberId(memberId)
+//        val threshold = totalLikeCount * 0.9
+//
+//        return redisDataSize <= threshold
+//    }
 
-    override fun readBoardCommentLikeCount(boardCommentId: String): Long {
-        // 설명. 스크롤 할 때 보일 총 좋아요 수..
-        val redisCount = redisTemplate.opsForSet().size("board-comment-like:$boardCommentId") ?: 0
+//    private fun readDBLikeCountByMemberId(memberId: String): Long = boardCommentLikeRepository.countByMemberId(memberId)
+//
+//    private fun readDBLikeCountByBoardId(boardId: String): Long = boardCommentLikeRepository.countByBoardId(boardId)
 
-        return if (needAdditionalBoard(boardCommentId, redisCount)) {
-            redisCount + readDBLikeCountByBoardId(boardCommentId)
-        } else {
-            redisCount
-        }
-    }
-
-    private fun needAdditionalBoard(
-        boardId: String,
-        redisDataSize: Long,
-    ): Boolean {
-        val totalLikeCount = readDBLikeCountByBoardId(boardId)
-        val threshold = totalLikeCount * 0.9
-
-        return redisDataSize <= threshold
-    }
-
-    private fun needAdditionalMember(
-        memberId: String,
-        redisDataSize: Long,
-    ): Boolean {
-        val totalLikeCount = readDBLikeCountByMemberId(memberId)
-        val threshold = totalLikeCount * 0.9
-
-        return redisDataSize <= threshold
-    }
-
-    private fun readDBLikeCountByMemberId(memberId: String): Long = boardCommentLikeRepository.countByMemberId(memberId)
-
-    private fun readDBLikeCountByBoardId(boardId: String): Long = boardCommentLikeRepository.countByBoardId(boardId)
+    private fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
 }

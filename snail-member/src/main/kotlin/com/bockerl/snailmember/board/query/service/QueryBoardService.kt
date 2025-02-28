@@ -10,7 +10,15 @@ import com.bockerl.snailmember.board.query.vo.QueryBoardResponseVO
 interface QueryBoardService {
     fun readBoardByBoardId(boardId: String): QueryBoardResponseVO
 
-    fun readBoardByBoardType(boardType: String): List<QueryBoardResponseVO>
+    fun readBoardByBoardType(
+        boardType: String,
+        lastId: Long?,
+        pageSize: Int,
+    ): List<QueryBoardResponseVO>
 
-    fun readBoardByBoardTag(boardTagList: List<String>): List<QueryBoardResponseVO>
+    fun readBoardByBoardTag(
+        boardTagList: List<String>,
+        lastId: Long?,
+        pageSize: Int,
+    ): List<QueryBoardResponseVO>
 }

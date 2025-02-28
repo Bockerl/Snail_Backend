@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bockerl.snailmember.boardcommentlike.query.repository.BoardCommentLikeMapper">
+
+    <select id="selectCountByBoardCommentId" resultType="Long">
+        SELECT
+            count(board_comment_like_id)
+          FROM
+            board_comment_like
+         WHERE
+            board_comment_id = #{boardCommentId}
+    </select>
+</mapper>

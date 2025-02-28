@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bockerl.snailmember.boardlike.query.repository.BoardLikeMapper">
+    <resultMap id="boardLikeResultMap" type="com.bockerl.snailmember.boardlike.query.dto.QueryBoardLikeDTO">
+        <result property="boardLikeId" column="board_like_id"/>
+        <result property="memberId" column="member_id"/>
+        <result property="boardId" column="board_id"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectMemberIdsByBoardId" resultMap="boardLikeResultMap">
+        SELECT
+        board_like_id,
+        member_id,
+        board_id,
+        created_at,
+        updated_at,
+        FROM
+        board_like
+        <where>
+            <if test="lastId != null">
+                board_like_id &lt; #{lastId} and
+            </if>
+            board_id = #{boardId}
+        </where>
+        ORDER BY board_like_id DESC
+        LIMIT #{pageSize}
+    </select>
+
+    <select id="selectBoardIdsByMemberId" resultMap="boardLikeResultMap">
+        SELECT
+        board_like_id,
+        member_id,
+        board_id,
+        created_at,
+        updated_at,
+        FROM
+        board_like
+        <where>
+            <if test="lastId != null">
+                board_like_id &lt; #{lastId} and
+            </if>
+            member_id = #{memberId}
+        </where>
+        ORDER BY board_like_id DESC
+        LIMIT #{pageSize}
+    </select>
+
+    <select id="selectByMemberIdAndBoardId" resultMap="boardLikeResultMap">
+        SELECT
+        board_like_id,
+        member_id,
+        board_id,
+        created_at,
+        updated_at,
+        FROM
+        board_like
+        <where>
+            board_id = #{boardId} and
+            member_id = #{memberId} and
+            active = true
+        </where>
+    </select>
+
+    <select id="selectCountByMemberId" resultType="Long">
+        SELECT
+            count(board_like_id)
+          FROM
+            board_comment
+        <where>
+            member_id = #{memberId} and
+            active = true
+        </where>
+    </select>
+
+    <select id="selectCountByBoardId" resultType="Long">
+        SELECT
+            count(board_like_id)
+          FROM
+            board_comment
+        <where>
+            board_id = #{boardId} and
+            active = true
+        </where>
+    </select>
+</mapper>

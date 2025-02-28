@@ -50,6 +50,7 @@ enum class ErrorCode(val code: Int, val httpStatus: HttpStatus, val message: Str
     ACCESS_DENIED(40301, HttpStatus.FORBIDDEN, "접근 권한이 거부되었습니다."),
 
     // 404: 리소스를 찾을 수 없음 (Not Found)
+    NOT_FOUND_ENV(40400, HttpStatus.NOT_FOUND, "환경 변수가 발견되지 않았습니다."),
     NOT_FOUND_MEMBER(40401, HttpStatus.NOT_FOUND, "회원이 존재하지 않습니다."),
     NOT_FOUND_SIDO(40402, HttpStatus.NOT_FOUND, "존재하지 않는 시도(Sido)입니다."),
     NOT_FOUND_SIGG(40403, HttpStatus.NOT_FOUND, "존재하지 않는 시군구(Sigg)입니다."),

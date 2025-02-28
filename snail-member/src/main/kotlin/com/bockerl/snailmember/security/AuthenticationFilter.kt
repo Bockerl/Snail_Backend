@@ -4,6 +4,7 @@ import com.bockerl.snailmember.common.ResponseDTO
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.service.CommandMemberService
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.MemberStatus
 import com.bockerl.snailmember.member.command.domain.aggregate.vo.request.MemberEmailLoginRequestVO
 import com.bockerl.snailmember.member.query.service.QueryMemberService
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -13,10 +14,12 @@ import io.jsonwebtoken.SignatureAlgorithm
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.env.Environment
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseCookie
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.LockedException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
@@ -29,14 +32,8 @@ class AuthenticationFilter(
     private val queryMemberService: QueryMemberService,
     private val commandMemberService: CommandMemberService,
     private val redisTemplate: RedisTemplate<String, String>,
-    @Value("\${TOKEN_SECRET}")
-    private val tokenSecret: String,
-    @Value("\${ACCESS_TOKEN_EXPIRATION}")
-    private val accessTokenExpiration: Long,
-    @Value("\${REFRESH_TOKEN_EXPIRATION}")
-    private val refreshTokenExpiration: Long,
-    @Value("\${TOKEN_ISSUER}")
-    private val tokenIssuer: String,
+    private val authenticationManager: AuthenticationManager,
+    private val environment: Environment,
 ) : UsernamePasswordAuthenticationFilter() {
     private val log = KotlinLogging.logger {}
 
@@ -49,6 +46,13 @@ class AuthenticationFilter(
             log.info { "credential 객체 정보: $credential" }
 
             val member = queryMemberService.loadUserByUsername(credential.memberEmail) as CustomMember
+
+            // 권한 검사
+            val authority = member.authorities.firstOrNull()?.authority
+            if (authority == MemberStatus.BLACKLIST.toString()) {
+                log.info { "블랙리스트 멤버 로그인, email: ${member.memberEmail}" }
+                throw LockedException("이 계정은 현재 사용이 제한되어 있습니다.")
+            }
 
             // 인증 토큰 생성
             val authToken = UsernamePasswordAuthenticationToken(
@@ -72,6 +76,20 @@ class AuthenticationFilter(
         authResult: Authentication,
     ) {
         log.info { "Authentication 인증 객체 정보: $authResult" }
+
+        // 환경 변수 관리
+        val accessTokenExpiration =
+            environment.getProperty("ACCESS_TOKEN_EXPIRATION")?.toLong()
+                ?: throw CommonException(ErrorCode.NOT_FOUND_ENV)
+        val refreshTokenExpiration =
+            environment.getProperty("REFRESH_TOKEN_EXPIRATION")?.toLong()
+                ?: throw CommonException(ErrorCode.NOT_FOUND_ENV)
+        val tokenIssuer =
+            environment.getProperty("TOKEN_ISSUER")
+                ?: throw CommonException(ErrorCode.NOT_FOUND_ENV)
+        val tokenSecret =
+            environment.getProperty("TOKEN_SECRET")
+                ?: throw CommonException(ErrorCode.NOT_FOUND_ENV)
 
         val customMember = authResult.credentials as CustomMember
         val roles = authResult.authorities.map { it.authority }

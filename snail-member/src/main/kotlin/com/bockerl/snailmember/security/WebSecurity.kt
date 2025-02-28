@@ -73,7 +73,7 @@ class WebSecurity(
     }
 
     @Bean
-    fun passwordEncoder() = BCryptPasswordEncoder(16)
+    fun passwordEncoder() = BCryptPasswordEncoder(10)
 
     fun getAuthenticationFilter(authenticationManager: AuthenticationManager): AuthenticationFilter {
         val authenticationFilter = AuthenticationFilter(

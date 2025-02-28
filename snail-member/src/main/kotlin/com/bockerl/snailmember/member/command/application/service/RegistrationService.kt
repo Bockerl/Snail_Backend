@@ -13,7 +13,7 @@ interface RegistrationService {
 
     fun verifyPhoneCode(requestDTO: PhoneVerifyRequestDTO): String
 
-    fun createPhoneRefreshCode(redisId: String)
+    fun createPhoneRefreshCode(requestDTO: PhoneRequestDTO): String
 
     fun postPassword(requestDTO: PasswordRequestDTO): String
 

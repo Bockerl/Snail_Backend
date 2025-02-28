@@ -14,6 +14,4 @@ data class CommandFileRequestVO(
     val fileTargetId: String,
     @field:Schema(description = "회원 번호", example = "MEM-00000001", type = "String")
     val memberId: String,
-){
-
-}
+)

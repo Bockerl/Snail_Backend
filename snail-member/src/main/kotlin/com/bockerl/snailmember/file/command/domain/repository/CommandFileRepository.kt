@@ -14,7 +14,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface CommandFileRepository : JpaRepository<File, Long> {
-
     @Query("SELECT f FROM File f WHERE f.active = true and f.fileTargetType = :fileTargetType and f.fileTargetId = :fileTargetId")
     fun findByFileTargetTypeAndFileTargetId(
         fileTargetType: FileTargetType?,
@@ -22,7 +21,9 @@ interface CommandFileRepository : JpaRepository<File, Long> {
     ): List<File>
 
     @Modifying
-    @Query("UPDATE File f SET f.active = false, f.fileUrl = '' WHERE f.fileTargetType = :fileTargetType and f.fileTargetId = :fileTargetId and f.active = true")
+    @Query(
+        "UPDATE File f SET f.active = false, f.fileUrl = '' WHERE f.fileTargetType = :fileTargetType and f.fileTargetId = :fileTargetId and f.active = true",
+    )
     fun updateActiveAndFileUrlByFileTargetIdAndFileTargetType(
         @Param("fileTargetId") fileTargetId: Long?,
         @Param("fileTargetType") fileTargetType: FileTargetType?,
@@ -30,14 +31,9 @@ interface CommandFileRepository : JpaRepository<File, Long> {
 
     @Modifying
     @Query("UPDATE File f SET f.active = false, f.fileUrl = '' WHERE f.fileId = :fileId and f.active = true")
-    fun updateActiveAndFileUrlByFileId(
-        fileId: Long?,
-    )
+    fun updateActiveAndFileUrlByFileId(fileId: Long?)
 
     @Modifying
     @Query("UPDATE File f SET f.active = false, f.fileUrl = '' WHERE f.active= true and f.fileId in :deletedFileIds")
-    fun updateActiveAndFileUrlByDeletedFileIds(
-        deletedFileIds: List<Long>?,
-    )
-
+    fun updateActiveAndFileUrlByDeletedFileIds(deletedFileIds: List<Long>?)
 }

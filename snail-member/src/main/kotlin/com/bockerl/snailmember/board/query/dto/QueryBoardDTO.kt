@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 
 data class QueryBoardDTO(
     @field:Schema(description = "게시글 고유 번호(PK)", example = "1", type = "Long")
-    val boardId: Long? = null,
+    val boardId: Long,
     @field:Schema(description = "게시글 내용", example = "달팽이 좋아요", type = "String")
     val boardContents: String? = null,
     @field:Schema(description = "게시글 타입", example = "FREE", type = "String")

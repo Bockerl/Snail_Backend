@@ -83,24 +83,24 @@ class CommandBoardCommentLikeController(
         return ResponseDTO.ok(null)
     }
 
-    @Operation(
-        summary = "게시글 댓글 좋아요 수 조회",
-        description =
-            "게시글 댓글 pk로 게시글 좋아요 수를 조회합니다.",
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "게시글 댓글 좋아요 수 조회 성공",
-                content = [
-                    Content(mediaType = "application/json", schema = Schema(implementation = ResponseDTO::class)),
-                ],
-            ),
-        ],
-    )
-    @GetMapping("count/{boardId}")
-    fun getBoardCommentLikeCount(
-        @PathVariable boardId: String,
-    ): ResponseDTO<*> = ResponseDTO.ok(commandBoardCommentLikeService.readBoardCommentLikeCount(boardId))
+//    @Operation(
+//        summary = "게시글 댓글 좋아요 수 조회",
+//        description =
+//            "게시글 댓글 pk로 게시글 좋아요 수를 조회합니다.",
+//    )
+//    @ApiResponses(
+//        value = [
+//            ApiResponse(
+//                responseCode = "200",
+//                description = "게시글 댓글 좋아요 수 조회 성공",
+//                content = [
+//                    Content(mediaType = "application/json", schema = Schema(implementation = ResponseDTO::class)),
+//                ],
+//            ),
+//        ],
+//    )
+//    @GetMapping("count/{boardId}")
+//    fun getBoardCommentLikeCount(
+//        @PathVariable boardId: String,
+//    ): ResponseDTO<*> = ResponseDTO.ok(commandBoardCommentLikeService.readBoardCommentLikeCount(boardId))
 }

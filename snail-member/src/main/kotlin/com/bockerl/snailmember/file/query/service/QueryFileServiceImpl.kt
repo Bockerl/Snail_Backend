@@ -32,8 +32,6 @@ class QueryFileServiceImpl(
 
         val fileDTOList = fileList.map { file -> dtoToResponseVO(file) }
 
-        logger.info { "읽혔습니다:: $fileDTOList files read" }
-
         return fileDTOList
     }
 

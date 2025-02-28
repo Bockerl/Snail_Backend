@@ -19,6 +19,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.*
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 
 class RegistrationServiceImplTests :
     BehaviorSpec({
@@ -27,6 +28,7 @@ class RegistrationServiceImplTests :
         val tempRepository = mockk<TempMemberRepository>()
         val memberRepository = mockk<MemberRepository>()
         val activityAreaRepository = mockk<ActivityAreaRepository>()
+        val bcryptPasswordEncoder = mockk<BCryptPasswordEncoder>()
 
         // test 서비스 설정
         val registrationService = RegistrationServiceImpl(
@@ -34,12 +36,14 @@ class RegistrationServiceImplTests :
             tempRepository,
             memberRepository = memberRepository,
             activityAreaRepository = activityAreaRepository,
+            bcryptPasswordEncoder = bcryptPasswordEncoder,
         )
 
         // 1. 회원가입 초기화 테스트
         Given("새로운 사용자가 이메일 회원가입을 하려고 할 때") {
             val request = createEmailRequestDTO()
             every { tempRepository.save(any()) } returns TEST_REDIS_ID
+            every { memberRepository.findMemberByMemberEmail(request.memberEmail) } returns null
             every { authService.createEmailVerificationCode(TEST_EMAIL) } just Runs
 
             When("유효한 이메일과 닉네임으로 회원가입 요청을 하면") {
@@ -64,6 +68,18 @@ class RegistrationServiceImplTests :
 
                 Then("이메일 인증코드가 생성된다.") {
                     verify { authService.createEmailVerificationCode(TEST_EMAIL) }
+                }
+            }
+
+            When("이미 존재하는 이메일로 회원가입을 요청하면") {
+                val existingMember = createMember(memberEmail = TEST_EMAIL)
+                every { memberRepository.findMemberByMemberEmail(request.memberEmail) } returns existingMember
+
+                Then("이미 존재하는 회원 예외를 반환한다.") {
+                    val exception = shouldThrow<CommonException> {
+                        registrationService.initiateRegistration(request)
+                    }
+                    exception.errorCode shouldBe ErrorCode.EXIST_USER
                 }
             }
         }
@@ -353,6 +369,7 @@ class RegistrationServiceImplTests :
 
             When("활동지역을 등록하고 회원가입을 완료하면") {
                 every { tempRepository.find(request.redisId) } returns tempMember
+                every { bcryptPasswordEncoder.encode(any()) } returns TEST_PASSWORD
                 every { memberRepository.save(capture(memberSlot)) } answers {
                     memberSlot.captured.apply { memberId = 1L }
                 }

@@ -7,9 +7,11 @@ import com.bockerl.snailmember.member.command.application.dto.request.PasswordRe
 import com.bockerl.snailmember.member.command.application.dto.request.PhoneRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.PhoneVerifyRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.response.KaKaoTokenResponseDTO
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.*
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.SignUpStep
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.TempMember
 import java.sql.Timestamp
+import java.time.LocalDate
 
 const val TEST_EMAIL = "test@test.com"
 const val TEST_NICKNAME = "testUser"
@@ -31,6 +33,29 @@ const val TEST_TOKEN_TYPE = "test-token"
 const val TEST_ACCESS_TOKEN = "test-access-token"
 const val TEST_REFRESH_TOKEN = "test-refresh-token"
 const val TEST_ID_TOKEN = "test-id-token"
+
+fun createMember(
+    memberId: Long = 1L,
+    memberEmail: String = TEST_EMAIL,
+    memberPhone: String = TEST_PHONE,
+    memberPassword: String = TEST_PASSWORD,
+    memberNickname: String = TEST_NICKNAME,
+    memberStatus: MemberStatus = MemberStatus.USER,
+): Member = Member(
+    memberId = memberId,
+    memberEmail = memberEmail,
+    memberPhoneNumber = memberPhone,
+    memberPassword = memberPassword,
+    memberBirth = LocalDate.now(),
+    memberNickName = memberNickname,
+    memberStatus = memberStatus,
+    memberPhoto = "default",
+    memberGender = Gender.MALE,
+    memberLanguage = Language.KOR,
+    memberRegion = "default",
+    signupPath = SignUpPath.EMAIL,
+    selfIntroduction = "default",
+)
 
 fun createTempMember(
     redisId: String = TEST_REDIS_ID,

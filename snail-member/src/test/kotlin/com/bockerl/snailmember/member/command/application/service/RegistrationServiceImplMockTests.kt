@@ -7,7 +7,6 @@ import com.bockerl.snailmember.area.command.domain.aggregate.entity.AreaType
 import com.bockerl.snailmember.area.command.domain.repository.ActivityAreaRepository
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
-import com.bockerl.snailmember.config.TestConfiguration
 import com.bockerl.snailmember.config.TestSupport
 import com.bockerl.snailmember.member.command.application.dto.request.*
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.Member
@@ -19,26 +18,29 @@ import com.bockerl.snailmember.member.command.domain.repository.TempMemberReposi
 import com.bockerl.snailmember.member.command.domain.service.RegistrationServiceImpl
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.*
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.context.annotation.Import
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.sql.Timestamp
 
-@Import(TestConfiguration::class)
-@SpringBootTest
-class RegistrationServiceImplMockBeanTests : TestSupport() {
-    @MockBean
+@ExtendWith(MockitoExtension::class)
+class RegistrationServiceImplMockTests : TestSupport() {
+    @Mock
     private lateinit var tempMemberRepository: TempMemberRepository
 
-    @MockBean
+    @Mock
     private lateinit var authService: AuthService
 
-    @MockBean
+    @Mock
     private lateinit var memberRepository: MemberRepository
 
-    @MockBean
+    @Mock
     private lateinit var activityAreaRepository: ActivityAreaRepository
+
+    @Mock
+    private lateinit var bcryptPasswordEncoder: BCryptPasswordEncoder
 
     private lateinit var registrationService: RegistrationService
 
@@ -49,6 +51,7 @@ class RegistrationServiceImplMockBeanTests : TestSupport() {
             tempMemberRepository,
             memberRepository,
             activityAreaRepository,
+            bcryptPasswordEncoder,
         )
     }
 
@@ -419,6 +422,7 @@ class RegistrationServiceImplMockBeanTests : TestSupport() {
                     signUpStep = SignUpStep.PASSWORD_VERIFIED,
                 )
             whenever(tempMemberRepository.find(TEST_REDIS_ID)).thenReturn(tempMember)
+            whenever(bcryptPasswordEncoder.encode(any())).thenAnswer { TEST_PASSWORD }
             whenever(memberRepository.save(any<Member>())).thenAnswer { invocation ->
                 val newMember = invocation.getArgument<Member>(0)
                 newMember.apply { memberId = 1L }

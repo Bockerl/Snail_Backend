@@ -2,7 +2,7 @@ package com.bockerl.snailmember.infrastructure.event.consumer
 
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.event.BoardLikeEvent
 import com.bockerl.snailmember.boardlike.command.domain.repository.BoardLikeRepository
-import com.bockerl.snailmember.infrastructure.event.handler.LikeEventHandler
+import com.bockerl.snailmember.infrastructure.event.processor.LikeEventProcessor
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
 import org.springframework.kafka.annotation.KafkaListener
@@ -15,7 +15,8 @@ import org.springframework.stereotype.Service
 @Service
 class LikeEventConsumerImpl(
     private val boardLikeRepository: BoardLikeRepository,
-    private val likeEventHandler: LikeEventHandler,
+    private val likeEventProcessor: LikeEventProcessor,
+//    private val likeEventHandler: LikeEventHandler,
 //    @Value("\${spring.kafka.consumer.group-id}") private val groupId: String,
 ) : LikeEventConsumer {
     private val logger = KotlinLogging.logger {}
@@ -36,7 +37,9 @@ class LikeEventConsumerImpl(
         logger.info { "received header: $partition" }
         // 설명. 멱등성 보장을 위한 try-catch문
         try {
-            likeEventHandler.handle(event)
+//            likeEventHandler.handle(event)
+            // 직접 LikeEventHandler를 호출하는 대신, 재시도 정책이 적용된 프로세서를 호출합니다.
+            likeEventProcessor.process(event)
             // 설명. 오프셋 수동 커밋
             acknowledgment.acknowledge()
         } catch (e: Exception) {

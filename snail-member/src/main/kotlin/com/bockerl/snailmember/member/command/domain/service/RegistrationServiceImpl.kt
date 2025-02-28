@@ -134,8 +134,10 @@ class RegistrationServiceImpl(
 
     // 3-1. 휴대폰 인증 코드 재요청
     @Transactional
-    override fun createPhoneRefreshCode(redisId: String) {
+    override fun createPhoneRefreshCode(requestDTO: PhoneRequestDTO): String {
         logger.info { "휴대폰 인증 코드 재요청 시작" }
+        val redisId = requestDTO.redisId
+        logger.info { "휴대폰 인증 시작 - redisId: $redisId" }
         val tempMember = tempMemberRepository.find(redisId)
             ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
         logger.info { "redis에서 조회된 tempMember: $tempMember" }
@@ -144,6 +146,8 @@ class RegistrationServiceImpl(
             throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
         }
         val code = authService.createPhoneVerificationCode(tempMember.phoneNumber)
+        logger.info { "새로 재생성된 핸드폰 인증 코드: $code" }
+        return code
     }
 
     // 4. 휴대폰 인증 요청

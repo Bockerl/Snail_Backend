@@ -46,6 +46,7 @@ class AuthenticationFilter(
             log.info { "credential 객체 정보: $credential" }
 
             val member = queryMemberService.loadUserByUsername(credential.memberEmail) as CustomMember
+            log.info { "mail로 조회된 회원 정보(CustomUser): $member" }
 
             // 권한 검사
             val authority = member.authorities.firstOrNull()?.authority
@@ -56,8 +57,8 @@ class AuthenticationFilter(
 
             // 인증 토큰 생성
             val authToken = UsernamePasswordAuthenticationToken(
-                member,
-                credential,
+                member.memberEmail,
+                credential.memberPassword,
                 member.authorities,
             )
             log.info { "생성된 인증 토큰: $authToken" }
@@ -91,7 +92,7 @@ class AuthenticationFilter(
             environment.getProperty("TOKEN_SECRET")
                 ?: throw CommonException(ErrorCode.NOT_FOUND_ENV)
 
-        val customMember = authResult.credentials as CustomMember
+        val customMember = authResult.principal as CustomMember
         val roles = authResult.authorities.map { it.authority }
         val accessExpiration = System.currentTimeMillis() + accessTokenExpiration
         val refreshExpiration = System.currentTimeMillis() + refreshTokenExpiration

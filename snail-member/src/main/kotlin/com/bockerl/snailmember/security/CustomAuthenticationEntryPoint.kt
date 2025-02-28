@@ -3,8 +3,8 @@ package com.bockerl.snailmember.security
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.security.authentication.AccountStatusException
 import org.springframework.security.authentication.BadCredentialsException
+import org.springframework.security.authentication.LockedException
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.stereotype.Component
@@ -19,7 +19,7 @@ class CustomAuthenticationEntryPoint : AuthenticationEntryPoint {
     ) {
         val (statusCode, message) = when (authException) {
             // 블랙리스트
-            is AccountStatusException -> HttpServletResponse.SC_FORBIDDEN to "이 계정은 현재 사용이 제한되어 있습니다."
+            is LockedException -> HttpServletResponse.SC_FORBIDDEN to authException.message
             // 잘못된 아이디 비밀번호
             is BadCredentialsException -> HttpServletResponse.SC_UNAUTHORIZED to "아이디 또는 비밀번호가 일치하지 않습니다."
             // 인증 실패

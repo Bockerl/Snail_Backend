@@ -12,7 +12,7 @@ import org.hibernate.annotations.UpdateTimestamp
 // @CompoundIndex(name = "board-like-id:index", def = "{'boardId': 1, 'memberId': 1}", unique = true)
 @Entity
 // 설명. 복합키 인덱스도 설정 및 복합키 unique로 설정해서 중복 삽입 시 예외 발생
-@Table(name = "Board-like", indexes = [Index(name = "board_like_member_board", columnList = "memberId, boardId", unique = true)])
+@Table(name = "board_like", indexes = [Index(name = "board_like_member_board", columnList = "memberId, boardId", unique = true)])
 data class BoardLike(
     @Id
     @GeneratedValue(
@@ -20,7 +20,7 @@ data class BoardLike(
         generator = "boa_lik_seq_generator", // 사용할 generator 이름
     )
     @SequenceGenerator(
-        name = "boa_like_seq_generator", // generator 이름
+        name = "boa_lik_seq_generator", // generator 이름
         sequenceName = "boa_lik", // db seq 이름
         allocationSize = 1, // seq 증가량 (추후에 성능에 따라 변경해야 할지도 모름)
     )

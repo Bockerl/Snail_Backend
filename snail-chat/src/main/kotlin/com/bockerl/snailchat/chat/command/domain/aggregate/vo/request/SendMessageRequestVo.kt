@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.v3.oas.annotations.media.Schema
 
 data class SendMessageRequestVo(
+    @field:Schema(description = "채팅방")
+    @JsonProperty("chatRoomId")
+    val chatRoomId: String,
     @field:Schema(description = "송신자")
     @JsonProperty("sender")
     val sender: String,

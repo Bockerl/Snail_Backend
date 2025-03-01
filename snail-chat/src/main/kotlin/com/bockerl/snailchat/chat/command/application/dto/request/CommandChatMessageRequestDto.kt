@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.media.Schema
 
 data class CommandChatMessageRequestDto(
     @field:Schema(description = "채팅방 번호", example = "1", type = "String")
-    @JsonProperty("roomId")
-    val roomId: String, // Dto는 데이터 전달하는 역할임으로, val(불변객체)로 선언
+    @JsonProperty("chatRoomId")
+    val chatRoomId: String, // Dto는 데이터 전달하는 역할임으로, val(불변객체)로 선언
     @field:Schema(description = "메시지 송신자", example = "Alice", type = "String")
     @JsonProperty("sender")
     val sender: String,

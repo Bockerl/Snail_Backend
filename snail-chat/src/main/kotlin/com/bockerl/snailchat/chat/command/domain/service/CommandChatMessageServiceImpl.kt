@@ -14,13 +14,13 @@ class CommandChatMessageServiceImpl(
 ) : CommandChatMessageService {
     // STOMP를 통한 메시지 전송
     override fun sendMessage(
-        roomId: String,
+        chatRoomId: String,
         updateMessageDto: CommandChatMessageRequestDto,
     ) {
         // 전송할 메시지 옮기기
         val chatMessage =
             ChatMessage(
-                chatRoomId = roomId,
+                chatRoomId = chatRoomId,
                 sender = updateMessageDto.sender,
                 message = updateMessageDto.message,
                 messageType = updateMessageDto.messageType,
@@ -28,9 +28,10 @@ class CommandChatMessageServiceImpl(
 
         // 전송할 메시지 DB에 저장
         val saveMessage = chatMessageRepository.save(chatMessage)
+
         println(saveMessage)
 
         // 해당 경로를 구독하고 있는 Client들에게 Message 전송
-        simpleMessagingTemplate.convertAndSend("/topic/message/$roomId", updateMessageDto)
+        simpleMessagingTemplate.convertAndSend("/topic/message/$chatRoomId", updateMessageDto)
     }
 }

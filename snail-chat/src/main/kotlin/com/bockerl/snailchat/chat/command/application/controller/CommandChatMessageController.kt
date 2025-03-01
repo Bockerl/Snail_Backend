@@ -61,14 +61,15 @@ class CommandChatMessageController(
             ),
         ],
     )
-    @MessageMapping("{roomId}")
+    @MessageMapping("{chatRoomId}")
     fun sendMessage(
-        @DestinationVariable roomId: String,
+        @DestinationVariable chatRoomId: String,
         sendMessageRequestVo: SendMessageRequestVo,
         simpleMessageHeaderAccessor: SimpMessageHeaderAccessor,
     ) {
+        val chatRoomId = sendMessageRequestVo.chatRoomId
         // Vo -> Dto
-        val commandChatMessageRequestDto = voToDtoConverter.sendMessageRequestVoToDto(sendMessageRequestVo, roomId)
+        val commandChatMessageRequestDto = voToDtoConverter.sendMessageRequestVoToDto(sendMessageRequestVo, chatRoomId)
 
         // messageType이 Enter일 경우에는 처음 등장이므로, Websocket의 세션에 정보 저장 (simpleMessageHeaderAccessor)
         val updateMessageDto =
@@ -76,7 +77,7 @@ class CommandChatMessageController(
                 CommandChatMessageType.ENTER -> {
                     simpleMessageHeaderAccessor.sessionAttributes?.apply {
                         put("username", commandChatMessageRequestDto.sender)
-                        put("roomId", commandChatMessageRequestDto.roomId)
+                        put("chatRoomId", commandChatMessageRequestDto.chatRoomId)
                     }
                     commandChatMessageRequestDto.copy(message = "${commandChatMessageRequestDto.sender}님이 입장하셨습니다.")
                 }
@@ -84,6 +85,6 @@ class CommandChatMessageController(
             }
 
         // 메시지 전송
-        commandChatMessageService.sendMessage(roomId, updateMessageDto)
+        commandChatMessageService.sendMessage(chatRoomId, updateMessageDto)
     }
 }

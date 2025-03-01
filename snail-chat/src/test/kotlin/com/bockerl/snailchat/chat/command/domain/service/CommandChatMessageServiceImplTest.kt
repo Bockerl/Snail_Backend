@@ -105,6 +105,8 @@ class CommandChatMessageServiceImplTest : TestSupport() {
             assertNotNull(receiveMessage, "메시지가 정상적으로 수신되지 않았습니다.")
             assertEquals("Alice", receiveMessage.sender)
             assertEquals("안녕하세요, Alice입니다.", receiveMessage.message)
+
+            session.disconnect()
         }
 
         @Test
@@ -141,13 +143,15 @@ class CommandChatMessageServiceImplTest : TestSupport() {
                 )
 
             // 잘못된 경로로 전송하여 예외 발생 검증
-            session.send("/chat/$roomId", messageDto)
+            session.send("/chattt/$roomId", messageDto)
 
             // 메시지 정상 전달 여부 확인
             val receiveMessage = messageQueue.poll(5, TimeUnit.SECONDS)
 
             // 메시지 전송 실패 검증
             assertNull(receiveMessage, "메시지가 잘못된 경로로 인해 수신되지 않아야 합니다.")
+
+            session.disconnect()
         }
     }
 

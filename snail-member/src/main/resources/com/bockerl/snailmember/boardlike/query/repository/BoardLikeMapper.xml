@@ -60,8 +60,7 @@
         board_like
         <where>
             board_id = #{boardId} and
-            member_id = #{memberId} and
-            active = true
+            member_id = #{memberId}
         </where>
     </select>
 
@@ -69,10 +68,9 @@
         SELECT
             count(board_like_id)
           FROM
-            board_comment
+            board_like
         <where>
-            member_id = #{memberId} and
-            active = true
+            member_id = #{memberId}
         </where>
     </select>
 
@@ -80,10 +78,9 @@
         SELECT
             count(board_like_id)
           FROM
-            board_comment
+            board_like
         <where>
-            board_id = #{boardId} and
-            active = true
+            board_id = #{boardId}
         </where>
     </select>
 </mapper>

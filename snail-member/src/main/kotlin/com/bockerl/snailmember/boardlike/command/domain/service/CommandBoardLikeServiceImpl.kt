@@ -17,11 +17,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
 import org.springframework.dao.DataIntegrityViolationException
-import org.springframework.data.redis.connection.RedisConnection
 import org.springframework.data.redis.connection.ReturnType
 import org.springframework.data.redis.core.RedisCallback
 import org.springframework.data.redis.core.RedisTemplate
-import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
 
@@ -31,7 +29,6 @@ class CommandBoardLikeServiceImpl(
     private val boardLikeRepository: BoardLikeRepository,
     private val queryMemberService: QueryMemberService,
     private val queryBoardService: QueryBoardService,
-    private val kafkaBoardLikeTemplate: KafkaTemplate<String, BoardLikeEvent>,
     private val outboxService: OutboxService,
     private val objectMapper: ObjectMapper,
 ) : CommandBoardLikeService {
@@ -41,20 +38,6 @@ class CommandBoardLikeServiceImpl(
     override fun createBoardLike(commandBoardLikeDTO: CommandBoardLikeDTO) {
         // 설명. redis에서 board pk 기준 인덱스 설정 및 member pk 기준 인덱스 설정 할 것
         // 설명. 집합으로 각 인덱스 관리. cold data 분리를 위해 expire 설정(1일) -> 호출될 때 마다 갱신됨
-
-        // 설명. 1. board pk 기준 인덱스
-//        redisTemplate
-//            .opsForSet()
-//            .add("board-like:${commandBoardLikeDTO.boardId}", commandBoardLikeDTO.memberId)
-//        redisTemplate.expire("board-like:${commandBoardLikeDTO.boardId}", Duration.ofDays(1))
-//
-//        redisTemplate.opsForValue().increment("board-like:count:${commandBoardLikeDTO.boardId}", 1)
-//
-//        // 설명. 2. member pk 기준 인덱스 (역 인덱스)
-//        redisTemplate
-//            .opsForSet()
-//            .add("board-like:${commandBoardLikeDTO.memberId}", commandBoardLikeDTO.boardId)
-//        redisTemplate.expire("board-like:${commandBoardLikeDTO.memberId}", Duration.ofDays(1))
 
         val boardSetKey = "board-like:${commandBoardLikeDTO.boardId}"
         val boardCountKey = "board-like:count:${commandBoardLikeDTO.boardId}"
@@ -166,16 +149,6 @@ class CommandBoardLikeServiceImpl(
 
     @Transactional
     override fun deleteBoardLike(commandBoardLikeDTO: CommandBoardLikeDTO) {
-        // 설명. 1. board pk 기준 인덱스
-//        redisTemplate
-//            .opsForSet()
-//            .remove("board-like:${commandBoardLikeDTO.boardId}", commandBoardLikeDTO.memberId)
-//
-//        // 설명. 2. member pk 기준 인덱스 (역 인덱스)
-//        redisTemplate
-//            .opsForSet()
-//            .remove("board-like:${commandBoardLikeDTO.memberId}", commandBoardLikeDTO.boardId)
-
         val boardSetKey = "board-like:${commandBoardLikeDTO.boardId}"
         val boardCountKey = "board-like:count:${commandBoardLikeDTO.boardId}"
         val memberSetKey = "board-like:${commandBoardLikeDTO.memberId}" // 역인덱스: 멤버별 좋아요 board 목록
@@ -214,8 +187,7 @@ class CommandBoardLikeServiceImpl(
 
         if (redisTemplate.execute(
                 RedisCallback<Long> { connection ->
-                    val nativeConnection = connection.nativeConnection as RedisConnection
-                    nativeConnection.eval(
+                    connection.eval(
                         luaScript.toByteArray(Charsets.UTF_8),
                         ReturnType.INTEGER,
                         keys.size,
@@ -223,7 +195,8 @@ class CommandBoardLikeServiceImpl(
                         *args.map { it.toByteArray(Charsets.UTF_8) }.toTypedArray(),
                     )
                 },
-            ) == 0L
+            )
+            == 0L
         ) {
             throw CommonException(ErrorCode.ALREADY_UNLIKED)
         }

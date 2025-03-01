@@ -20,7 +20,7 @@ class QueryBoardCommentLikeController(
     @Operation(
         summary = "게시글 댓글 좋아요 수 조회",
         description =
-            "게시글 댓글 pk로 게시글 좋아요 수를 조회합니다.",
+            "게시글 댓글 pk로 게시글 댓글 좋아요 수를 조회합니다.",
     )
     @ApiResponses(
         value = [
@@ -33,8 +33,8 @@ class QueryBoardCommentLikeController(
             ),
         ],
     )
-    @GetMapping("count/{boardId}")
+    @GetMapping("count/{boardCommentId}")
     fun getBoardCommentLikeCount(
-        @PathVariable boardId: String,
-    ): ResponseDTO<*> = ResponseDTO.ok(queryBoardCommentLikeService.readBoardCommentLikeCount(boardId))
+        @PathVariable boardCommentId: String,
+    ): ResponseDTO<*> = ResponseDTO.ok(queryBoardCommentLikeService.readBoardCommentLikeCount(boardCommentId))
 }

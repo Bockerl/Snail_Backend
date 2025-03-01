@@ -12,7 +12,7 @@ import org.hibernate.annotations.UpdateTimestamp
 // @CompoundIndex(name = "board-comment-like-id:index", def = "{'boardId': 1, 'memberId': 1}", unique = true)
 @Entity
 @Table(
-    name = "Board-comment-like",
+    name = "board_comment_like",
     indexes = [
         Index(
             name = "board_comment_like_member_board_comment",
@@ -25,11 +25,11 @@ data class BoardCommentLike(
     @Id
     @GeneratedValue(
         strategy = GenerationType.SEQUENCE,
-        generator = "boa_lik_seq_generator", // 사용할 generator 이름
+        generator = "boa_com_lik_seq_generator", // 사용할 generator 이름
     )
     @SequenceGenerator(
-        name = "boa_like_seq_generator", // generator 이름
-        sequenceName = "boa_lik", // db seq 이름
+        name = "boa_com_lik_seq_generator", // generator 이름
+        sequenceName = "boa_com_lik", // db seq 이름
         allocationSize = 1, // seq 증가량 (추후에 성능에 따라 변경해야 할지도 모름)
     )
     val boardCommentLikeId: Long? = null,

@@ -11,7 +11,8 @@ import org.hibernate.annotations.UpdateTimestamp
 // 설명. 복합키 인덱스 설정해서 중복 삽입 시 예외 발생 설정
 // @CompoundIndex(name = "board-like-id:index", def = "{'boardId': 1, 'memberId': 1}", unique = true)
 @Entity
-@Table(name = "Board-like")
+// 설명. 복합키 인덱스도 설정 및 복합키 unique로 설정해서 중복 삽입 시 예외 발생
+@Table(name = "Board-like", indexes = [Index(name = "board_like_member_board", columnList = "memberId, boardId", unique = true)])
 data class BoardLike(
     @Id
     @GeneratedValue(

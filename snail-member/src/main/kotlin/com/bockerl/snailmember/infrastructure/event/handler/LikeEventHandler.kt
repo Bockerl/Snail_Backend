@@ -28,7 +28,7 @@ class LikeEventHandler(
         when (event) {
             is BoardLikeEvent -> {
                 when (event.boardLikeActionType) {
-                    BoardLikeActionType.LIKE -> {
+                    BoardLikeActionType.CREATE -> {
                         val like = CommandBoardLikeDTO(memberId = event.memberId, boardId = event.boardId)
                         boardLikeBuffer.add(like)
                         if (boardLikeBuffer.size >= bufferSize) {
@@ -37,7 +37,7 @@ class LikeEventHandler(
                         }
                     }
 
-                    BoardLikeActionType.UNLIKE -> {
+                    BoardLikeActionType.DELETE -> {
                         commandBoardLikeService.deleteBoardLikeEvent(
                             CommandBoardLikeDTO(
                                 memberId = event.memberId,
@@ -50,7 +50,7 @@ class LikeEventHandler(
 
             is BoardCommentLikeEvent -> {
                 when (event.boardCommentLikeActionType) {
-                    BoardCommentLikeActionType.LIKE -> {
+                    BoardCommentLikeActionType.CREATE -> {
                         val like =
                             CommandBoardCommentLikeDTO(
                                 memberId = event.memberId,
@@ -64,7 +64,7 @@ class LikeEventHandler(
                         }
                     }
 
-                    BoardCommentLikeActionType.UNLIKE -> {
+                    BoardCommentLikeActionType.DELETE -> {
                         commandBoardCommentLikeService.deleteBoardCommentLikeEvent(
                             CommandBoardCommentLikeDTO(
                                 memberId = event.memberId,

@@ -11,7 +11,16 @@ import org.hibernate.annotations.UpdateTimestamp
 // 설명. 복합키 인덱스 설정해서 중복 삽입 시 예외 발생 설정
 // @CompoundIndex(name = "board-comment-like-id:index", def = "{'boardId': 1, 'memberId': 1}", unique = true)
 @Entity
-@Table(name = "Board-comment-like")
+@Table(
+    name = "Board-comment-like",
+    indexes = [
+        Index(
+            name = "board_comment_like_member_board_comment",
+            columnList = "memberId, boardCommentId",
+            unique = true,
+        ),
+    ],
+)
 data class BoardCommentLike(
     @Id
     @GeneratedValue(

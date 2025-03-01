@@ -1,7 +1,7 @@
 package com.bockerl.snailmember.infrastructure.event.consumer
 
-import com.bockerl.snailmember.boardlike.command.domain.aggregate.event.BoardLikeEvent
 import com.bockerl.snailmember.boardlike.command.domain.repository.BoardLikeRepository
+import com.bockerl.snailmember.common.BaseLikeEvent
 import com.bockerl.snailmember.infrastructure.event.processor.LikeEventProcessor
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
@@ -29,7 +29,7 @@ class LikeEventConsumerImpl(
         containerFactory = "kafkaListenerContainerFactory",
     )
     fun consume(
-        @Payload event: BoardLikeEvent,
+        @Payload event: BaseLikeEvent,
         @Header(KafkaHeaders.RECEIVED_PARTITION) partition: Int,
         // 설명. 오프셋 커밋용
         acknowledgment: Acknowledgment,

@@ -13,12 +13,18 @@ spring:
         database-platform: org.hibernate.dialect.PostgreSQLDialect
         hibernate:
             ddl-auto: update
+        properties:
+          hibernate:
+              jdbc:
+                lob:
+                    non_contextual_creation: true
     sql:
         init:
             mode: always
     properties:
         hibernate:
             format_sql: true
+
     mail:
         host: smtp.gmail.com
         port: 587

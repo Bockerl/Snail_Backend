@@ -2,7 +2,8 @@
 
 package com.bockerl.snailmember.infrastructure.config
 
-import com.bockerl.snailmember.boardlike.command.domain.aggregate.event.BoardLikeEvent
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -16,6 +17,7 @@ import org.springframework.kafka.core.*
 import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer
 import org.springframework.kafka.listener.DefaultErrorHandler
+import org.springframework.kafka.support.converter.StringJsonMessageConverter
 import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.kafka.support.serializer.JsonSerializer
 import org.springframework.util.backoff.FixedBackOff
@@ -28,7 +30,7 @@ class KafkaConsumerConfig(
     private val logger = KotlinLogging.logger {}
 
     @Bean
-    fun kafkaBoardLikeConsumerFactory(): ConsumerFactory<String, BoardLikeEvent> {
+    fun kafkaBoardLikeConsumerFactory(): ConsumerFactory<String, Any> {
         val props =
             mapOf<String, Any>(
                 ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServers,
@@ -41,17 +43,23 @@ class KafkaConsumerConfig(
                 ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG to 30000,
             )
 
+        val objectMapper = ObjectMapper().registerKotlinModule()
         val deserializer =
-            JsonDeserializer(BoardLikeEvent::class.java).apply {
-                // 설명. 각각의 service를 추가해야 하지 않을까 싶습니다
+            JsonDeserializer(Any::class.java, objectMapper).apply {
                 addTrustedPackages("*")
             }
+
+//        val deserializer =
+//            JsonDeserializer(BaseLikeEvent::class.java).apply {
+//                // 설명. 각각의 service를 추가해야 하지 않을까 싶습니다
+//                addTrustedPackages("*")
+//            }
         return DefaultKafkaConsumerFactory(props, StringDeserializer(), deserializer)
     }
 
     @Bean
-    fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, BoardLikeEvent> {
-        val factory = ConcurrentKafkaListenerContainerFactory<String, BoardLikeEvent>()
+    fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, Any> {
+        val factory = ConcurrentKafkaListenerContainerFactory<String, Any>()
         factory.consumerFactory = kafkaBoardLikeConsumerFactory()
         // 설명. consumer thread 수 default 3 or 5
         factory.setConcurrency(1)
@@ -60,6 +68,8 @@ class KafkaConsumerConfig(
 
         // 설명. 에러 핸들러 설정
         factory.setCommonErrorHandler(errorHandler())
+
+        factory.setRecordMessageConverter(StringJsonMessageConverter())
 
         return factory
     }

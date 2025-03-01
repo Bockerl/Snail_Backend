@@ -10,7 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "Outbox")
+@Table(name = "Outbox", indexes = [Index(name = "idx_event_id", columnList = "event_id")])
 class Outbox(
     @Id
     @GeneratedValue(
@@ -31,7 +31,6 @@ class Outbox(
     @Enumerated(EnumType.STRING)
     var eventType: EventType,
     @JsonProperty("payload")
-    @Lob
     @Column(name = "payload", columnDefinition = "TEXT")
     var payload: String,
     @Column(name = "status", nullable = false)

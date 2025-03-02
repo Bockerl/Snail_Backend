@@ -151,6 +151,7 @@ class AuthenticationFilter(
             .secure(false) // 개발 환경에선 https가 아니므로 false
             .sameSite("Strict") // csrf 방지
             .path("/api")
+            .maxAge(refreshTokenExpiration / 1000) // 초 단위로 변환
             .build()
 
         log.info { "accessToken 헤더에 담기 시작" }

@@ -9,17 +9,21 @@ package com.bockerl.snailmember.file.command.domain.service
 import com.azure.storage.blob.BlobContainerClient
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
+import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
+import com.bockerl.snailmember.file.command.application.dto.CommandFileWithGatheringDTO
 import com.bockerl.snailmember.file.command.application.service.CommandFileService
 import com.bockerl.snailmember.file.command.application.service.CommandGatheringFileService
 import com.bockerl.snailmember.file.command.domain.aggregate.entity.File
-import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileRequestVO
-import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileWithGatheringRequestVO
+import com.bockerl.snailmember.file.command.domain.aggregate.event.FileEvent
 import com.bockerl.snailmember.file.command.domain.repository.CommandFileRepository
+import com.bockerl.snailmember.infrastructure.outbox.dto.OutboxDTO
+import com.bockerl.snailmember.infrastructure.outbox.enums.EventType
+import com.bockerl.snailmember.infrastructure.outbox.service.OutboxService
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import java.io.ByteArrayOutputStream
 import java.util.*
 
 @Service
@@ -27,48 +31,104 @@ class CommandFileServiceImpl(
     private val blobContainerClient: BlobContainerClient,
     private val commandFileRepository: CommandFileRepository,
     private val gatheringFileService: CommandGatheringFileService,
+    private val objectMapper: ObjectMapper,
+    private val outboxService: OutboxService,
 ) : CommandFileService {
     private val logger = KotlinLogging.logger {}
 
     @Transactional
-    override fun uploadSingleFile(
+    override fun createSingleFile(
         file: MultipartFile,
-        commandFileRequestVO: CommandFileRequestVO,
+        commandFileDTO: CommandFileDTO,
     ) {
         val fileName = generateUniqueFileName(file.originalFilename)
         val blobClient = blobContainerClient.getBlobClient(fileName)
-        blobClient.upload(file.inputStream, file.size, true)
+
+        try {
+            // Blob Storage에 파일 업로드 시도
+            blobClient.upload(file.inputStream, file.size, true)
+        } catch (ex: Exception) {
+            // 업로드 실패 시 로그 기록 후 사용자 정의 예외 전환
+            logger.error { "Blob storage 업로드 실패: 파일명 $fileName, $ex" }
+            throw CommonException(ErrorCode.BLOB_STORAGE_ERROR)
+        }
+
         val fileUrl = blobClient.blobUrl
 
-        val fileEntity =
-            File(
+        val event =
+            FileEvent(
                 fileName = fileName,
                 fileType = file.contentType ?: "unknown",
                 fileUrl = fileUrl,
-                fileTargetType = commandFileRequestVO.fileTargetType,
-                fileTargetId = extractDigits(commandFileRequestVO.fileTargetId),
-                memberId = extractDigits(commandFileRequestVO.memberId),
+                fileTargetType = commandFileDTO.fileTargetType,
+                fileTargetId = extractDigits(commandFileDTO.fileTargetId),
+                memberId = extractDigits(commandFileDTO.memberId),
             )
 
-        commandFileRepository.save(fileEntity)
+        val jsonPayload = objectMapper.writeValueAsString(event)
+
+        // 설명. 파일에서는 aggregateId에 fileName을 넣겠습니다.
+        val outbox =
+            OutboxDTO(
+                aggregateId = fileName,
+                eventType = EventType.FILE,
+                payload = jsonPayload,
+            )
+
+        outboxService.createOutbox(outbox)
+//        val fileEntity =
+//            File(
+//                fileName = fileName,
+//                fileType = file.contentType ?: "unknown",
+//                fileUrl = fileUrl,
+//                fileTargetType = commandFileRequestVO.fileTargetType,
+//                fileTargetId = extractDigits(commandFileRequestVO.fileTargetId),
+//                memberId = extractDigits(commandFileRequestVO.memberId),
+//            )
+
+//        commandFileRepository.save(fileEntity)
     }
 
     @Transactional
-    override fun uploadFiles(
+    override fun createFiles(
         files: List<MultipartFile>,
-        commandFileRequestVO: CommandFileRequestVO,
+        commandFileDTO: CommandFileDTO,
     ) {
-        val fileEntities = mutableListOf<File>()
+//        val fileEntities = mutableListOf<File>()
+        val outboxEvents = mutableListOf<OutboxDTO>()
 
         // 설명. 업로드 파일 수 제한 10개 초과 되지 않도록...
         if (files.size > 10) {
             throw CommonException(ErrorCode.TOO_MANY_FILES)
         }
 
+//        files.forEach { file ->
+//            val fileName = generateUniqueFileName(file.originalFilename)
+//            val blobClient = blobContainerClient.getBlobClient(fileName)
+//            blobClient.upload(file.inputStream, file.size, true)
+//            val fileUrl = blobClient.blobUrl
+//
+//            val fileEntity =
+//                File(
+//                    fileName = fileName,
+//                    fileType = file.contentType ?: "unknown",
+//                    fileUrl = fileUrl,
+//                    fileTargetType = commandFileDTO.fileTargetType,
+//                    fileTargetId = extractDigits(commandFileDTO.fileTargetId),
+//                    memberId = extractDigits(commandFileDTO.memberId),
+//                )
+//            fileEntities.add(fileEntity)
+//        }
+
         files.forEach { file ->
             val fileName = generateUniqueFileName(file.originalFilename)
             val blobClient = blobContainerClient.getBlobClient(fileName)
-            blobClient.upload(file.inputStream, file.size, true)
+            try {
+                blobClient.upload(file.inputStream, file.size, true)
+            } catch (ex: Exception) {
+                logger.error { "Blob storage 업로드 실패: 파일명 $fileName, $ex" }
+                throw CommonException(ErrorCode.BLOB_STORAGE_ERROR)
+            }
             val fileUrl = blobClient.blobUrl
 
             val fileEntity =
@@ -76,20 +136,42 @@ class CommandFileServiceImpl(
                     fileName = fileName,
                     fileType = file.contentType ?: "unknown",
                     fileUrl = fileUrl,
-                    fileTargetType = commandFileRequestVO.fileTargetType,
-                    fileTargetId = extractDigits(commandFileRequestVO.fileTargetId),
-                    memberId = extractDigits(commandFileRequestVO.memberId),
+                    fileTargetType = commandFileDTO.fileTargetType,
+                    fileTargetId = extractDigits(commandFileDTO.fileTargetId),
+                    memberId = extractDigits(commandFileDTO.memberId),
                 )
-            fileEntities.add(fileEntity)
+            // fileEntity 저장 로직 (예: DB 저장)이 필요하다면 추가합니다.
+            // commandFileRepository.save(fileEntity)
+
+            // 각 파일마다 개별 이벤트 생성
+            val event =
+                FileEvent(
+                    fileName = fileName,
+                    fileType = fileEntity.fileType,
+                    fileUrl = fileUrl,
+                    fileTargetType = commandFileDTO.fileTargetType,
+                    fileTargetId = extractDigits(commandFileDTO.fileTargetId),
+                    memberId = extractDigits(commandFileDTO.memberId),
+                )
+            val jsonPayload = objectMapper.writeValueAsString(event)
+            // 여기서는 파일 이름을 aggregateId로 활용합니다.
+            val outbox =
+                OutboxDTO(
+                    aggregateId = fileName,
+                    eventType = EventType.FILE,
+                    payload = jsonPayload,
+                )
+            outboxEvents.add(outbox)
         }
 
-        commandFileRepository.saveAll(fileEntities)
+//        commandFileRepository.saveAll(fileEntities)
+        outboxService.createOutboxes(outboxEvents)
     }
 
     @Transactional
-    override fun uploadFilesWithGatheringId(
+    override fun createFilesWithGatheringId(
         files: List<MultipartFile>,
-        commandFileWithGatheringRequestVO: CommandFileWithGatheringRequestVO,
+        commandFileWithGatheringDTO: CommandFileWithGatheringDTO,
     ) {
         val fileEntities = mutableListOf<File>()
 
@@ -111,9 +193,9 @@ class CommandFileServiceImpl(
                     fileName = fileName,
                     fileType = file.contentType ?: "unknown",
                     fileUrl = fileUrl,
-                    fileTargetType = commandFileWithGatheringRequestVO.fileTargetType,
-                    fileTargetId = extractDigits(commandFileWithGatheringRequestVO.fileTargetId),
-                    memberId = extractDigits(commandFileWithGatheringRequestVO.memberId),
+                    fileTargetType = commandFileWithGatheringDTO.fileTargetType,
+                    fileTargetId = extractDigits(commandFileWithGatheringDTO.fileTargetId),
+                    memberId = extractDigits(commandFileWithGatheringDTO.memberId),
                 )
             fileEntities.add(fileEntity)
         }
@@ -123,7 +205,7 @@ class CommandFileServiceImpl(
 
         // fileId와 gatheringId를 이용해 GatheringFile 저장
         savedFiles.forEach { file ->
-            gatheringFileService.createGatheringFile(file.fileId!!, extractDigits(commandFileWithGatheringRequestVO.gatheringId), file)
+            gatheringFileService.createGatheringFile(file.fileId!!, extractDigits(commandFileWithGatheringDTO.gatheringId), file)
         }
     }
 
@@ -131,15 +213,15 @@ class CommandFileServiceImpl(
     @Transactional
     override fun updateProfileImage(
         file: MultipartFile,
-        commandFileRequestVO: CommandFileRequestVO,
+        commandFileDTO: CommandFileDTO,
     ) {
         if (!file.contentType?.startsWith("image/")!!) {
             throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT)
         }
         val existingFile =
             commandFileRepository.findByFileTargetTypeAndFileTargetId(
-                commandFileRequestVO.fileTargetType,
-                extractDigits(commandFileRequestVO.fileTargetId),
+                commandFileDTO.fileTargetType,
+                extractDigits(commandFileDTO.fileTargetId),
             )
 
         val blobClient = blobContainerClient.getBlobClient(existingFile[0].fileName)
@@ -158,9 +240,9 @@ class CommandFileServiceImpl(
                 fileName = fileName,
                 fileType = file.contentType ?: "unknown",
                 fileUrl = fileUrl,
-                fileTargetType = commandFileRequestVO.fileTargetType,
-                fileTargetId = extractDigits(commandFileRequestVO.fileTargetId),
-                memberId = extractDigits(commandFileRequestVO.memberId),
+                fileTargetType = commandFileDTO.fileTargetType,
+                fileTargetId = extractDigits(commandFileDTO.fileTargetId),
+                memberId = extractDigits(commandFileDTO.memberId),
             )
 
         commandFileRepository.save(fileEntity)
@@ -169,14 +251,14 @@ class CommandFileServiceImpl(
     // 설명. 삭제할 파일 삭제 후 새로운 파일 추가
     @Transactional
     override fun updateFiles(
-        commandFileRequestVO: CommandFileRequestVO,
+        commandFileDTO: CommandFileDTO,
         deletedFileIds: List<Long>,
         newFiles: List<MultipartFile>,
     ) {
         val existingFiles =
             commandFileRepository.findByFileTargetTypeAndFileTargetId(
-                commandFileRequestVO.fileTargetType,
-                extractDigits(commandFileRequestVO.fileTargetId),
+                commandFileDTO.fileTargetType,
+                extractDigits(commandFileDTO.fileTargetId),
             )
 
         // 삭제할 파일만 삭제
@@ -204,9 +286,9 @@ class CommandFileServiceImpl(
                     fileName = fileName,
                     fileType = file.contentType ?: "unknown",
                     fileUrl = blobClient.blobUrl,
-                    fileTargetType = commandFileRequestVO.fileTargetType,
-                    fileTargetId = extractDigits(commandFileRequestVO.fileTargetId),
-                    memberId = extractDigits(commandFileRequestVO.memberId),
+                    fileTargetType = commandFileDTO.fileTargetType,
+                    fileTargetId = extractDigits(commandFileDTO.fileTargetId),
+                    memberId = extractDigits(commandFileDTO.memberId),
                 )
             }
 
@@ -222,14 +304,14 @@ class CommandFileServiceImpl(
     // 설명. 모임 삭제할 파일 삭제 후 새로운 파일 추가
     @Transactional
     override fun updateFilesWithGatheringId(
-        commandFileWithGatheringRequestVO: CommandFileWithGatheringRequestVO,
+        commandFileWithGatheringDTO: CommandFileWithGatheringDTO,
         deletedFileIds: List<Long>,
         newFiles: List<MultipartFile>,
     ) {
         val existingFiles =
             commandFileRepository.findByFileTargetTypeAndFileTargetId(
-                commandFileWithGatheringRequestVO.fileTargetType,
-                extractDigits(commandFileWithGatheringRequestVO.fileTargetId),
+                commandFileWithGatheringDTO.fileTargetType,
+                extractDigits(commandFileWithGatheringDTO.fileTargetId),
             )
 
         // 삭제할 파일만 삭제
@@ -257,9 +339,9 @@ class CommandFileServiceImpl(
                     fileName = fileName,
                     fileType = file.contentType ?: "unknown",
                     fileUrl = blobClient.blobUrl,
-                    fileTargetType = commandFileWithGatheringRequestVO.fileTargetType,
-                    fileTargetId = extractDigits(commandFileWithGatheringRequestVO.fileTargetId),
-                    memberId = extractDigits(commandFileWithGatheringRequestVO.memberId),
+                    fileTargetType = commandFileWithGatheringDTO.fileTargetType,
+                    fileTargetId = extractDigits(commandFileWithGatheringDTO.fileTargetId),
+                    memberId = extractDigits(commandFileWithGatheringDTO.memberId),
                 )
             }
 
@@ -273,7 +355,7 @@ class CommandFileServiceImpl(
 
         // fileId와 gatheringId를 이용해 GatheringFile 저장
         savedFiles.forEach { file ->
-            gatheringFileService.createGatheringFile(file.fileId!!, extractDigits(commandFileWithGatheringRequestVO.gatheringId), file)
+            gatheringFileService.createGatheringFile(file.fileId!!, extractDigits(commandFileWithGatheringDTO.gatheringId), file)
         }
     }
 
@@ -281,17 +363,17 @@ class CommandFileServiceImpl(
      *  fileName에 해당하는 Blob을 삭제함.
      * */
     @Transactional
-    override fun deleteFile(commandFileRequestVO: CommandFileRequestVO) {
+    override fun deleteFile(commandFileDTO: CommandFileDTO) {
         val files =
             commandFileRepository.findByFileTargetTypeAndFileTargetId(
-                commandFileRequestVO.fileTargetType,
-                extractDigits(commandFileRequestVO.fileTargetId),
+                commandFileDTO.fileTargetType,
+                extractDigits(commandFileDTO.fileTargetId),
             )
 
         if (files.isNotEmpty()) {
             commandFileRepository.updateActiveAndFileUrlByFileTargetIdAndFileTargetType(
-                extractDigits(commandFileRequestVO.fileTargetId),
-                commandFileRequestVO.fileTargetType,
+                extractDigits(commandFileDTO.fileTargetId),
+                commandFileDTO.fileTargetType,
             )
 
             for (file in files) {
@@ -299,18 +381,6 @@ class CommandFileServiceImpl(
                 blobClient.delete()
             }
         }
-    }
-
-    /* 설명.
-     *  Filename을 받아 Blob에서 파일을 다운로드함.
-     *  ByteArrayOutputStream을 사용해서 바이너리 데이터를 읽어옴
-     * */
-    @Transactional
-    override fun downloadFile(fileName: String): ByteArray {
-        val blobClient = blobContainerClient.getBlobClient(fileName)
-        val outputStream = ByteArrayOutputStream()
-        blobClient.download(outputStream)
-        return outputStream.toByteArray()
     }
 
     // 설명. uuid 생성으로 파일 이름 중복 방지

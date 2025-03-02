@@ -1,6 +1,5 @@
 package com.bockerl.snailmember.infrastructure.event.consumer
 
-import com.bockerl.snailmember.boardlike.command.domain.repository.BoardLikeRepository
 import com.bockerl.snailmember.common.BaseLikeEvent
 import com.bockerl.snailmember.infrastructure.event.processor.LikeEventProcessor
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class LikeEventConsumerImpl(
-    private val boardLikeRepository: BoardLikeRepository,
     private val likeEventProcessor: LikeEventProcessor,
 //    private val likeEventHandler: LikeEventHandler,
 //    @Value("\${spring.kafka.consumer.group-id}") private val groupId: String,

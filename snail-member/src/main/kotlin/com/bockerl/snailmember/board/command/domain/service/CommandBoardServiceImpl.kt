@@ -13,9 +13,9 @@ import com.bockerl.snailmember.board.command.domain.aggregate.entity.Board
 import com.bockerl.snailmember.board.command.domain.repository.CommandBoardRepository
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
+import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
 import com.bockerl.snailmember.file.command.application.service.CommandFileService
 import com.bockerl.snailmember.file.command.domain.aggregate.enums.FileTargetType
-import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileRequestVO
 import jakarta.transaction.Transactional
 import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.stereotype.Service
@@ -45,16 +45,16 @@ class CommandBoardServiceImpl(
         val boardEntity = commandBoardRepository.save(board)
 
         if (files.isNotEmpty()) {
-            val commandFileRequestVO =
+            val commandFileDTO =
                 boardEntity.boardId?.let {
-                    CommandFileRequestVO(
+                    CommandFileDTO(
                         fileTargetType = FileTargetType.BOARD,
                         fileTargetId = formattedBoardId(it),
                         memberId = commandBoardCreateDTO.memberId,
                     )
                 }
 
-            commandFileRequestVO?.let { commandFileService.uploadFiles(files, it) }
+            commandFileDTO?.let { commandFileService.createFiles(files, it) }
         }
 
         cacheManager.getCache("board/${commandBoardCreateDTO.boardTag}")?.clear()
@@ -81,16 +81,16 @@ class CommandBoardServiceImpl(
         val boardEntity = commandBoardRepository.save(board)
 
         if (files.isNotEmpty()) {
-            val commandFileRequestVO =
+            val commandFileDTO =
                 boardEntity.boardId?.let {
-                    CommandFileRequestVO(
+                    CommandFileDTO(
                         fileTargetType = FileTargetType.BOARD,
                         fileTargetId = formattedBoardId(it),
                         memberId = commandBoardUpdateDTO.memberId,
                     )
                 }
 
-            commandFileRequestVO?.let { commandFileService.updateFiles(it, commandBoardUpdateDTO.deleteFilesIds, files) }
+            commandFileDTO?.let { commandFileService.updateFiles(it, commandBoardUpdateDTO.deleteFilesIds, files) }
         }
 
         cacheManager.getCache("board/${commandBoardUpdateDTO.boardTag}")?.clear()
@@ -106,14 +106,14 @@ class CommandBoardServiceImpl(
             active = false
         }
 
-        val commandFileRequestVO =
-            CommandFileRequestVO(
+        val commandFileDTO =
+            CommandFileDTO(
                 fileTargetType = FileTargetType.BOARD,
                 fileTargetId = formattedBoardId(boardId),
                 memberId = commandBoardDeleteDTO.memberId,
             )
 
-        commandFileService.deleteFile(commandFileRequestVO)
+        commandFileService.deleteFile(commandFileDTO)
 
         cacheManager.getCache("board/${board.boardType}")?.clear()
         cacheManager.getCache("board/${board.boardTag}")?.clear()

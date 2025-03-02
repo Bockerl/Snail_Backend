@@ -304,5 +304,5 @@ class RegistrationServiceImpl(
         logger.info { "회원 가입 종료 - 회원 가입 성공" }
     }
 
-    fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
+    private fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
 }

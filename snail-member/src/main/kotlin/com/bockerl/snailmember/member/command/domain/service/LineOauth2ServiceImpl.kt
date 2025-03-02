@@ -4,6 +4,7 @@ import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.client.LineAuthClient
 import com.bockerl.snailmember.member.command.application.dto.response.LinePayloadDTO
+import com.bockerl.snailmember.member.command.application.dto.response.LoginResponseDTO
 import com.bockerl.snailmember.member.command.application.service.LineOauth2Service
 import com.bockerl.snailmember.member.command.config.Oauth2LoginProperties
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.Gender
@@ -30,7 +31,7 @@ class LineOauth2ServiceImpl(
     private val logger = KotlinLogging.logger {}
 
     @Transactional
-    override fun lineLogin(code: String): String {
+    override fun lineLogin(code: String): LoginResponseDTO {
         // 코드 기반으로 요청을 보낸 뒤 id token만 추출
         val idToken = requestTokenFromLine(code)
         // 유저 정보 디코딩
@@ -111,7 +112,7 @@ class LineOauth2ServiceImpl(
             memberEmail = email,
             memberPhoneNumber = "FromLine",
             memberPhoto = "",
-            memberStatus = MemberStatus.USER,
+            memberStatus = MemberStatus.ROLE_USER,
             memberRegion = "",
             memberLanguage = Language.KOR,
             memberGender = Gender.UNKNOWN,

@@ -4,6 +4,7 @@ import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.client.GoogleAuthClient
 import com.bockerl.snailmember.member.command.application.dto.response.GooglePayloadDTO
+import com.bockerl.snailmember.member.command.application.dto.response.LoginResponseDTO
 import com.bockerl.snailmember.member.command.application.service.GoogleOauth2Service
 import com.bockerl.snailmember.member.command.config.Oauth2LoginProperties
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.Gender
@@ -30,7 +31,7 @@ class GoogleOauth2ServiceImpl(
     private val logger = KotlinLogging.logger {}
 
     @Transactional
-    override fun googleLogin(code: String): String {
+    override fun googleLogin(code: String): LoginResponseDTO {
         // 코드 기반으로 요청을 보낸 뒤 id token만 추출
         val idToken = requestTokenFromGoogle(code)
         // 유저 정보 디코딩
@@ -109,7 +110,7 @@ class GoogleOauth2ServiceImpl(
             memberEmail = email,
             memberPhoneNumber = "FromGoogle",
             memberPhoto = "",
-            memberStatus = MemberStatus.USER,
+            memberStatus = MemberStatus.ROLE_USER,
             memberRegion = "",
             memberLanguage = Language.KOR,
             memberGender = Gender.UNKNOWN,

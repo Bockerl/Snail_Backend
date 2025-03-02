@@ -48,6 +48,7 @@ class JwtFilter(
             path.startsWith("/swagger-resources") or
             path.startsWith("/api/registration") or
             path.startsWith("/api/user/oauth2") or
+            path.startsWith("/favicon.ico") or
             path.startsWith("/v3/api-docs") or
             path.startsWith("/api/member/health")
     }

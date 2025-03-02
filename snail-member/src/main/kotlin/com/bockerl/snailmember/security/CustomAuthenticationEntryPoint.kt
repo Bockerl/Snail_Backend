@@ -33,7 +33,7 @@ class CustomAuthenticationEntryPoint : AuthenticationEntryPoint {
             // 블랙리스트
             is LockedException -> HttpServletResponse.SC_FORBIDDEN to authException.message
             // 잘못된 아이디 비밀번호
-            is BadCredentialsException -> HttpServletResponse.SC_UNAUTHORIZED to "아이디 또는 비밀번호가 일치하지 않습니다."
+            is BadCredentialsException -> HttpServletResponse.SC_UNAUTHORIZED to authException.message
             // 인증 실패
             else -> HttpServletResponse.SC_BAD_REQUEST to "인증에 실패했습니다."
         }

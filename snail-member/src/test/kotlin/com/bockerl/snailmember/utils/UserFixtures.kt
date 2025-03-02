@@ -40,7 +40,7 @@ fun createMember(
     memberPhone: String = TEST_PHONE,
     memberPassword: String = TEST_PASSWORD,
     memberNickname: String = TEST_NICKNAME,
-    memberStatus: MemberStatus = MemberStatus.USER,
+    memberStatus: MemberStatus = MemberStatus.ROLE_USER,
 ): Member = Member(
     memberId = memberId,
     memberEmail = memberEmail,

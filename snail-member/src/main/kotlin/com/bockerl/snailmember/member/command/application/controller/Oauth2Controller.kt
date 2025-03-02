@@ -3,6 +3,7 @@ package com.bockerl.snailmember.member.command.application.controller
 import com.bockerl.snailmember.common.ResponseDTO
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
+import com.bockerl.snailmember.member.command.application.mapper.AuthConverter
 import com.bockerl.snailmember.member.command.application.service.GoogleOauth2Service
 import com.bockerl.snailmember.member.command.application.service.KaKaoOauth2Service
 import com.bockerl.snailmember.member.command.application.service.LineOauth2Service
@@ -18,6 +19,7 @@ class Oauth2Controller(
     private val kakaoOauth2Service: KaKaoOauth2Service,
     private val googleOauth2Service: GoogleOauth2Service,
     private val lineOauth2Service: LineOauth2Service,
+    private val authConverter: AuthConverter,
 ) {
     private val logger = KotlinLogging.logger {}
 
@@ -35,9 +37,10 @@ class Oauth2Controller(
 
         code != null -> {
             logger.info { "카카오 로그인 시작 - code: $code" }
-            val kakaoToken = kakaoOauth2Service.kakaoLogin(code)
+            val kakaoTokenDTO = kakaoOauth2Service.kakaoLogin(code)
+            val kakaoTokenVO = authConverter.loginDTOToVO(kakaoTokenDTO)
             // jwt 토근과 회원 vo 객체에 발행할 예정
-            ResponseDTO.ok(kakaoToken)
+            ResponseDTO.ok(kakaoTokenVO)
         }
 
         else -> {

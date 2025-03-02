@@ -235,7 +235,7 @@ class RegistrationServiceImpl(
             memberGender = Gender.UNKNOWN,
             memberLanguage = Language.KOR,
             memberRegion = "",
-            memberStatus = MemberStatus.USER,
+            memberStatus = MemberStatus.ROLE_USER,
             signupPath = SignUpPath.EMAIL,
             selfIntroduction = "",
         )

@@ -49,6 +49,7 @@ enum class ErrorCode(val code: Int, val httpStatus: HttpStatus, val message: Str
     // 403: 권한 부족 (Forbidden)
     FORBIDDEN_ROLE(40300, HttpStatus.FORBIDDEN, "요청한 리소스에 대한 권한이 없습니다."),
     ACCESS_DENIED(40301, HttpStatus.FORBIDDEN, "접근 권한이 거부되었습니다."),
+    BLACK_LIST_ROLE(40302, HttpStatus.FORBIDDEN, "이 계정은 현재 사용이 제한되어 있습니다."),
 
     // 404: 리소스를 찾을 수 없음 (Not Found)
     NOT_FOUND_ENV(40400, HttpStatus.NOT_FOUND, "환경 변수가 발견되지 않았습니다."),

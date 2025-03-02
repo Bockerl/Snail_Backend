@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.bockerl.snailmember.utils
 
 import com.bockerl.snailmember.member.command.application.dto.request.ActivityAreaRequestDTO

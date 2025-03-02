@@ -1,5 +1,3 @@
-@file:Suppress("ktlint:standard:no-wildcard-imports")
-
 package com.bockerl.snailmember.member.command.domain.service
 
 import com.bockerl.snailmember.common.exception.CommonException
@@ -9,11 +7,16 @@ import com.bockerl.snailmember.member.command.application.dto.response.KaKaoPayl
 import com.bockerl.snailmember.member.command.application.dto.response.LoginResponseDTO
 import com.bockerl.snailmember.member.command.application.service.KaKaoOauth2Service
 import com.bockerl.snailmember.member.command.config.Oauth2LoginProperties
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.*
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.Gender
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.Language
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.Member
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.MemberStatus
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.SignUpPath
 import com.bockerl.snailmember.member.command.domain.repository.MemberRepository
 import com.bockerl.snailmember.security.CustomMember
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.core.env.Environment
@@ -24,7 +27,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Base64
+import java.util.Date
+import java.util.UUID
 import javax.crypto.spec.SecretKeySpec
 
 @Service
@@ -166,47 +171,69 @@ class KaKaoOauth2ServiceImpl(
     }
 
     private fun generateJwtResponse(customMember: CustomMember): LoginResponseDTO {
-        logger.info { "카카오 회원의 at, rt 생성 시작" }
-
+        logger.info { "카카오 회원의 토큰 생성 시작" }
         val email = customMember.memberEmail
-        val accessExpiration = System.currentTimeMillis() + accessTokenExpiration
-        val refreshExpiration = System.currentTimeMillis() + refreshTokenExpiration
-        // 혹시 모를 redisAT 삭제
-        redisTemplate.runCatching {
-            delete("$REDIS_AT_PREFIX$email")
-        }.onSuccess {
-            logger.info { "redis에 존재하는 at 삭제 성공" }
-        }.onFailure {
-            logger.warn { "redis에 존재하는 at 삭제 실패" }
-        }
-        // redis에서 rt만 조회하고, at는 새로 발급
-        logger.info { "redis에 있을 rt 조회" }
-        var existingRefreshToken = redisTemplate.opsForValue().get("$REDIS_RT_PREFIX$email")
-        logger.info { "accessClaim 생성 시작" }
-        val accessClaims = Jwts.claims().apply {
-            subject = email
+        // AccessToken 생성 및 저장
+        val accessToken = generateAccessToken(customMember)
+        // RefreshToken 처리
+        val refreshToken = getOrCreateRefreshToken(email, customMember.authorities.firstOrNull()?.authority)
+        return LoginResponseDTO(accessToken, refreshToken)
+    }
+
+    private fun generateAccessToken(customMember: CustomMember): String {
+        logger.info { "AccessToken 생성 시작" }
+        val email = customMember.memberEmail
+        // 기존 AccessToken 삭제
+        deleteAccessToken(email)
+        // AccessToken Claims 생성
+        val claims = Jwts.claims().apply {
+            subject = customMember.memberEmail
         }
         val authority = customMember.authorities.firstOrNull()?.authority
-        accessClaims["auth"] = authority
-        accessClaims["memberNickname"] = customMember.memberNickname
-        accessClaims["memberId"] = customMember.memberId
-        accessClaims["memberPhoto"] = customMember.memberPhoto
+        claims["auth"] = authority
+        claims["memberNickname"] = customMember.memberNickname
+        claims["memberId"] = customMember.memberId
+        claims["memberPhoto"] = customMember.memberPhoto
+        // AccessToken 생성
+        val accessExpiration = System.currentTimeMillis() + accessTokenExpiration
+        val accessToken = generateToken(claims, accessExpiration)
+        // Redis에 저장
+        saveAccessToken(accessToken, email)
+        logger.info { "AccessToken 생성 완료" }
+        return accessToken
+    }
 
-        logger.info { "refreshClaim 생성 시작" }
-        val refreshClaims = Jwts.claims().apply {
-            subject = email
+    private fun getOrCreateRefreshToken(email: String, authority: String?): String {
+        logger.info { "RefreshToken 처리 시작" }
+        // Redis에서 기존 RefreshToken 조회
+        val existingRefreshToken = redisTemplate.opsForValue().get("$REDIS_RT_PREFIX$email")
+        // 기존 토큰이 있으면 재사용, 없으면 새로 생성
+        return if (existingRefreshToken != null) {
+            logger.info { "기존 RefreshToken 재사용" }
+            existingRefreshToken
+        } else {
+            logger.info { "새 RefreshToken 생성" }
+            val refreshClaims = Jwts.claims().apply {
+                subject = email
+                this["auth"] = authority
+            }
+            val refreshExpiration = System.currentTimeMillis() + refreshTokenExpiration
+            generateToken(refreshClaims, refreshExpiration)
         }
-        refreshClaims["auth"] = authority
+    }
 
-        val accessToken: String = Jwts.builder()
-            .setClaims(accessClaims)
+    private fun generateToken(claims: Claims?, expiration: Long): String {
+        val token: String = Jwts.builder()
+            .setClaims(claims)
             .setIssuedAt(Date())
-            .setExpiration(Date(accessExpiration))
+            .setExpiration(Date(expiration))
             .setIssuer(tokenIssuer)
             .signWith(SecretKeySpec(tokenSecret.toByteArray(), SignatureAlgorithm.HS512.jcaName))
             .compact()!!
-        logger.info { "생성된 accessToken: $accessToken" }
-        // 새로운 accessToken redis에 저장
+        return token
+    }
+
+    private fun saveAccessToken(accessToken: String, email: String) {
         redisTemplate.opsForValue().runCatching {
             logger.info { "새로 생성된 at - redis에 저장: $accessToken" }
             set("$REDIS_AT_PREFIX$email", accessToken)
@@ -215,17 +242,16 @@ class KaKaoOauth2ServiceImpl(
         }.onFailure {
             logger.warn { "redis에 새로운 at 저장 실패" }
         }
-        if (existingRefreshToken == null) {
-            existingRefreshToken = Jwts.builder()
-                .setClaims(refreshClaims)
-                .setIssuedAt(Date())
-                .setExpiration(Date(refreshExpiration))
-                .setIssuer(tokenIssuer)
-                .signWith(SecretKeySpec(tokenSecret.toByteArray(), SignatureAlgorithm.HS512.jcaName))
-                .compact()!!
+    }
+
+    private fun deleteAccessToken(email: String) {
+        redisTemplate.runCatching {
+            delete("$REDIS_AT_PREFIX$email")
+        }.onSuccess {
+            logger.info { "redis에 존재하는 at 삭제 성공" }
+        }.onFailure {
+            logger.warn { "redis에 존재하는 at 삭제 실패" }
         }
-        logger.info { "생성된 refreshToken: $existingRefreshToken" }
-        return LoginResponseDTO(accessToken, existingRefreshToken)
     }
 
     private fun String.toLocalDateOrNow(): LocalDate = try {

@@ -5,6 +5,7 @@ import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.service.CommandMemberService
 import com.bockerl.snailmember.member.command.domain.aggregate.vo.request.MemberEmailLoginRequestVO
+import com.bockerl.snailmember.member.command.domain.aggregate.vo.response.LoginResponseVO
 import com.bockerl.snailmember.member.query.service.QueryMemberService
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -15,8 +16,6 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.core.env.Environment
 import org.springframework.data.redis.core.RedisTemplate
-import org.springframework.http.HttpHeaders
-import org.springframework.http.ResponseCookie
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -135,26 +134,18 @@ class AuthenticationFilter(
             TimeUnit.MILLISECONDS,
         )
 
-        log.info { "refreshToken용 쿠기 생성 시작" }
-        // RT는 HttpOnly Cookie에 담기
-        val refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
-            .httpOnly(true) // document.cookie 공격 불가
-            .secure(false) // 개발 환경에선 https가 아니므로 false
-            .sameSite("Strict") // csrf 방지
-            .path("/api")
-            .maxAge(refreshTokenExpiration / 1000) // 초 단위로 변환
-            .build()
-
-        log.info { "accessToken 헤더에 담기 시작" }
-        response.addHeader("Authorization", "Bearer $accessToken")
-        log.info { "refreshToken 쿠키에 담기 시작" }
-        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-
+        log.info { "rt와 at를 담은 loginVO 생성 시작" }
+        // 앱 환경에선 body에서 꺼내 쓴다고 하여 수정
+        val loginVO = LoginResponseVO(
+            accessToken = accessToken,
+            refreshToken = refreshToken,
+        )
+        log.info { "전달한 loginVO: $loginVO" }
         log.info { "멤버 마지막 로그인 시각 변경 시작" }
         commandMemberService.putLastAccessTime(customMember.memberEmail)
 
         log.info { "ResponseDTO 생성 시작" }
-        val responseDTO = ResponseDTO.ok("로그인 성공")
+        val responseDTO = ResponseDTO.ok(loginVO)
 
         // JSON 문자열로 변환
         val json = ObjectMapper().writeValueAsString(responseDTO)

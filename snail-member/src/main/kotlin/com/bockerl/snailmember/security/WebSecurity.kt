@@ -69,6 +69,7 @@ class WebSecurity(
             .addFilterBefore(
                 JwtFilter(
                     queryMemberService,
+                    commandMemberService,
                     jwtUtils,
                     redisTemplate,
                     environment,

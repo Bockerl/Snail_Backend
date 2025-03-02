@@ -1,9 +1,13 @@
 package com.bockerl.snailmember.security
 
+import com.bockerl.snailmember.common.ResponseDTO
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
+import com.bockerl.snailmember.member.command.application.service.CommandMemberService
+import com.bockerl.snailmember.member.command.domain.aggregate.vo.response.LoginResponseVO
 import com.bockerl.snailmember.member.query.service.QueryMemberService
 import com.bockerl.snailmember.security.config.TokenType
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
@@ -12,8 +16,6 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.core.env.Environment
 import org.springframework.data.redis.core.RedisTemplate
-import org.springframework.http.HttpHeaders
-import org.springframework.http.ResponseCookie
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.filter.OncePerRequestFilter
@@ -21,6 +23,7 @@ import java.lang.Exception
 
 class JwtFilter(
     private val queryMemberService: QueryMemberService,
+    private val commandMemberService: CommandMemberService,
     private val jwtUtils: JwtUtils,
     private val redisTemplate: RedisTemplate<String, String>,
     private val environment: Environment,
@@ -66,14 +69,12 @@ class JwtFilter(
                 filterChain.doFilter(request, response)
                 return
             }
-
             log.info { "at가 없거나 유효하지 않음, rt 검증 시작" }
             if (processRefreshToken(request, response)) {
                 log.info { "rt 유효성 검사 성공" }
                 filterChain.doFilter(request, response)
                 return
             }
-
             log.warn { "인증 실패, at와 rt 모두 유효하지 않음" }
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "토큰 인증이 필요합니다.")
         } catch (e: CommonException) {
@@ -97,51 +98,75 @@ class JwtFilter(
     }
 
     private fun processRefreshToken(request: HttpServletRequest, response: HttpServletResponse): Boolean {
-        try {
+        return try {
             val refreshToken = jwtUtils.extractRefreshToken(request)
             val claims = jwtUtils.parseClaims(refreshToken)
-            if (validateClaims(claims, refreshToken, TokenType.REFRESH_TOKEN)) {
-                // at 재발급 및 헤더에 추가, 넘어가는 claims의 rt의 것(email뿐)
-                val newAccessToken = jwtUtils.generateAccessToken(claims)
-                response.addHeader("Authorization", "Bearer $newAccessToken")
-
-                // rt 7일 이하 남았으면 재발급
-                val remainingTime = claims.expiration.time - System.currentTimeMillis()
-                val sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000L
-
-                if (remainingTime <= sevenDaysInMillis) {
-                    val newRefreshToken = jwtUtils.generateRefreshToken(claims)
-                    val refreshCookie = ResponseCookie.from("refreshToken", newRefreshToken)
-                        .httpOnly(true) // document.cookie 공격 불가
-                        .secure(false) // 개발 환경에선 https가 아니므로 false
-                        .sameSite("Strict") // csrf 방지
-                        .path("/api")
-                        .maxAge(refreshTokenExpiration / 1000) // 초 단위로 변환
-                        .build()
-                    log.info { "refreshToken 쿠키에 담기 시작" }
-                    response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                }
-                return true
-            } else {
-                // RT를 재발급하지 않더라도 기존 RT를 쿠키에 다시 설정
-                val remainingTime = claims.expiration.time - System.currentTimeMillis()
-                val refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
-                    .httpOnly(true)
-                    .secure(false)
-                    .sameSite("Strict")
-                    .path("/api")
-                    .maxAge(remainingTime / 1000) // 남은 시간을 초 단위로 변환
-                    .build()
-                response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+            if (!validateClaims(claims, refreshToken, TokenType.REFRESH_TOKEN)) {
+                sendErrorResponse(response, ErrorCode.INVALID_TOKEN_ERROR)
                 return false
             }
+            processValidRefreshToken(claims, refreshToken, response)
+            true
         } catch (e: ExpiredJwtException) {
             log.warn { "만료된 refreshToken: ${e.message}" }
-            return false
+            sendErrorResponse(response, ErrorCode.EXPIRED_TOKEN_ERROR)
+            false
         } catch (e: Exception) {
             log.warn { "refreshToken 유효성 검사 중 에러 발생: ${e.message}" }
-            return false
+            sendErrorResponse(response, ErrorCode.INTERNAL_SERVER_ERROR)
+            false
         }
+    }
+
+    private fun processValidRefreshToken(claims: Claims, refreshToken: String, response: HttpServletResponse) {
+        // 액세스 토큰 발급
+        val newAccessToken = jwtUtils.generateAccessToken(claims)
+        // Refresh Token 만료 기간 확인
+        val remainingTime = claims.expiration.time - System.currentTimeMillis()
+        val sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000L
+        // RT가 7일 이하로 남았으면 새로 발급, 아니면 기존 것 사용
+        val finalRefreshToken = if (remainingTime <= sevenDaysInMillis) {
+            log.info { "RT 만료 기간이 7일 이하로 남아 새로 발급" }
+            jwtUtils.generateRefreshToken(claims)
+        } else {
+            refreshToken
+        }
+        // 사용자 마지막 로그인 시간 업데이트
+        updateLastAccessTime(claims.subject)
+        // 응답 데이터 생성 및 전송
+        sendTokenResponse(response, newAccessToken, finalRefreshToken)
+    }
+
+    private fun updateLastAccessTime(email: String) {
+        commandMemberService.runCatching {
+            log.info { "멤버 마지막 로그인 시각 변경 시작" }
+            putLastAccessTime(email)
+        }.onSuccess {
+            log.info { "멤버 마지막 로그인 시각 변경 성공" }
+        }.onFailure { e ->
+            log.warn { "멤버 마지막 로그인 시각 변경 실패: ${e.message}" }
+        }
+    }
+
+    private fun sendTokenResponse(response: HttpServletResponse, accessToken: String, refreshToken: String) {
+        val loginVO = LoginResponseVO(
+            accessToken = accessToken,
+            refreshToken = refreshToken,
+        )
+        val responseDTO = ResponseDTO.ok(loginVO)
+        sendJsonResponse(response, responseDTO)
+    }
+
+    private fun sendErrorResponse(response: HttpServletResponse, errorCode: ErrorCode) {
+        val responseDTO = ResponseDTO.fail(CommonException(errorCode))
+        sendJsonResponse(response, responseDTO)
+    }
+
+    private fun sendJsonResponse(response: HttpServletResponse, responseDTO: ResponseDTO<*>) {
+        val json = ObjectMapper().writeValueAsString(responseDTO)
+        response.contentType = "application/json"
+        response.characterEncoding = "UTF-8"
+        response.writer.write(json)
     }
 
     private fun validateClaims(claims: Claims, token: String, type: TokenType): Boolean {

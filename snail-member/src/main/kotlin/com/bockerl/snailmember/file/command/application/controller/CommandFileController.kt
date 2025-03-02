@@ -8,6 +8,8 @@
 package com.bockerl.snailmember.file.command.application.controller
 
 import com.bockerl.snailmember.common.ResponseDTO
+import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
+import com.bockerl.snailmember.file.command.application.dto.CommandFileWithGatheringDTO
 import com.bockerl.snailmember.file.command.application.service.CommandFileService
 import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileRequestVO
 import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileWithGatheringRequestVO
@@ -18,9 +20,7 @@ import io.swagger.v3.oas.annotations.media.Encoding
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
@@ -58,7 +58,14 @@ class CommandFileController(
         @RequestPart("file") file: MultipartFile,
         @RequestPart("commandFileRequestVO") commandFileRequestVO: CommandFileRequestVO,
     ): ResponseDTO<Void> {
-        commandFileService.uploadSingleFile(file, commandFileRequestVO)
+        val commandFileDTO =
+            CommandFileDTO(
+                fileTargetType = commandFileRequestVO.fileTargetType,
+                fileTargetId = commandFileRequestVO.fileTargetId,
+                memberId = commandFileRequestVO.memberId,
+            )
+
+        commandFileService.createSingleFile(file, commandFileDTO)
 
         return ResponseDTO.ok(null)
     }
@@ -93,7 +100,14 @@ class CommandFileController(
         @RequestPart("commandFileRequestVO")
         commandFileRequestVO: CommandFileRequestVO,
     ): ResponseDTO<Void> {
-        commandFileService.uploadFiles(files, commandFileRequestVO)
+        val commandFileDTO =
+            CommandFileDTO(
+                fileTargetType = commandFileRequestVO.fileTargetType,
+                fileTargetId = commandFileRequestVO.fileTargetId,
+                memberId = commandFileRequestVO.memberId,
+            )
+
+        commandFileService.createFiles(files, commandFileDTO)
 
         return ResponseDTO.ok(null)
     }
@@ -127,7 +141,15 @@ class CommandFileController(
         @RequestPart("files") files: List<MultipartFile>,
         @RequestPart("commandFileWithGatheringRequestVO") commandFileWithGatheringRequestVO: CommandFileWithGatheringRequestVO,
     ): ResponseDTO<Void> {
-        commandFileService.uploadFilesWithGatheringId(files, commandFileWithGatheringRequestVO)
+        val commandFileWithGatheringDTO =
+            CommandFileWithGatheringDTO(
+                fileTargetType = commandFileWithGatheringRequestVO.fileTargetType,
+                fileTargetId = commandFileWithGatheringRequestVO.fileTargetId,
+                memberId = commandFileWithGatheringRequestVO.memberId,
+                gatheringId = commandFileWithGatheringRequestVO.gatheringId,
+            )
+
+        commandFileService.createFilesWithGatheringId(files, commandFileWithGatheringDTO)
 
         return ResponseDTO.ok(null)
     }
@@ -161,7 +183,14 @@ class CommandFileController(
         @RequestPart("file") file: MultipartFile,
         @RequestPart("commandFileRequestVO") commandFileRequestVO: CommandFileRequestVO,
     ): ResponseDTO<Void> {
-        commandFileService.updateProfileImage(file, commandFileRequestVO)
+        val commandFileDTO =
+            CommandFileDTO(
+                fileTargetType = commandFileRequestVO.fileTargetType,
+                fileTargetId = commandFileRequestVO.fileTargetId,
+                memberId = commandFileRequestVO.memberId,
+            )
+
+        commandFileService.updateProfileImage(file, commandFileDTO)
 
         return ResponseDTO.ok(null)
     }
@@ -199,7 +228,14 @@ class CommandFileController(
         @RequestPart("deleteFilesIds") deleteFilesIds: List<Long>,
         @RequestPart("newFiles") newFiles: List<MultipartFile>,
     ): ResponseDTO<Void> {
-        commandFileService.updateFiles(commandFileRequestVO, deleteFilesIds, newFiles)
+        val commandFileDTO =
+            CommandFileDTO(
+                fileTargetType = commandFileRequestVO.fileTargetType,
+                fileTargetId = commandFileRequestVO.fileTargetId,
+                memberId = commandFileRequestVO.memberId,
+            )
+
+        commandFileService.updateFiles(commandFileDTO, deleteFilesIds, newFiles)
 
         return ResponseDTO.ok(null)
     }
@@ -237,7 +273,15 @@ class CommandFileController(
         @RequestPart("deleteFilesIds") deleteFilesIds: List<Long>,
         @RequestPart("newFiles") newFiles: List<MultipartFile>,
     ): ResponseDTO<Void> {
-        commandFileService.updateFilesWithGatheringId(commandFileWithGatheringRequestVO, deleteFilesIds, newFiles)
+        val commandFileWithGatheringDTO =
+            CommandFileWithGatheringDTO(
+                fileTargetType = commandFileWithGatheringRequestVO.fileTargetType,
+                fileTargetId = commandFileWithGatheringRequestVO.fileTargetId,
+                memberId = commandFileWithGatheringRequestVO.memberId,
+                gatheringId = commandFileWithGatheringRequestVO.gatheringId,
+            )
+
+        commandFileService.updateFilesWithGatheringId(commandFileWithGatheringDTO, deleteFilesIds, newFiles)
 
         return ResponseDTO.ok(null)
     }
@@ -261,21 +305,14 @@ class CommandFileController(
     fun deleteFile(
         @RequestBody commandFileRequestVO: CommandFileRequestVO,
     ): ResponseDTO<Void> {
-        commandFileService.deleteFile(commandFileRequestVO)
+        val commandFileDTO =
+            CommandFileDTO(
+                fileTargetType = commandFileRequestVO.fileTargetType,
+                fileTargetId = commandFileRequestVO.fileTargetId,
+                memberId = commandFileRequestVO.memberId,
+            )
+
+        commandFileService.deleteFile(commandFileDTO)
         return ResponseDTO.ok(null)
-    }
-
-    @GetMapping("/download/{fileName}")
-    fun downloadFile(
-        @PathVariable fileName: String,
-    ): ResponseEntity<ByteArray> {
-        val data = commandFileService.downloadFile(fileName)
-
-        // 설명. 이거 responseDTO로 받을 수 있는 방법 알아보자
-        return ResponseEntity
-            .ok()
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"$fileName\"")
-            .body(data)
     }
 }

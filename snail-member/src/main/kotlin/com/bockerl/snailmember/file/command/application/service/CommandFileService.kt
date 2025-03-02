@@ -5,44 +5,42 @@
 
 package com.bockerl.snailmember.file.command.application.service
 
-import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileRequestVO
-import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileWithGatheringRequestVO
+import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
+import com.bockerl.snailmember.file.command.application.dto.CommandFileWithGatheringDTO
 import org.springframework.web.multipart.MultipartFile
 
 interface CommandFileService {
-    fun uploadSingleFile(
+    fun createSingleFile(
         file: MultipartFile,
-        commandFileRequestVO: CommandFileRequestVO,
+        commandFileDTO: CommandFileDTO,
     )
 
-    fun uploadFiles(
-        file: List<MultipartFile>,
-        commandFileRequestVO: CommandFileRequestVO,
-    )
-
-    fun uploadFilesWithGatheringId(
+    fun createFiles(
         files: List<MultipartFile>,
-        commandFileWithGatheringRequestVO: CommandFileWithGatheringRequestVO,
+        commandFileDTO: CommandFileDTO,
     )
 
-    fun downloadFile(fileName: String): ByteArray
+    fun createFilesWithGatheringId(
+        files: List<MultipartFile>,
+        commandFileWithGatheringDTO: CommandFileWithGatheringDTO,
+    )
 
     fun updateProfileImage(
         file: MultipartFile,
-        commandFileRequestVO: CommandFileRequestVO,
+        commandFileDTO: CommandFileDTO,
     )
 
     fun updateFiles(
-        commandFileRequestVO: CommandFileRequestVO,
+        commandFileDTO: CommandFileDTO,
         deletedFileIds: List<Long>,
         newFiles: List<MultipartFile>,
     )
 
     fun updateFilesWithGatheringId(
-        commandFileWithGatheringRequestVO: CommandFileWithGatheringRequestVO,
+        commandFileWithGatheringDTO: CommandFileWithGatheringDTO,
         deletedFileIds: List<Long>,
         newFiles: List<MultipartFile>,
     )
 
-    fun deleteFile(commandFileRequestVO: CommandFileRequestVO)
+    fun deleteFile(commandFileDTO: CommandFileDTO)
 }

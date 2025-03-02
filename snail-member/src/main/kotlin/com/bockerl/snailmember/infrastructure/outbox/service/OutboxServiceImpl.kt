@@ -32,5 +32,29 @@ class OutboxServiceImpl(
         outboxRepository.save(outbox)
     }
 
+    override fun createOutboxes(outboxDTOs: List<OutboxDTO>) {
+        val outboxes =
+            outboxDTOs.map { outboxDTO ->
+                val outbox =
+                    Outbox(
+                        aggregateId = extractDigits(outboxDTO.aggregateId),
+                        eventType = outboxDTO.eventType,
+                        payload = outboxDTO.payload,
+                    )
+                if (outbox.eventId == null) {
+                    val nextVal =
+                        (
+                            entityManager
+                                .createNativeQuery("SELECT nextval('eve')")
+                                .singleResult as Number
+                        ).toLong()
+                    outbox.eventId = nextVal
+                }
+                outbox
+            }
+
+        outboxRepository.saveAll(outboxes)
+    }
+
     fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
 }

@@ -1,6 +1,5 @@
 package com.bockerl.snailmember.boardlike.command.domain.service
 
-import com.bockerl.snailmember.board.query.service.QueryBoardService
 import com.bockerl.snailmember.boardlike.command.application.dto.CommandBoardLikeDTO
 import com.bockerl.snailmember.boardlike.command.application.service.CommandBoardLikeService
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.entity.BoardLike
@@ -12,7 +11,6 @@ import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.infrastructure.outbox.dto.OutboxDTO
 import com.bockerl.snailmember.infrastructure.outbox.enums.EventType
 import com.bockerl.snailmember.infrastructure.outbox.service.OutboxService
-import com.bockerl.snailmember.member.query.service.QueryMemberService
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
@@ -27,8 +25,6 @@ import java.time.Duration
 class CommandBoardLikeServiceImpl(
     private val redisTemplate: RedisTemplate<String, String>,
     private val boardLikeRepository: BoardLikeRepository,
-    private val queryMemberService: QueryMemberService,
-    private val queryBoardService: QueryBoardService,
     private val outboxService: OutboxService,
     private val objectMapper: ObjectMapper,
 ) : CommandBoardLikeService {
@@ -127,7 +123,7 @@ class CommandBoardLikeServiceImpl(
 
             boardLikeRepository.saveAll(boardLikeListEntities)
         } catch (ex: DataIntegrityViolationException) {
-            logger.error("Bulk insert 실패: ${ex.message}. 개별 처리 시도합니다.")
+            logger.error { "Bulk insert 실패: ${ex.message}. 개별 처리 시도합니다." }
             boardLikeList.forEach { event ->
                 val boardLikeEntity =
                     BoardLike(

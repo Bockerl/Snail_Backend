@@ -28,11 +28,11 @@ data class File(
     )
     var fileId: Long? = null,
     @Column(name = "file_name", nullable = false, length = 255)
-    var fileName: String?,
+    var fileName: String,
     @Column(name = "file_type", nullable = false, length = 255)
-    var fileType: String?,
+    var fileType: String,
     @Column(name = "file_url", nullable = false, length = 255)
-    var fileUrl: String?,
+    var fileUrl: String,
     @Column(name = "active", nullable = false)
     var active: Boolean = true,
     // 설명. fk인 회원 번호

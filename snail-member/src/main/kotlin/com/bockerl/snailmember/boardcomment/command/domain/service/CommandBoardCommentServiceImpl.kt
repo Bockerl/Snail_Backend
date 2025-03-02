@@ -8,9 +8,9 @@ import com.bockerl.snailmember.boardcomment.command.domain.aggregate.entity.Boar
 import com.bockerl.snailmember.boardcomment.command.domain.repository.CommandBoardCommentRepository
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
+import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
 import com.bockerl.snailmember.file.command.application.service.CommandFileService
 import com.bockerl.snailmember.file.command.domain.aggregate.enums.FileTargetType
-import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileRequestVO
 import jakarta.transaction.Transactional
 import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.stereotype.Service
@@ -49,16 +49,16 @@ class CommandBoardCommentServiceImpl(
 
         val boardCommentEntity = commandBoardCommentRepository.save(boardComment)
 
-        val commandFileRequestVO =
+        val commandFileDTO =
             boardCommentEntity.boardCommentId?.let {
-                CommandFileRequestVO(
+                CommandFileDTO(
                     fileTargetType = FileTargetType.BOARD_COMMENT,
                     fileTargetId = formattedBoardCommentId(it),
                     memberId = commandBoardCommentCreateByGifDTO.memberId,
                 )
             }
 
-        commandFileRequestVO?.let { commandFileService.uploadSingleFile(file, commandFileRequestVO) }
+        commandFileDTO?.let { commandFileService.createSingleFile(file, commandFileDTO) }
 
         cacheManager.getCache("boardComments/${commandBoardCommentCreateByGifDTO.boardId}")?.clear()
     }
@@ -79,13 +79,13 @@ class CommandBoardCommentServiceImpl(
 
         // 설명. 내용이 비어있을 때, 파일 지우러 감
         boardComment.boardCommentContents?.let {
-            val commandFileRequestVO =
-                CommandFileRequestVO(
+            val commandFileDTO =
+                CommandFileDTO(
                     fileTargetType = FileTargetType.BOARD_COMMENT,
                     fileTargetId = formattedBoardCommentId(boardCommentId),
                     memberId = commandBoardCommentDeleteDTO.memberId,
                 )
-            commandFileService.deleteFile(commandFileRequestVO)
+            commandFileService.deleteFile(commandFileDTO)
         }
 
         cacheManager.getCache("boardComments/${commandBoardCommentDeleteDTO.boardId}")?.clear()

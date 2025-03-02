@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -24,8 +23,6 @@ import org.springframework.web.bind.annotation.*
 class QueryBoardController(
     private val queryBoardService: QueryBoardService,
 ) {
-    private val log = LoggerFactory.getLogger(this.javaClass)
-
     @Operation(
         summary = "게시글 pk로 게시글 상세 조회",
         description = "게시글 pk로 게시글 ResponseVO를 조회합니다.",

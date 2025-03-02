@@ -43,7 +43,8 @@ enum class ErrorCode(val code: Int, val httpStatus: HttpStatus, val message: Str
     INVALID_CODE(40116, HttpStatus.UNAUTHORIZED, "유효하지 않은 코드입니다."),
     KAKAO_AUTH_ERROR(40117, HttpStatus.UNAUTHORIZED, "카카오 로그인 중 오류가 발생했습니다."),
     GOOGLE_AUTH_ERROR(40118, HttpStatus.UNAUTHORIZED, "구글 로그인 중 오류가 발생했습니다."),
-    LINE_AUTH_ERROR(40118, HttpStatus.UNAUTHORIZED, "라인 로그인 중 오류가 발생했습니다."),
+    LINE_AUTH_ERROR(40119, HttpStatus.UNAUTHORIZED, "라인 로그인 중 오류가 발생했습니다."),
+    COOKIE_ERROR(40120, HttpStatus.UNAUTHORIZED, "쿠키가 없거나 비어있습니다."),
 
     // 403: 권한 부족 (Forbidden)
     FORBIDDEN_ROLE(40300, HttpStatus.FORBIDDEN, "요청한 리소스에 대한 권한이 없습니다."),

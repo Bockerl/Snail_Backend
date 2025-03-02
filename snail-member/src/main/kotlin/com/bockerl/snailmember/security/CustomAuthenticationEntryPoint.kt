@@ -1,6 +1,7 @@
 package com.bockerl.snailmember.security
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.authentication.BadCredentialsException
@@ -12,11 +13,22 @@ import java.time.LocalDateTime
 
 @Component
 class CustomAuthenticationEntryPoint : AuthenticationEntryPoint {
+    private val log = KotlinLogging.logger {}
     override fun commence(
         request: HttpServletRequest,
         response: HttpServletResponse,
         authException: AuthenticationException,
     ) {
+        log.info { "AuthenticationEntryPoint.commence 호출됨" }
+        log.info { "예외 클래스: ${authException.javaClass.name}" }
+        log.info { "예외 메시지: ${authException.message}" }
+
+        // 원인 예외 출력
+        if (authException.cause != null) {
+            log.info { "원인 예외 클래스: ${authException.cause!!.javaClass.name}" }
+            log.info { "원인 예외 메시지: ${authException.cause!!.message}" }
+        }
+
         val (statusCode, message) = when (authException) {
             // 블랙리스트
             is LockedException -> HttpServletResponse.SC_FORBIDDEN to authException.message

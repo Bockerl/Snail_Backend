@@ -24,6 +24,7 @@ class WebSecurity(
     private val commandMemberService: CommandMemberService,
     private val authenticationEntryPoint: CustomAuthenticationEntryPoint,
     private val environment: Environment,
+    private val jwtUtils: JwtUtils,
 ) {
 
     @Bean
@@ -46,7 +47,7 @@ class WebSecurity(
                 logout.logoutSuccessUrl("/api/member/login")
                 // logout.logoutSuccessHandler(customLogoutHandler)  // 핸들러 설정 시
             }
-            // 예외 발생 시, 처리할 exceptionHandler 추가
+//             예외 발생 시, 처리할 exceptionHandler 추가
             .exceptionHandling { exceptions ->
                 exceptions.authenticationEntryPoint(authenticationEntryPoint)
             }
@@ -64,7 +65,15 @@ class WebSecurity(
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
             .authenticationManager(authenticationManager)
-//        .addFilterBefore(AuthorizationFilter, UsernamePasswordAuthenticationFilter::class.java) // JWT 인증 필터
+            .addFilterBefore(
+                JwtFilter(
+                    queryMemberService,
+                    jwtUtils,
+                    redisTemplate,
+                    environment,
+                ),
+                UsernamePasswordAuthenticationFilter::class.java,
+            ) // JWT 인증 필터
             .addFilterAt(
                 getAuthenticationFilter(authenticationManager),
                 UsernamePasswordAuthenticationFilter::class.java,

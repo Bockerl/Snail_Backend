@@ -1,5 +1,3 @@
-@file:Suppress("ktlint:standard:import-ordering")
-
 package com.bockerl.snailmember.member.command.config
 
 import feign.codec.EncodeException

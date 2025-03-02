@@ -4,7 +4,7 @@ import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMes
 
 interface CommandChatMessageService {
     fun sendMessage(
-        roomId: String,
+        chatRoomId: String,
         updateMessageDto: CommandChatMessageRequestDto,
     )
 }

@@ -11,7 +11,7 @@ class VoToDtoConverter {
         requestVo: SendMessageRequestVo,
         chatRoomId: String,
     ) = CommandChatMessageRequestDto(
-        chatRoomId = chatRoomId, // DestinationVariable 받아온 roomId 넣어줌
+        chatRoomId = chatRoomId, // DestinationVariable 받아온 chatRoomId 넣어줌
         sender = requestVo.sender ?: throw RuntimeException("존재하지 않는 sender"),
         message = requestVo.message ?: throw RuntimeException("message가 존재하지 않습니다."),
         messageType = requestVo.messageType ?: throw RuntimeException("존재하지 않는 메시지 타입"),

@@ -2,6 +2,7 @@ package com.bockerl.snailchat.testConfig
 
 import com.bockerl.snailchat.chat.command.application.mapper.VoToDtoConverter
 import com.bockerl.snailchat.chat.command.application.service.CommandChatMessageService
+import com.bockerl.snailchat.chat.command.domain.repository.CommandChatMessageRepository
 import org.mockito.Mockito.mock
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -23,4 +24,9 @@ class TestConfiguration {
     @Primary
     @Bean
     fun mockVoToDtoConverter() = mock(VoToDtoConverter::class.java)!!
+
+    // DB 저장을 위해서 Repository 등록
+    @Primary
+    @Bean
+    fun mockCommandChatMessageRepository() = mock(CommandChatMessageRepository::class.java)!!
 }

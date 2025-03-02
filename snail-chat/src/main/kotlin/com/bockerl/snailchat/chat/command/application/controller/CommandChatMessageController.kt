@@ -67,7 +67,6 @@ class CommandChatMessageController(
         sendMessageRequestVo: SendMessageRequestVo,
         simpleMessageHeaderAccessor: SimpMessageHeaderAccessor,
     ) {
-        val chatRoomId = sendMessageRequestVo.chatRoomId
         // Vo -> Dto
         val commandChatMessageRequestDto = voToDtoConverter.sendMessageRequestVoToDto(sendMessageRequestVo, chatRoomId)
 

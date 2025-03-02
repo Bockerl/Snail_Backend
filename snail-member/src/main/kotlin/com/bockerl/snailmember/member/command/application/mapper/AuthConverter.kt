@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.bockerl.snailmember.member.command.application.mapper
 
 import com.bockerl.snailmember.common.exception.CommonException

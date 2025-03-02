@@ -1,7 +1,125 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
+
 package com.bockerl.snailmember.board.command.domain.service
 
+import com.bockerl.snailmember.board.command.application.dto.CommandBoardCreateDTO
+import com.bockerl.snailmember.board.command.application.dto.CommandBoardDeleteDTO
+import com.bockerl.snailmember.board.command.application.dto.CommandBoardUpdateDTO
 import com.bockerl.snailmember.board.command.application.service.CommandBoardService
+import com.bockerl.snailmember.board.command.domain.aggregate.entity.Board
+import com.bockerl.snailmember.board.command.domain.repository.CommandBoardRepository
+import com.bockerl.snailmember.common.exception.CommonException
+import com.bockerl.snailmember.common.exception.ErrorCode
+import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
+import com.bockerl.snailmember.file.command.application.service.CommandFileService
+import com.bockerl.snailmember.file.command.domain.aggregate.enums.FileTargetType
+import jakarta.transaction.Transactional
+import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
 
 @Service
-class CommandBoardServiceImpl : CommandBoardService
+class CommandBoardServiceImpl(
+    private val commandBoardRepository: CommandBoardRepository,
+    private val commandFileService: CommandFileService,
+    private val cacheManager: RedisCacheManager,
+) : CommandBoardService {
+    @Transactional
+    override fun createBoard(
+        commandBoardCreateDTO: CommandBoardCreateDTO,
+        files: List<MultipartFile>,
+    ) {
+        val board =
+            Board(
+                boardContents = commandBoardCreateDTO.boardContents,
+                boardType = commandBoardCreateDTO.boardType,
+                boardTag = commandBoardCreateDTO.boardTag,
+                boardLocation = commandBoardCreateDTO.boardLocation,
+                boardAccessLevel = commandBoardCreateDTO.boardAccessLevel,
+                memberId = extractDigits(commandBoardCreateDTO.memberId),
+            )
+
+        val boardEntity = commandBoardRepository.save(board)
+
+        if (files.isNotEmpty()) {
+            val commandFileDTO =
+                boardEntity.boardId?.let {
+                    CommandFileDTO(
+                        fileTargetType = FileTargetType.BOARD,
+                        fileTargetId = formattedBoardId(it),
+                        memberId = commandBoardCreateDTO.memberId,
+                    )
+                }
+
+            commandFileDTO?.let { commandFileService.createFiles(files, it) }
+        }
+
+        cacheManager.getCache("board/${commandBoardCreateDTO.boardTag}")?.clear()
+        cacheManager.getCache("board/${commandBoardCreateDTO.boardType}")?.clear()
+    }
+
+    override fun updateBoard(
+        commandBoardUpdateDTO: CommandBoardUpdateDTO,
+        files: List<MultipartFile>,
+    ) {
+        val boardId = extractDigits(commandBoardUpdateDTO.boardId)
+
+        val board = commandBoardRepository.findById(boardId).orElseThrow { CommonException(ErrorCode.NOT_FOUND_BOARD) }
+
+        board.apply {
+            boardContents = commandBoardUpdateDTO.boardContents
+            boardType = commandBoardUpdateDTO.boardType
+            boardTag = commandBoardUpdateDTO.boardTag
+            boardLocation = commandBoardUpdateDTO.boardLocation
+            boardAccessLevel = commandBoardUpdateDTO.boardAccessLevel
+            memberId = extractDigits(commandBoardUpdateDTO.memberId)
+        }
+
+        val boardEntity = commandBoardRepository.save(board)
+
+        if (files.isNotEmpty()) {
+            val commandFileDTO =
+                boardEntity.boardId?.let {
+                    CommandFileDTO(
+                        fileTargetType = FileTargetType.BOARD,
+                        fileTargetId = formattedBoardId(it),
+                        memberId = commandBoardUpdateDTO.memberId,
+                    )
+                }
+
+            commandFileDTO?.let { commandFileService.updateFiles(it, commandBoardUpdateDTO.deleteFilesIds, files) }
+        }
+
+        cacheManager.getCache("board/${commandBoardUpdateDTO.boardTag}")?.clear()
+        cacheManager.getCache("board/${commandBoardUpdateDTO.boardType}")?.clear()
+    }
+
+    // 설명. soft delete로 바꾸기
+    override fun deleteBoard(commandBoardDeleteDTO: CommandBoardDeleteDTO) {
+        val boardId = extractDigits(commandBoardDeleteDTO.boardId)
+        val board = commandBoardRepository.findById(boardId).orElseThrow { CommonException(ErrorCode.NOT_FOUND_BOARD) }
+
+        board.apply {
+            active = false
+        }
+
+        val commandFileDTO =
+            CommandFileDTO(
+                fileTargetType = FileTargetType.BOARD,
+                fileTargetId = formattedBoardId(boardId),
+                memberId = commandBoardDeleteDTO.memberId,
+            )
+
+        commandFileService.deleteFile(commandFileDTO)
+
+        cacheManager.getCache("board/${board.boardType}")?.clear()
+        cacheManager.getCache("board/${board.boardTag}")?.clear()
+    }
+
+    fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
+
+    fun formattedBoardId(boardId: Long): String = "BOA-${boardId.toString().padStart(8, '0') ?: "00000000"}"
+}

@@ -51,8 +51,15 @@
             updated_at
           FROM
             board
-         WHERE
-            board_type = #{boardType}
+        <where>
+            <if test="lastId != null">
+                board_id &lt; #{lastId} and
+            </if>
+            board_type = #{boardType} and
+            active = true
+        </where>
+        ORDER BY board_id DESC
+        LIMIT #{pageSize}
     </select>
 
     <select id="selectBoardByBoardTag" parameterType="String" resultMap="boardResultMap">
@@ -70,11 +77,20 @@
             updated_at
           FROM
             board
-        <if test="boardTagList != null and boardTagList.size() > 0">
-         WHERE board_tag IN
-            <foreach collection="boardTagList" item="board_tag" open="(" separator="," close=")">
-                #{board_tag}
-            </foreach>
-        </if>
+        <where>
+            <if test="lastId != null">
+                board_id &lt; #{lastId} and
+            </if>
+            board_type = #{boardType} and
+            active = true
+            <if test="boardTagList != null and boardTagList.size() > 0">
+                board_tag IN
+                <foreach collection="boardTagList" item="board_tag" open="(" separator="," close=")">
+                    #{board_tag}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY board_id DESC
+        LIMIT #{pageSize}
     </select>
 </mapper>

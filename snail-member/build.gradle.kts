@@ -1,3 +1,9 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
+@file:Suppress("DEPRECATION")
+
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 plugins {
@@ -10,12 +16,16 @@ plugins {
 }
 
 ktlint {
-    version.set("1.2.1")
+    version.set("1.5.0")
     verbose.set(true)
     outputToConsole.set(true)
     reporters {
         reporter(ReporterType.JSON)
     }
+    filter {
+        exclude("**/*.kts")
+    }
+    disabledRules.set(setOf("header")) // HEADER_KEYWORD 규칙 비활성화
 }
 
 // build.gradle.kts
@@ -54,11 +64,14 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+    implementation("org.springframework.kafka:spring-kafka")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.4")
     testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.springframework.kafka:spring-kafka-test")
     "developmentOnly"("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("org.postgresql:postgresql")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -74,6 +87,9 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     // hibernate(Json 저장을 위한)
     implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
+
+    // redis sentinel 가용을 위한
+    implementation("io.lettuce:lettuce-core") // Redis Sentinel 지원을 위해 Lettuce 클라이언트 사용
 }
 dependencyManagement {
     imports {

@@ -5,7 +5,9 @@ package com.bockerl.snailmember.member.command.application.mapper
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.dto.request.*
+import com.bockerl.snailmember.member.command.application.dto.response.LoginResponseDTO
 import com.bockerl.snailmember.member.command.domain.aggregate.vo.request.*
+import com.bockerl.snailmember.member.command.domain.aggregate.vo.response.LoginResponseVO
 import org.springframework.stereotype.Component
 
 @Component
@@ -47,5 +49,11 @@ class AuthConverter {
         primaryFormattedId = requestVO.primaryFormattedId ?: throw CommonException(ErrorCode.INVALID_INPUT_VALUE),
         // 직장 장소는 입력을 안 할 수도 있으므로 nullable
         workplaceFormattedId = requestVO.workplaceFormattedId,
+    )
+
+    // 로그인 토큰 dto to vo
+    fun loginDTOToVO(responseDTO: LoginResponseDTO): LoginResponseVO = LoginResponseVO(
+        accessToken = responseDTO.accessToken,
+        refreshToken = responseDTO.refreshToken,
     )
 }

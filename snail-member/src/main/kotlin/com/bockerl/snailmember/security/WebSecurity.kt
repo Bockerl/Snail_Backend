@@ -57,7 +57,8 @@ class WebSecurity(
                     .requestMatchers("/v3/api-docs/**").permitAll()
                     .requestMatchers("/api/member/login").permitAll()
                     .requestMatchers("/api/registration/**").permitAll()
-                    .requestMatchers("/api/user/oauth2").permitAll()
+                    .requestMatchers("/api/user/oauth2/**").permitAll()
+                    .requestMatchers("/favicon.ico").permitAll()
                     .requestMatchers("/api/member/health").permitAll()
                     .anyRequest().authenticated()
             }

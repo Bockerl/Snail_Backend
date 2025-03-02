@@ -17,6 +17,7 @@ import com.bockerl.snailmember.file.command.application.service.CommandFileServi
 import com.bockerl.snailmember.file.command.domain.aggregate.enums.FileTargetType
 import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileRequestVO
 import jakarta.transaction.Transactional
+import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile
 class CommandBoardServiceImpl(
     private val commandBoardRepository: CommandBoardRepository,
     private val commandFileService: CommandFileService,
+    private val cacheManager: RedisCacheManager,
 ) : CommandBoardService {
     @Transactional
     override fun createBoard(
@@ -54,6 +56,9 @@ class CommandBoardServiceImpl(
 
             commandFileRequestVO?.let { commandFileService.uploadFiles(files, it) }
         }
+
+        cacheManager.getCache("board/${commandBoardCreateDTO.boardTag}")?.clear()
+        cacheManager.getCache("board/${commandBoardCreateDTO.boardType}")?.clear()
     }
 
     override fun updateBoard(
@@ -87,6 +92,9 @@ class CommandBoardServiceImpl(
 
             commandFileRequestVO?.let { commandFileService.updateFiles(it, commandBoardUpdateDTO.deleteFilesIds, files) }
         }
+
+        cacheManager.getCache("board/${commandBoardUpdateDTO.boardTag}")?.clear()
+        cacheManager.getCache("board/${commandBoardUpdateDTO.boardType}")?.clear()
     }
 
     // 설명. soft delete로 바꾸기
@@ -106,6 +114,9 @@ class CommandBoardServiceImpl(
             )
 
         commandFileService.deleteFile(commandFileRequestVO)
+
+        cacheManager.getCache("board/${board.boardType}")?.clear()
+        cacheManager.getCache("board/${board.boardTag}")?.clear()
     }
 
     fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()

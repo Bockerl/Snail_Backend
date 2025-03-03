@@ -1,35 +1,46 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
+
 package com.bockerl.snailmember.file.command.application.service
 
-import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileRequestVO
-import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileWithGatheringRequestVO
+import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
+import com.bockerl.snailmember.file.command.application.dto.CommandFileWithGatheringDTO
 import org.springframework.web.multipart.MultipartFile
 
 interface CommandFileService {
-
-    fun uploadProfileImage(file: MultipartFile, commandFileRequestVO: CommandFileRequestVO)
-
-    fun uploadFiles(file: List<MultipartFile>, commandFileRequestVO: CommandFileRequestVO)
-
-    fun uploadFilesWithGatheringId(
-        files: List<MultipartFile>,
-        commandFileWithGatheringRequestVO: CommandFileWithGatheringRequestVO,
+    fun createSingleFile(
+        file: MultipartFile,
+        commandFileDTO: CommandFileDTO,
     )
 
-    fun downloadFile(fileName: String): ByteArray
+    fun createFiles(
+        files: List<MultipartFile>,
+        commandFileDTO: CommandFileDTO,
+    )
 
-    fun updateProfileImage(file: MultipartFile, commandFileRequestVO: CommandFileRequestVO)
+    fun createFilesWithGatheringId(
+        files: List<MultipartFile>,
+        commandFileWithGatheringDTO: CommandFileWithGatheringDTO,
+    )
+
+    fun updateProfileImage(
+        file: MultipartFile,
+        commandFileDTO: CommandFileDTO,
+    )
 
     fun updateFiles(
-        commandFileRequestVO: CommandFileRequestVO,
+        commandFileDTO: CommandFileDTO,
         deletedFileIds: List<Long>,
         newFiles: List<MultipartFile>,
     )
 
     fun updateFilesWithGatheringId(
-        commandFileWithGatheringRequestVO: CommandFileWithGatheringRequestVO,
+        commandFileWithGatheringDTO: CommandFileWithGatheringDTO,
         deletedFileIds: List<Long>,
         newFiles: List<MultipartFile>,
     )
 
-    fun deleteFile(commandFileRequestVO: CommandFileRequestVO)
+    fun deleteFile(commandFileDTO: CommandFileDTO)
 }

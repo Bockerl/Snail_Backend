@@ -1,35 +1,43 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
+
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.bockerl.snailmember.file.command.application.controller
 
 import com.bockerl.snailmember.common.ResponseDTO
-import com.bockerl.snailmember.config.OpenApiBody
+import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
+import com.bockerl.snailmember.file.command.application.dto.CommandFileWithGatheringDTO
 import com.bockerl.snailmember.file.command.application.service.CommandFileService
 import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileRequestVO
 import com.bockerl.snailmember.file.command.domain.aggregate.vo.CommandFileWithGatheringRequestVO
+import com.bockerl.snailmember.infrastructure.config.OpenApiBody
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Encoding
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/api/file")
-class CommandFileController(private val commandFileService: CommandFileService) {
-
+class CommandFileController(
+    private val commandFileService: CommandFileService,
+) {
     @Operation(
-        summary = "프로필 사진 등록",
-        description = "프로필 사진(1장)을 등록합니다. (회원, 모임)",
+        summary = "단일 파일 등록",
+        description = "파일 (1장)을 등록합니다. (회원, 모임, gif)",
     )
     @ApiResponses(
         value = [
             ApiResponse(
                 responseCode = "200",
-                description = "프로필 사진 등록 성공",
+                description = "단일 파일 등록 성공",
                 content = [
                     Content(mediaType = "application/json", schema = Schema(implementation = ResponseDTO::class)),
                 ],
@@ -37,7 +45,7 @@ class CommandFileController(private val commandFileService: CommandFileService) 
         ],
     )
     @OpenApiBody(
-        description = "회원 아이디를 등록합니다.",
+        description = "단일 파일을 등록합니다.",
         content = [
             Content(
                 encoding = [Encoding(name = "commandFileRequestVO", contentType = MediaType.APPLICATION_JSON_VALUE)],
@@ -45,12 +53,19 @@ class CommandFileController(private val commandFileService: CommandFileService) 
         ],
         required = true,
     )
-    @PostMapping("/profile", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun postProfileImage(
+    @PostMapping("/single", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun postSingleFile(
         @RequestPart("file") file: MultipartFile,
         @RequestPart("commandFileRequestVO") commandFileRequestVO: CommandFileRequestVO,
     ): ResponseDTO<Void> {
-        commandFileService.uploadProfileImage(file, commandFileRequestVO)
+        val commandFileDTO =
+            CommandFileDTO(
+                fileTargetType = commandFileRequestVO.fileTargetType,
+                fileTargetId = commandFileRequestVO.fileTargetId,
+                memberId = commandFileRequestVO.memberId,
+            )
+
+        commandFileService.createSingleFile(file, commandFileDTO)
 
         return ResponseDTO.ok(null)
     }
@@ -79,13 +94,20 @@ class CommandFileController(private val commandFileService: CommandFileService) 
         ],
         required = true,
     )
-    @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @PostMapping("multi", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun postFiles(
         @RequestPart("files") files: List<MultipartFile>,
         @RequestPart("commandFileRequestVO")
         commandFileRequestVO: CommandFileRequestVO,
     ): ResponseDTO<Void> {
-        commandFileService.uploadFiles(files, commandFileRequestVO)
+        val commandFileDTO =
+            CommandFileDTO(
+                fileTargetType = commandFileRequestVO.fileTargetType,
+                fileTargetId = commandFileRequestVO.fileTargetId,
+                memberId = commandFileRequestVO.memberId,
+            )
+
+        commandFileService.createFiles(files, commandFileDTO)
 
         return ResponseDTO.ok(null)
     }
@@ -106,10 +128,10 @@ class CommandFileController(private val commandFileService: CommandFileService) 
         ],
     )
     @OpenApiBody(
-        description = "추가로 모임 id를 등록합니다.",
+        description = "다중 파일 등록에 추가로 모임 id를 등록합니다.",
         content = [
             Content(
-                encoding = [Encoding(name = "commandFileRequestVO", contentType = MediaType.APPLICATION_JSON_VALUE)],
+                encoding = [Encoding(name = "commandFileWithGatheringRequestVO", contentType = MediaType.APPLICATION_JSON_VALUE)],
             ),
         ],
         required = true,
@@ -117,10 +139,17 @@ class CommandFileController(private val commandFileService: CommandFileService) 
     @PostMapping("/gathering", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun postFilesWithGatheringId(
         @RequestPart("files") files: List<MultipartFile>,
-        @RequestPart("commandFileWithGatheringRequestVO") commandFileWithGatheringRequestVO:
-        CommandFileWithGatheringRequestVO,
+        @RequestPart("commandFileWithGatheringRequestVO") commandFileWithGatheringRequestVO: CommandFileWithGatheringRequestVO,
     ): ResponseDTO<Void> {
-        commandFileService.uploadFilesWithGatheringId(files, commandFileWithGatheringRequestVO)
+        val commandFileWithGatheringDTO =
+            CommandFileWithGatheringDTO(
+                fileTargetType = commandFileWithGatheringRequestVO.fileTargetType,
+                fileTargetId = commandFileWithGatheringRequestVO.fileTargetId,
+                memberId = commandFileWithGatheringRequestVO.memberId,
+                gatheringId = commandFileWithGatheringRequestVO.gatheringId,
+            )
+
+        commandFileService.createFilesWithGatheringId(files, commandFileWithGatheringDTO)
 
         return ResponseDTO.ok(null)
     }
@@ -154,7 +183,14 @@ class CommandFileController(private val commandFileService: CommandFileService) 
         @RequestPart("file") file: MultipartFile,
         @RequestPart("commandFileRequestVO") commandFileRequestVO: CommandFileRequestVO,
     ): ResponseDTO<Void> {
-        commandFileService.updateProfileImage(file, commandFileRequestVO)
+        val commandFileDTO =
+            CommandFileDTO(
+                fileTargetType = commandFileRequestVO.fileTargetType,
+                fileTargetId = commandFileRequestVO.fileTargetId,
+                memberId = commandFileRequestVO.memberId,
+            )
+
+        commandFileService.updateProfileImage(file, commandFileDTO)
 
         return ResponseDTO.ok(null)
     }
@@ -192,7 +228,14 @@ class CommandFileController(private val commandFileService: CommandFileService) 
         @RequestPart("deleteFilesIds") deleteFilesIds: List<Long>,
         @RequestPart("newFiles") newFiles: List<MultipartFile>,
     ): ResponseDTO<Void> {
-        commandFileService.updateFiles(commandFileRequestVO, deleteFilesIds, newFiles)
+        val commandFileDTO =
+            CommandFileDTO(
+                fileTargetType = commandFileRequestVO.fileTargetType,
+                fileTargetId = commandFileRequestVO.fileTargetId,
+                memberId = commandFileRequestVO.memberId,
+            )
+
+        commandFileService.updateFiles(commandFileDTO, deleteFilesIds, newFiles)
 
         return ResponseDTO.ok(null)
     }
@@ -230,7 +273,15 @@ class CommandFileController(private val commandFileService: CommandFileService) 
         @RequestPart("deleteFilesIds") deleteFilesIds: List<Long>,
         @RequestPart("newFiles") newFiles: List<MultipartFile>,
     ): ResponseDTO<Void> {
-        commandFileService.updateFilesWithGatheringId(commandFileWithGatheringRequestVO, deleteFilesIds, newFiles)
+        val commandFileWithGatheringDTO =
+            CommandFileWithGatheringDTO(
+                fileTargetType = commandFileWithGatheringRequestVO.fileTargetType,
+                fileTargetId = commandFileWithGatheringRequestVO.fileTargetId,
+                memberId = commandFileWithGatheringRequestVO.memberId,
+                gatheringId = commandFileWithGatheringRequestVO.gatheringId,
+            )
+
+        commandFileService.updateFilesWithGatheringId(commandFileWithGatheringDTO, deleteFilesIds, newFiles)
 
         return ResponseDTO.ok(null)
     }
@@ -251,19 +302,17 @@ class CommandFileController(private val commandFileService: CommandFileService) 
         ],
     )
     @DeleteMapping("")
-    fun deleteFile(@RequestBody commandFileRequestVO: CommandFileRequestVO): ResponseDTO<Void> {
-        commandFileService.deleteFile(commandFileRequestVO)
+    fun deleteFile(
+        @RequestBody commandFileRequestVO: CommandFileRequestVO,
+    ): ResponseDTO<Void> {
+        val commandFileDTO =
+            CommandFileDTO(
+                fileTargetType = commandFileRequestVO.fileTargetType,
+                fileTargetId = commandFileRequestVO.fileTargetId,
+                memberId = commandFileRequestVO.memberId,
+            )
+
+        commandFileService.deleteFile(commandFileDTO)
         return ResponseDTO.ok(null)
-    }
-
-    @GetMapping("/download/{fileName}")
-    fun downloadFile(@PathVariable fileName: String): ResponseEntity<ByteArray> {
-        val data = commandFileService.downloadFile(fileName)
-
-        /* 설명. 이거 responseDTO로 받을 수 있는 방법 알아보자*/
-        return ResponseEntity.ok()
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"$fileName\"")
-            .body(data)
     }
 }

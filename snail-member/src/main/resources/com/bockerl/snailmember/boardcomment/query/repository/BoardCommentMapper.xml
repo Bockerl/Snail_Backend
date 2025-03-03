@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bockerl.snailmember.boardcomment.query.repository.BoardCommentMapper">
+    <resultMap id="boardCommentResultMap" type="com.bockerl.snailmember.boardcomment.query.dto.QueryBoardCommentDTO">
+        <result property="boardCommentId" column="board_comment_id"/>
+        <result property="boardCommentContents" column="board_comment_contents"/>
+        <result property="memberId" column="member_id"/>
+        <result property="boardId" column="board_id"/>
+        <result property="active" column="active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectBoardCommentsByBoardId" resultMap="boardCommentResultMap">
+        SELECT
+            board_comment_id,
+            board_comment_contents,
+            member_id,
+            board_id,
+            active,
+            created_at,
+            updated_at
+          FROM
+            board_comment
+        <where>
+            <if test="lastId != null">
+                board_comment_id &lt; #{lastId} and
+            </if>
+            board_id = #{boardId} and
+            active = true
+        </where>
+         ORDER BY board_comment_id DESC
+         LIMIT #{pageSize}
+    </select>
+
+    <select id="selectBoardCommentsByMemberId" resultMap="boardCommentResultMap">
+        SELECT
+        board_comment_id,
+        board_comment_contents,
+        member_id,
+        board_id,
+        active,
+        created_at,
+        updated_at
+        FROM
+        board_comment
+        <where>
+            <if test="lastId != null">
+                board_comment_id &lt; #{lastId} and
+            </if>
+            member_id = #{memberId} and
+            active = true
+        </where>
+        ORDER BY board_comment_id DESC
+        LIMIT #{pageSize}
+    </select>
+
+</mapper>

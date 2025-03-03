@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
 package com.bockerl.snailmember.board.command.domain.aggregate.vo.request
 
 import com.bockerl.snailmember.board.command.domain.aggregate.enums.BoardTag
@@ -17,6 +21,8 @@ data class CommandBoardUpdateRequestVO(
     val boardLocation: String,
     @field:Schema(description = "게시글 공개 범위", example = "ALL", type = "String")
     val boardAccessLevel: String,
-    @field:Schema(description = "회원번호", example = "1", type = "Long")
-    val memberId: Long,
+    @field:Schema(description = "회원번호", example = "1", type = "String")
+    val memberId: String,
+    @field:Schema(description = "삭제할 파일 리스트", example = "[1,2]", type = "List<Long>")
+    val deleteFilesIds: List<Long>,
 )

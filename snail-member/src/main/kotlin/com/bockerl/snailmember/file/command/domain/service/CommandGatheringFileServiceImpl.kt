@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
 package com.bockerl.snailmember.file.command.domain.service
 
 import com.bockerl.snailmember.file.command.application.service.CommandGatheringFileService
@@ -8,16 +12,21 @@ import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 
 @Service
-class CommandGatheringFileServiceImpl(private val commandGatheringFileRepository: CommandGatheringFileRepository) :
-    CommandGatheringFileService {
-
+class CommandGatheringFileServiceImpl(
+    private val commandGatheringFileRepository: CommandGatheringFileRepository,
+) : CommandGatheringFileService {
     @Transactional
-    override fun createGatheringFile(fileId: Long, gatheringId: Long, file: File) {
-        val gatheringFile = GatheringFile(
-            fileId = fileId,
-            gatheringId = gatheringId,
-            file = file,
-        )
+    override fun createGatheringFile(
+        fileId: Long,
+        gatheringId: Long,
+        file: File,
+    ) {
+        val gatheringFile =
+            GatheringFile(
+                fileId = fileId,
+                gatheringId = gatheringId,
+                file = file,
+            )
         commandGatheringFileRepository.save(gatheringFile)
     }
 

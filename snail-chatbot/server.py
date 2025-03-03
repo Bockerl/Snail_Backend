@@ -38,6 +38,8 @@ vector_db = None
 # 현재 시간 가져오기
 timestamp = datetime.datetime.now().isoformat()  # ISO 형식으로 날짜 및 시간 반환
 
+# Tesseract OCR 경로 설정
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 # Chroma 벡터 DB 설정
 CHROMA_DB_DIR = "vectorstore"
@@ -133,6 +135,13 @@ async def chat(input: str = Form(...), file: Optional[UploadFile] = File(None), 
 
         # 대화 ID 생성
         conversation_id = str(uuid.uuid4())
+
+        # 이미지가 업로드된 경우 OCR 처리
+        if file:
+            image = Image.open(io.BytesIO(await file.read()))
+            ocr_text = pytesseract.image_to_string(image, lang="kor+eng")
+            input_data.messages.append(ocr_text)
+            result["ocr_text"] = ocr_text
 
         # 챗봇 응답 생성
         result["chatbot_response"] = chat_chain.invoke(input_data.messages)

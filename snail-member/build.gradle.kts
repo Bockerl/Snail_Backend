@@ -1,3 +1,9 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
+@file:Suppress("DEPRECATION")
+
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 plugins {
@@ -12,16 +18,14 @@ plugins {
 ktlint {
     version.set("1.5.0")
     verbose.set(true)
-    android.set(false)
     outputToConsole.set(true)
-    enableExperimentalRules.set(true)
-    filter {
-        exclude("**/test/**") // 테스트 소스 제외
-        exclude("**/*.kts") // Kotlin 스크립트 파일 제외
-    }
     reporters {
         reporter(ReporterType.JSON)
     }
+    filter {
+        exclude("**/*.kts")
+    }
+    disabledRules.set(setOf("header")) // HEADER_KEYWORD 규칙 비활성화
 }
 
 // build.gradle.kts
@@ -63,12 +67,14 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+    implementation("org.springframework.kafka:spring-kafka")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.4")
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.springframework.kafka:spring-kafka-test")
     "developmentOnly"("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("org.postgresql:postgresql")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -104,7 +110,6 @@ dependencies {
 dependencyManagement {
     imports {
         mavenBom("com.azure.spring:spring-cloud-azure-dependencies:$springCloudAzureVersion")
-        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2023.0.0") // Spring Cloud의 버전을 명시적으로 지정
     }
 }
 

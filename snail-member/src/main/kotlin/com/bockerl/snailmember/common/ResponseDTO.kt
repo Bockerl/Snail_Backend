@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
+
 package com.bockerl.snailmember.common
 
 import com.bockerl.snailmember.common.exception.CommonException

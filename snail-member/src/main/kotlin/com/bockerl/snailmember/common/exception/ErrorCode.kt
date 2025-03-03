@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
 package com.bockerl.snailmember.common.exception
 
 import org.springframework.http.HttpStatus
@@ -17,6 +21,8 @@ enum class ErrorCode(val code: Int, val httpStatus: HttpStatus, val message: Str
     INACTIVE_REPLY(40013, HttpStatus.BAD_REQUEST, "해당 대댓글은 삭제돼 있습니다."),
     EMPTY_REQUEST_INPUTSTREAM(40015, HttpStatus.BAD_REQUEST, "요청 본문이 비어 있습니다. 필수 데이터를 포함해야 합니다."),
     TOO_MANY_FILES(40016, HttpStatus.BAD_REQUEST, "파일 업로드 제한 수를 넘었습니다."),
+    ALREADY_LIKED(40017, HttpStatus.BAD_REQUEST, "이미 좋아요가 존재합니다"),
+    ALREADY_UNLIKED(40018, HttpStatus.BAD_REQUEST, "이미 좋아요는 취소되었습니다"),
     NULL_BLANK_SEARCH_KEYWORD(40017, HttpStatus.BAD_REQUEST, "검색어가 null이거나 공백입니다."),
     OVERSIZE_KEYWORD_LENGTH(40018, HttpStatus.BAD_REQUEST, "검색어가 최대 글자 수 제한을 넘었습니다."),
     SQL_INJECTION_DETECTED(40019, HttpStatus.BAD_REQUEST, "SQL INJECTION이 탐지되었습니다."),
@@ -66,6 +72,7 @@ enum class ErrorCode(val code: Int, val httpStatus: HttpStatus, val message: Str
     NOT_FOUND_KAKAO_REDIRECT(40416, HttpStatus.NOT_FOUND, "카카오 redirect Uri가 존재하지 않습니다."),
     NOT_FOUND_KAKAO_CLIENT_ID(40417, HttpStatus.NOT_FOUND, "카카오 client id가 존재하지 않습니다."),
     NOT_FOUND_KAKAO_CLIENT_SECRET(40418, HttpStatus.NOT_FOUND, "카카오 client secret이 존재하지 않습니다."),
+    NOT_FOUND_BOARD_COMMENT(40415, HttpStatus.NOT_FOUND, "해당 게시글 댓글이 존재하지 않습니다"),
 
     // 429: 요청 과다 (Too Many Requests)
     TOO_MANY_REQUESTS(42900, HttpStatus.TOO_MANY_REQUESTS, "요청 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요."),
@@ -73,6 +80,7 @@ enum class ErrorCode(val code: Int, val httpStatus: HttpStatus, val message: Str
     // 500: 서버 내부 오류 (Internal Server Error)
     INTERNAL_SERVER_ERROR(50000, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다"),
     MAIL_SEND_FAIL(50001, HttpStatus.INTERNAL_SERVER_ERROR, "인증 메일 전송에 실패했습니다."),
+    BLOB_STORAGE_ERROR(50002, HttpStatus.INTERNAL_SERVER_ERROR, "blob storage 파일 업로드에 실패했습니다."),
     ;
 
     companion object {

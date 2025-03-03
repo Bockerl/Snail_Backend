@@ -1,3 +1,10 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
+
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.bockerl.snailmember.file.query.controller
 
 import com.bockerl.snailmember.common.ResponseDTO
@@ -13,7 +20,9 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/file")
-class QueryFileController(private val queryFileService: QueryFileService) {
+class QueryFileController(
+    private val queryFileService: QueryFileService,
+) {
     @Operation(
         summary = "타겟 도메인 타입, pk로 해당 파일 조회",
         description = "타겟 도메인 타입, pk로 해당 파일을 조회합니다.",
@@ -24,16 +33,15 @@ class QueryFileController(private val queryFileService: QueryFileService) {
                 responseCode = "200",
                 description = "타겟 도메인 타입, pk로 해당 파일을 조회 성공",
                 content = [
-                    Content(
-                        mediaType = "application/json",
-                        schema = Schema(implementation = QueryFileResponseVO::class),
-                    ),
+                    Content(mediaType = "application/json", schema = Schema(implementation = QueryFileResponseVO::class)),
                 ],
             ),
         ],
     )
     @PostMapping("/target")
-    fun getFilesByTarget(@RequestBody queryFileRequestVO: QueryFileRequestVO): ResponseDTO<*> {
+    fun getFilesByTarget(
+        @RequestBody queryFileRequestVO: QueryFileRequestVO,
+    ): ResponseDTO<*> {
         val fileList = queryFileService.readFilesByTarget(queryFileRequestVO)
 
         return ResponseDTO.ok(fileList)
@@ -49,16 +57,15 @@ class QueryFileController(private val queryFileService: QueryFileService) {
                 responseCode = "200",
                 description = "모임별 전체 사진 조회성공",
                 content = [
-                    Content(
-                        mediaType = "application/json",
-                        schema = Schema(implementation = QueryFileResponseVO::class),
-                    ),
+                    Content(mediaType = "application/json", schema = Schema(implementation = QueryFileResponseVO::class)),
                 ],
             ),
         ],
     )
     @GetMapping("/gathering/{gatheringId}")
-    fun getFilesByGatheringId(@PathVariable("gatheringId") gatheringId: Long): ResponseDTO<*> {
+    fun getFilesByGatheringId(
+        @PathVariable("gatheringId") gatheringId: String,
+    ): ResponseDTO<*> {
         val fileList = queryFileService.readFilesByGatheringId(gatheringId)
 
         return ResponseDTO.ok(fileList)

@@ -1,4 +1,4 @@
-package com.bockerl.snailmember.common
+package com.bockerl.snailmember.common.event
 
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.event.BoardCommentLikeEvent
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.event.BoardLikeEvent

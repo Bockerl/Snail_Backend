@@ -1,6 +1,6 @@
 package com.bockerl.snailmember.boardlike.command.domain.aggregate.event
 
-import com.bockerl.snailmember.boardlike.command.domain.aggregate.enum.BoardLikeActionType
+import com.bockerl.snailmember.boardlike.command.domain.aggregate.enums.BoardLikeActionType
 import com.bockerl.snailmember.common.event.BaseLikeEvent
 
 data class BoardLikeEvent(

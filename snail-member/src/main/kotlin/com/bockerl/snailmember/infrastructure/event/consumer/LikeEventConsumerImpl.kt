@@ -1,6 +1,6 @@
 package com.bockerl.snailmember.infrastructure.event.consumer
 
-import com.bockerl.snailmember.common.BaseLikeEvent
+import com.bockerl.snailmember.common.event.BaseLikeEvent
 import com.bockerl.snailmember.infrastructure.event.processor.LikeEventProcessor
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional

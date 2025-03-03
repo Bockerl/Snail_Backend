@@ -1,6 +1,6 @@
 package com.bockerl.snailmember.infrastructure.event.processor
 
-import com.bockerl.snailmember.common.BaseLikeEvent
+import com.bockerl.snailmember.common.event.BaseLikeEvent
 import com.bockerl.snailmember.infrastructure.event.handler.LikeEventHandler
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.dao.DuplicateKeyException
@@ -22,22 +22,11 @@ class LikeEventProcessor(
      * 최대 3회 재시도하며, 첫 재시도는 1초 후 시작하고 지수 백오프를 적용합니다.
      */
     @Retryable(
-        value = [TransientDataAccessException::class],
+        value = [TransientDataAccessException::class, DuplicateKeyException::class],
         maxAttempts = 3,
         backoff = Backoff(delay = 1000, multiplier = 2.0, random = true),
     )
     fun process(event: BaseLikeEvent) {
-        logger.info { "이벤트 처리 시작: $event" }
-        likeEventHandler.handle(event)
-        logger.info { "이벤트 처리 성공: $event" }
-    }
-
-    @Retryable(
-        value = [DuplicateKeyException::class],
-        maxAttempts = 2,
-        backoff = Backoff(delay = 1000, multiplier = 2.0, random = true),
-    )
-    fun processDuplicateKey(event: BaseLikeEvent) {
         logger.info { "이벤트 처리 시작: $event" }
         likeEventHandler.handle(event)
         logger.info { "이벤트 처리 성공: $event" }

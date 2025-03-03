@@ -1,0 +1,3 @@
+package com.bockerl.snailmember.boardrecommentlike.command.application.service
+
+interface CommandBoardRecommentLikeService

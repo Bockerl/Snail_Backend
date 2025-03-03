@@ -1,0 +1,3 @@
+package com.bockerl.snailmember.boardrecomment.query.repository
+
+interface BoardRecommentMapper

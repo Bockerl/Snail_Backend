@@ -4,7 +4,7 @@ import com.bockerl.snailmember.board.query.service.QueryBoardService
 import com.bockerl.snailmember.boardcommentlike.command.application.dto.CommandBoardCommentLikeDTO
 import com.bockerl.snailmember.boardcommentlike.command.application.service.CommandBoardCommentLikeService
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.entity.BoardCommentLike
-import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.enum.BoardCommentLikeActionType
+import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.enums.BoardCommentLikeActionType
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.event.BoardCommentLikeEvent
 import com.bockerl.snailmember.boardcommentlike.command.domain.repository.BoardCommentLikeRepository
 import com.bockerl.snailmember.common.exception.CommonException

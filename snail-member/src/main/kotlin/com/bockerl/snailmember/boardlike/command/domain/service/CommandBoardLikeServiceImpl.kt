@@ -3,7 +3,7 @@ package com.bockerl.snailmember.boardlike.command.domain.service
 import com.bockerl.snailmember.boardlike.command.application.dto.CommandBoardLikeDTO
 import com.bockerl.snailmember.boardlike.command.application.service.CommandBoardLikeService
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.entity.BoardLike
-import com.bockerl.snailmember.boardlike.command.domain.aggregate.enum.BoardLikeActionType
+import com.bockerl.snailmember.boardlike.command.domain.aggregate.enums.BoardLikeActionType
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.event.BoardLikeEvent
 import com.bockerl.snailmember.boardlike.command.domain.repository.BoardLikeRepository
 import com.bockerl.snailmember.common.exception.CommonException

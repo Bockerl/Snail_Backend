@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.servlet.NoHandlerFoundException
 
-@RestControllerAdvice(basePackages = ["com.bockerl.snail.member"])
+@RestControllerAdvice(basePackages = ["com.bockerl.snailmember"])
 class GlobalExceptionHandler {
     // companion object를 사용하여 logger를 정의합니다
     private val log = LoggerFactory.getLogger(this::class.java)

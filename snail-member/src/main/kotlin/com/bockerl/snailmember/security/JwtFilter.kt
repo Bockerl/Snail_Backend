@@ -26,7 +26,7 @@ class JwtFilter(
     private val commandMemberService: CommandMemberService,
     private val jwtUtils: JwtUtils,
     private val redisTemplate: RedisTemplate<String, String>,
-    private val environment: Environment,
+    environment: Environment,
 ) : OncePerRequestFilter() {
     private val log = KotlinLogging.logger {}
 

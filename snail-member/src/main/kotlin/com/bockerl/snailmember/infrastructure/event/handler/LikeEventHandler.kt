@@ -8,7 +8,7 @@ import com.bockerl.snailmember.boardlike.command.application.dto.CommandBoardLik
 import com.bockerl.snailmember.boardlike.command.application.service.CommandBoardLikeService
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.enum.BoardLikeActionType
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.event.BoardLikeEvent
-import com.bockerl.snailmember.common.BaseLikeEvent
+import com.bockerl.snailmember.common.event.BaseLikeEvent
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service

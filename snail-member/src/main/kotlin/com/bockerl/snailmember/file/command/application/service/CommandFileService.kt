@@ -5,8 +5,7 @@
 
 package com.bockerl.snailmember.file.command.application.service
 
-import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
-import com.bockerl.snailmember.file.command.application.dto.CommandFileWithGatheringDTO
+import com.bockerl.snailmember.file.command.application.dto.*
 import org.springframework.web.multipart.MultipartFile
 
 interface CommandFileService {
@@ -43,4 +42,10 @@ interface CommandFileService {
     )
 
     fun deleteFile(commandFileDTO: CommandFileDTO)
+
+    fun createFileEvent(commandFileCreateDTO: CommandFileCreateDTO)
+
+    fun deleteFileEvent(commandFileDeleteDTO: CommandFileDeleteDTO)
+
+    fun createGatheringFileEvent(commandFileWithGatheringCreateDTO: CommandFileWithGatheringCreateDTO)
 }

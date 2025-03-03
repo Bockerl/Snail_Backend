@@ -9,13 +9,13 @@ package com.bockerl.snailmember.file.command.domain.service
 import com.azure.storage.blob.BlobContainerClient
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
-import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
-import com.bockerl.snailmember.file.command.application.dto.CommandFileWithGatheringDTO
+import com.bockerl.snailmember.file.command.application.dto.*
 import com.bockerl.snailmember.file.command.application.service.CommandFileService
 import com.bockerl.snailmember.file.command.application.service.CommandGatheringFileService
 import com.bockerl.snailmember.file.command.domain.aggregate.entity.File
 import com.bockerl.snailmember.file.command.domain.aggregate.event.FileCreatedEvent
 import com.bockerl.snailmember.file.command.domain.aggregate.event.FileDeletedEvent
+import com.bockerl.snailmember.file.command.domain.aggregate.event.GatheringFileCreatedEvent
 import com.bockerl.snailmember.file.command.domain.repository.CommandFileRepository
 import com.bockerl.snailmember.infrastructure.outbox.dto.OutboxDTO
 import com.bockerl.snailmember.infrastructure.outbox.enums.EventType
@@ -62,8 +62,8 @@ class CommandFileServiceImpl(
                 fileType = file.contentType ?: "unknown",
                 fileUrl = fileUrl,
                 fileTargetType = commandFileDTO.fileTargetType,
-                fileTargetId = extractDigits(commandFileDTO.fileTargetId),
-                memberId = extractDigits(commandFileDTO.memberId),
+                fileTargetId = commandFileDTO.fileTargetId,
+                memberId = commandFileDTO.memberId,
             )
 
         val jsonPayload = objectMapper.writeValueAsString(event)
@@ -150,8 +150,8 @@ class CommandFileServiceImpl(
                     fileType = file.contentType ?: "unknown",
                     fileUrl = fileUrl,
                     fileTargetType = commandFileDTO.fileTargetType,
-                    fileTargetId = extractDigits(commandFileDTO.fileTargetId),
-                    memberId = extractDigits(commandFileDTO.memberId),
+                    fileTargetId = commandFileDTO.fileTargetId,
+                    memberId = commandFileDTO.memberId,
                 )
             val jsonPayload = objectMapper.writeValueAsString(event)
             // 여기서는 파일 이름을 aggregateId로 활용합니다.
@@ -225,13 +225,14 @@ class CommandFileServiceImpl(
 
             // 각 파일마다 개별 이벤트 생성
             val event =
-                FileCreatedEvent(
+                GatheringFileCreatedEvent(
                     fileName = fileName,
                     fileType = file.contentType ?: "unknown",
                     fileUrl = fileUrl,
                     fileTargetType = commandFileWithGatheringDTO.fileTargetType,
-                    fileTargetId = extractDigits(commandFileWithGatheringDTO.fileTargetId),
-                    memberId = extractDigits(commandFileWithGatheringDTO.memberId),
+                    fileTargetId = commandFileWithGatheringDTO.fileTargetId,
+                    memberId = commandFileWithGatheringDTO.memberId,
+                    gatheringId = commandFileWithGatheringDTO.gatheringId,
                 )
             val jsonPayload = objectMapper.writeValueAsString(event)
             // 여기서는 파일 이름을 aggregateId로 활용합니다.
@@ -281,7 +282,8 @@ class CommandFileServiceImpl(
 //        commandFileRepository.updateActiveAndFileUrlByFileId(existingFile[0].fileId)
         val deleteEvent =
             FileDeletedEvent(
-                fileId = existingFile[0].fileId?.let { formattedFileId(it) },
+                fileTargetId = commandFileDTO.fileTargetId,
+                fileTargetType = commandFileDTO.fileTargetType,
             )
 
         val deleteJsonPayload = objectMapper.writeValueAsString(deleteEvent)
@@ -321,8 +323,8 @@ class CommandFileServiceImpl(
                 fileType = file.contentType ?: "unknown",
                 fileUrl = fileUrl,
                 fileTargetType = commandFileDTO.fileTargetType,
-                fileTargetId = extractDigits(commandFileDTO.fileTargetId),
-                memberId = extractDigits(commandFileDTO.memberId),
+                fileTargetId = commandFileDTO.fileTargetId,
+                memberId = commandFileDTO.memberId,
             )
         val createJsonPayload = objectMapper.writeValueAsString(event)
         // 여기서는 파일 이름을 aggregateId로 활용합니다.
@@ -385,7 +387,8 @@ class CommandFileServiceImpl(
                 // 삭제 이벤트 생성
                 val deleteEvent =
                     FileDeletedEvent(
-                        fileId = file.fileId?.let { formattedFileId(it) },
+                        fileTargetId = commandFileDTO.fileTargetId,
+                        fileTargetType = commandFileDTO.fileTargetType,
                     )
                 val deleteJsonPayload = objectMapper.writeValueAsString(deleteEvent)
                 val deleteOutbox =
@@ -449,8 +452,8 @@ class CommandFileServiceImpl(
                     fileType = file.contentType ?: "unknown",
                     fileUrl = fileUrl,
                     fileTargetType = commandFileDTO.fileTargetType,
-                    fileTargetId = extractDigits(commandFileDTO.fileTargetId),
-                    memberId = extractDigits(commandFileDTO.memberId),
+                    fileTargetId = commandFileDTO.fileTargetId,
+                    memberId = commandFileDTO.memberId,
                 )
             val createJsonPayload = objectMapper.writeValueAsString(createEvent)
             val createOutbox =
@@ -516,7 +519,8 @@ class CommandFileServiceImpl(
                 // 삭제 이벤트 생성
                 val deleteEvent =
                     FileDeletedEvent(
-                        fileId = file.fileId?.let { formattedFileId(it) },
+                        fileTargetId = commandFileWithGatheringDTO.fileTargetId,
+                        fileTargetType = commandFileWithGatheringDTO.fileTargetType,
                     )
                 val deleteJsonPayload = objectMapper.writeValueAsString(deleteEvent)
                 val deleteOutbox =
@@ -575,13 +579,14 @@ class CommandFileServiceImpl(
 
             // 생성 이벤트 생성
             val createEvent =
-                FileCreatedEvent(
+                GatheringFileCreatedEvent(
                     fileName = fileName,
                     fileType = file.contentType ?: "unknown",
                     fileUrl = fileUrl,
                     fileTargetType = commandFileWithGatheringDTO.fileTargetType,
-                    fileTargetId = extractDigits(commandFileWithGatheringDTO.fileTargetId),
-                    memberId = extractDigits(commandFileWithGatheringDTO.memberId),
+                    fileTargetId = commandFileWithGatheringDTO.fileTargetId,
+                    memberId = commandFileWithGatheringDTO.memberId,
+                    gatheringId = commandFileWithGatheringDTO.gatheringId,
                 )
             val createJsonPayload = objectMapper.writeValueAsString(createEvent)
             val createOutbox =
@@ -634,7 +639,8 @@ class CommandFileServiceImpl(
                 // 삭제 이벤트 생성
                 val deleteEvent =
                     FileDeletedEvent(
-                        fileId = file.fileId?.let { formattedFileId(it) },
+                        fileTargetType = commandFileDTO.fileTargetType,
+                        fileTargetId = commandFileDTO.fileTargetId,
                     )
                 val deleteJsonPayload = objectMapper.writeValueAsString(deleteEvent)
                 val deleteOutbox =
@@ -647,6 +653,47 @@ class CommandFileServiceImpl(
             }
         }
         outboxService.createOutboxes(outboxEvents)
+    }
+
+    override fun createFileEvent(commandFileCreateDTO: CommandFileCreateDTO) {
+        val fileEntity =
+            File(
+                fileName = commandFileCreateDTO.fileName,
+                fileUrl = commandFileCreateDTO.fileUrl,
+                fileType = commandFileCreateDTO.fileType,
+                fileTargetType = commandFileCreateDTO.fileTargetType,
+                fileTargetId = extractDigits(commandFileCreateDTO.fileTargetId),
+                memberId = extractDigits(commandFileCreateDTO.memberId),
+            )
+
+        commandFileRepository.save(fileEntity)
+    }
+
+    override fun createGatheringFileEvent(commandFileWithGatheringCreateDTO: CommandFileWithGatheringCreateDTO) {
+        val fileEntity =
+            File(
+                fileName = commandFileWithGatheringCreateDTO.fileName,
+                fileUrl = commandFileWithGatheringCreateDTO.fileUrl,
+                fileType = commandFileWithGatheringCreateDTO.fileType,
+                fileTargetType = commandFileWithGatheringCreateDTO.fileTargetType,
+                fileTargetId = extractDigits(commandFileWithGatheringCreateDTO.fileTargetId),
+                memberId = extractDigits(commandFileWithGatheringCreateDTO.memberId),
+            )
+
+        val savedFile = commandFileRepository.save(fileEntity)
+
+        gatheringFileService.createGatheringFile(
+            savedFile.fileId!!,
+            extractDigits(commandFileWithGatheringCreateDTO.gatheringId),
+            savedFile,
+        )
+    }
+
+    override fun deleteFileEvent(commandFileDeleteDTO: CommandFileDeleteDTO) {
+        commandFileRepository.updateActiveAndFileUrlByFileTargetIdAndFileTargetType(
+            extractDigits(commandFileDeleteDTO.fileTargetId),
+            commandFileDeleteDTO.fileTargetType,
+        )
     }
 
     // 설명. uuid 생성으로 파일 이름 중복 방지

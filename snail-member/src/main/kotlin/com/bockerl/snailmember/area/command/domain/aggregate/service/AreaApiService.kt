@@ -64,56 +64,61 @@ class AreaApiService(
         }
     }
 
-    private fun loadSidoAreas(): String = executeApiCall(
-        baseUrl = "https://api.vworld.kr/ned/data/admCodeList",
-        parameters =
-        mapOf(
-            "key" to key,
-            "format" to "json",
-            "numOfRows" to "20",
-            "pageNo" to "1",
-            "domain" to "",
-        ),
-        logPrefix = "시도",
-    )
+    private fun loadSidoAreas(): String =
+        executeApiCall(
+            baseUrl = "https://api.vworld.kr/ned/data/admCodeList",
+            parameters =
+                mapOf(
+                    "key" to key,
+                    "format" to "json",
+                    "numOfRows" to "20",
+                    "pageNo" to "1",
+                    "domain" to "",
+                ),
+            logPrefix = "시도",
+        )
 
-    private fun loadSiggAreas(sidoList: List<SidoArea>): List<SiggArea> = sidoList.flatMap { sidoArea ->
-        val siggJsonResponse = loadSiggAreasForSido(sidoArea)
-        parseSiggResponseArea(siggJsonResponse, sidoArea)
-    }
+    private fun loadSiggAreas(sidoList: List<SidoArea>): List<SiggArea> =
+        sidoList.flatMap { sidoArea ->
+            val siggJsonResponse = loadSiggAreasForSido(sidoArea)
+            parseSiggResponseArea(siggJsonResponse, sidoArea)
+        }
 
-    private fun loadSiggAreasForSido(sidoArea: SidoArea): String = executeApiCall(
-        baseUrl = "https://api.vworld.kr/ned/data/admSiList",
-        parameters =
-        mapOf(
-            "key" to key,
-            "format" to "json",
-            "numOfRows" to "100",
-            "pageNo" to "1",
-            "admCode" to sidoArea.sidoAreaAdmCode,
-            "domain" to "",
-        ),
-        logPrefix = "시군구[${sidoArea.sidoAreaName}]",
-    )
+    private fun loadSiggAreasForSido(sidoArea: SidoArea): String =
+        executeApiCall(
+            baseUrl = "https://api.vworld.kr/ned/data/admSiList",
+            parameters =
+                mapOf(
+                    "key" to key,
+                    "format" to "json",
+                    "numOfRows" to "100",
+                    "pageNo" to "1",
+                    "admCode" to sidoArea.sidoAreaAdmCode,
+                    "domain" to "",
+                ),
+            logPrefix = "시군구[${sidoArea.sidoAreaName}]",
+        )
 
-    private fun loadEmdAreas(siggList: List<SiggArea>): List<EmdArea> = siggList.flatMap { siggArea ->
-        val emdJsonResponse = loadEmdAreasForSigg(siggArea)
-        parseEmdResponseArea(emdJsonResponse, siggArea)
-    }
+    private fun loadEmdAreas(siggList: List<SiggArea>): List<EmdArea> =
+        siggList.flatMap { siggArea ->
+            val emdJsonResponse = loadEmdAreasForSigg(siggArea)
+            parseEmdResponseArea(emdJsonResponse, siggArea)
+        }
 
-    private fun loadEmdAreasForSigg(siggArea: SiggArea): String = executeApiCall(
-        baseUrl = "https://api.vworld.kr/ned/data/admDongList",
-        parameters =
-        mapOf(
-            "key" to key,
-            "format" to "json",
-            "numOfRows" to "200",
-            "pageNo" to "1",
-            "admCode" to siggArea.siggAreaAdmCode,
-            "domain" to "",
-        ),
-        logPrefix = "읍면동[${siggArea.siggAreaName}]",
-    )
+    private fun loadEmdAreasForSigg(siggArea: SiggArea): String =
+        executeApiCall(
+            baseUrl = "https://api.vworld.kr/ned/data/admDongList",
+            parameters =
+                mapOf(
+                    "key" to key,
+                    "format" to "json",
+                    "numOfRows" to "200",
+                    "pageNo" to "1",
+                    "admCode" to siggArea.siggAreaAdmCode,
+                    "domain" to "",
+                ),
+            logPrefix = "읍면동[${siggArea.siggAreaName}]",
+        )
 
     // 리 데이터 처리를 위한 메서드
     private fun processReeDataForEmdAreas(emdList: List<EmdArea>) {
@@ -123,14 +128,14 @@ class AreaApiService(
                     executeApiCall(
                         baseUrl = "https://api.vworld.kr/ned/data/admReeList",
                         parameters =
-                        mapOf(
-                            "key" to key,
-                            "format" to "json",
-                            "numOfRows" to "100",
-                            "pageNo" to "1",
-                            "admCode" to emd.emdAreaAdmCode,
-                            "domain" to "",
-                        ),
+                            mapOf(
+                                "key" to key,
+                                "format" to "json",
+                                "numOfRows" to "100",
+                                "pageNo" to "1",
+                                "admCode" to emd.emdAreaAdmCode,
+                                "domain" to "",
+                            ),
                         logPrefix = "리[${emd.emdAreaName}]",
                     )
 
@@ -150,7 +155,11 @@ class AreaApiService(
         }
     }
 
-    private fun executeApiCall(baseUrl: String, parameters: Map<String, String>, logPrefix: String): String {
+    private fun executeApiCall(
+        baseUrl: String,
+        parameters: Map<String, String>,
+        logPrefix: String,
+    ): String {
         val urlBuilder = StringBuilder(baseUrl)
         val parameterBuilder = StringBuilder()
 
@@ -186,7 +195,11 @@ class AreaApiService(
     }
 
     private fun parseSidoResponseArea(sidoJsonResponse: String): List<SidoArea> {
-        data class AdmVO(val admCode: String, val admCodeNm: String, val lowestAdmCodeNm: String)
+        data class AdmVO(
+            val admCode: String,
+            val admCodeNm: String,
+            val lowestAdmCodeNm: String,
+        )
 
         data class AdmVOListWrapper(
             val pageNo: String,
@@ -195,7 +208,9 @@ class AreaApiService(
             val numOfRows: String,
         )
 
-        data class ApiResponse(val admVOList: AdmVOListWrapper)
+        data class ApiResponse(
+            val admVOList: AdmVOListWrapper,
+        )
 
         val response = objectMapper.readValue<ApiResponse>(sidoJsonResponse)
 
@@ -207,8 +222,15 @@ class AreaApiService(
         }
     }
 
-    private fun parseSiggResponseArea(siggJsonResponse: String, sidoArea: SidoArea): List<SiggArea> {
-        data class AdmVO(val admCode: String, val admCodeNm: String, val lowestAdmCodeNm: String)
+    private fun parseSiggResponseArea(
+        siggJsonResponse: String,
+        sidoArea: SidoArea,
+    ): List<SiggArea> {
+        data class AdmVO(
+            val admCode: String,
+            val admCodeNm: String,
+            val lowestAdmCodeNm: String,
+        )
 
         data class AdmVOListWrapper(
             val pageNo: String,
@@ -217,7 +239,9 @@ class AreaApiService(
             val numOfRows: String,
         )
 
-        data class ApiResponse(val admVOList: AdmVOListWrapper)
+        data class ApiResponse(
+            val admVOList: AdmVOListWrapper,
+        )
 
         val response = objectMapper.readValue<ApiResponse>(siggJsonResponse)
 
@@ -231,8 +255,15 @@ class AreaApiService(
         }
     }
 
-    private fun parseEmdResponseArea(emdJsonResponse: String, siggArea: SiggArea): List<EmdArea> {
-        data class AdmVO(val admCode: String, val admCodeNm: String, val lowestAdmCodeNm: String)
+    private fun parseEmdResponseArea(
+        emdJsonResponse: String,
+        siggArea: SiggArea,
+    ): List<EmdArea> {
+        data class AdmVO(
+            val admCode: String,
+            val admCodeNm: String,
+            val lowestAdmCodeNm: String,
+        )
 
         data class AdmVOListWrapper(
             val pageNo: String,
@@ -241,7 +272,9 @@ class AreaApiService(
             val numOfRows: String,
         )
 
-        data class ApiResponse(val admVOList: AdmVOListWrapper)
+        data class ApiResponse(
+            val admVOList: AdmVOListWrapper,
+        )
 
         val response = objectMapper.readValue<ApiResponse>(emdJsonResponse)
 
@@ -255,8 +288,15 @@ class AreaApiService(
         }
     }
 
-    private fun parseReeResponseArea(reeJsonResponse: String, emdArea: EmdArea): List<EmdArea.ReeArea> {
-        data class AdmVO(val admCode: String, val admCodeNm: String, val lowestAdmCodeNm: String)
+    private fun parseReeResponseArea(
+        reeJsonResponse: String,
+        emdArea: EmdArea,
+    ): List<EmdArea.ReeArea> {
+        data class AdmVO(
+            val admCode: String,
+            val admCodeNm: String,
+            val lowestAdmCodeNm: String,
+        )
 
         data class AdmVOListWrapper(
             val pageNo: String,
@@ -267,9 +307,13 @@ class AreaApiService(
             val numOfRows: String,
         )
 
-        data class ApiResponseWithAdmVOList(val admVOList: AdmVOListWrapper)
+        data class ApiResponseWithAdmVOList(
+            val admVOList: AdmVOListWrapper,
+        )
 
-        data class ApiResponseEmpty(val response: AdmVOListWrapper)
+        data class ApiResponseEmpty(
+            val response: AdmVOListWrapper,
+        )
 
         return try {
             // 먼저 리가 있는 경우의 응답 구조로 파싱 시도

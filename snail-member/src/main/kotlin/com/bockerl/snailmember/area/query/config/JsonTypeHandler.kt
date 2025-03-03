@@ -10,7 +10,9 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
 
-class JsonTypeHandler(private val objectMapper: ObjectMapper) : BaseTypeHandler<List<EmdArea.ReeArea>>() {
+class JsonTypeHandler(
+    private val objectMapper: ObjectMapper,
+) : BaseTypeHandler<List<EmdArea.ReeArea>>() {
     private val logger = KotlinLogging.logger {}
 
     // DB에 데이터를 저장할 때 호출됨
@@ -24,20 +26,28 @@ class JsonTypeHandler(private val objectMapper: ObjectMapper) : BaseTypeHandler<
     }
 
     // 컬럼명으로 결과를 조회할 때 호출됨
-    override fun getNullableResult(rs: ResultSet, columnName: String): List<EmdArea.ReeArea>? =
+    override fun getNullableResult(
+        rs: ResultSet,
+        columnName: String,
+    ): List<EmdArea.ReeArea>? =
         rs.getString(columnName)?.let {
             convertToList(it)
         }
 
     // 컬럼 인덱스로 결과를 조회할 때 호출됨
-    override fun getNullableResult(rs: ResultSet, columnIndex: Int): List<EmdArea.ReeArea>? =
+    override fun getNullableResult(
+        rs: ResultSet,
+        columnIndex: Int,
+    ): List<EmdArea.ReeArea>? =
         rs.getString(columnIndex)?.let {
             convertToList(it)
         }
 
     // 저장 프로시저의 결과를 조회할 때 호출됨
-    override fun getNullableResult(cs: CallableStatement, columnIndex: Int): List<EmdArea.ReeArea>? =
-        cs.getString(columnIndex)?.let { convertToList(it) }
+    override fun getNullableResult(
+        cs: CallableStatement,
+        columnIndex: Int,
+    ): List<EmdArea.ReeArea>? = cs.getString(columnIndex)?.let { convertToList(it) }
 
     private fun convertToList(jsonString: String): List<EmdArea.ReeArea> {
         if (jsonString.isBlank()) {

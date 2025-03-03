@@ -4,7 +4,6 @@ import com.bockerl.snailmember.common.BaseLikeEvent
 import com.bockerl.snailmember.infrastructure.event.processor.LikeEventProcessor
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
-import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header
@@ -19,13 +18,13 @@ class LikeEventConsumerImpl(
 ) : LikeEventConsumer {
     private val logger = KotlinLogging.logger {}
 
+    //    @KafkaListener(
+//        // 설명. 이 토픽에서 좋아요 이벤트는 다 받게할 것
+//        topics = ["board-like-events"],
+//        groupId = "snail-member",
+//        containerFactory = "kafkaListenerContainerFactory",
+//    )
     @Transactional
-    @KafkaListener(
-        // 설명. 이 토픽에서 좋아요 이벤트는 다 받게할 것
-        topics = ["board-like-events"],
-        groupId = "snail-member",
-        containerFactory = "kafkaListenerContainerFactory",
-    )
     fun consume(
         @Payload event: BaseLikeEvent,
         @Header(KafkaHeaders.RECEIVED_PARTITION) partition: Int,

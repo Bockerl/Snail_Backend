@@ -28,7 +28,12 @@ class SiggArea(
     var siggFullName: String,
 ) {
     companion object {
-        fun create(sidoAreaId: Long, admCode: String, areaName: String, fullName: String) = SiggArea(
+        fun create(
+            sidoAreaId: Long,
+            admCode: String,
+            areaName: String,
+            fullName: String,
+        ) = SiggArea(
             siggAreaId = 0,
             sidoAreaId = sidoAreaId,
             siggAreaAdmCode = admCode,

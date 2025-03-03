@@ -86,18 +86,22 @@ class JwtFilter(
         }
     }
 
-    private fun processAccessToken(accessToken: String): Boolean = try {
-        val claims = jwtUtils.parseClaims(accessToken)
-        validateClaims(claims, accessToken, TokenType.ACCESS_TOKEN)
-    } catch (e: ExpiredJwtException) {
-        log.warn { "만료된 accessToken: ${e.message}" }
-        false
-    } catch (e: Exception) {
-        log.warn { "accessToken 유효성 검사 중 에러 발생: ${e.message}" }
-        false
-    }
+    private fun processAccessToken(accessToken: String): Boolean =
+        try {
+            val claims = jwtUtils.parseClaims(accessToken)
+            validateClaims(claims, accessToken, TokenType.ACCESS_TOKEN)
+        } catch (e: ExpiredJwtException) {
+            log.warn { "만료된 accessToken: ${e.message}" }
+            false
+        } catch (e: Exception) {
+            log.warn { "accessToken 유효성 검사 중 에러 발생: ${e.message}" }
+            false
+        }
 
-    private fun processRefreshToken(request: HttpServletRequest, response: HttpServletResponse): Boolean {
+    private fun processRefreshToken(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+    ): Boolean {
         return try {
             val refreshToken = jwtUtils.extractRefreshToken(request)
             val claims = jwtUtils.parseClaims(refreshToken)
@@ -118,19 +122,24 @@ class JwtFilter(
         }
     }
 
-    private fun processValidRefreshToken(claims: Claims, refreshToken: String, response: HttpServletResponse) {
+    private fun processValidRefreshToken(
+        claims: Claims,
+        refreshToken: String,
+        response: HttpServletResponse,
+    ) {
         // 액세스 토큰 발급
         val newAccessToken = jwtUtils.generateAccessToken(claims)
         // Refresh Token 만료 기간 확인
         val remainingTime = claims.expiration.time - System.currentTimeMillis()
         val sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000L
         // RT가 7일 이하로 남았으면 새로 발급, 아니면 기존 것 사용
-        val finalRefreshToken = if (remainingTime <= sevenDaysInMillis) {
-            log.info { "RT 만료 기간이 7일 이하로 남아 새로 발급" }
-            jwtUtils.generateRefreshToken(claims)
-        } else {
-            refreshToken
-        }
+        val finalRefreshToken =
+            if (remainingTime <= sevenDaysInMillis) {
+                log.info { "RT 만료 기간이 7일 이하로 남아 새로 발급" }
+                jwtUtils.generateRefreshToken(claims)
+            } else {
+                refreshToken
+            }
         // 사용자 마지막 로그인 시간 업데이트
         updateLastAccessTime(claims.subject)
         // 응답 데이터 생성 및 전송
@@ -138,38 +147,54 @@ class JwtFilter(
     }
 
     private fun updateLastAccessTime(email: String) {
-        commandMemberService.runCatching {
-            log.info { "멤버 마지막 로그인 시각 변경 시작" }
-            putLastAccessTime(email)
-        }.onSuccess {
-            log.info { "멤버 마지막 로그인 시각 변경 성공" }
-        }.onFailure { e ->
-            log.warn { "멤버 마지막 로그인 시각 변경 실패: ${e.message}" }
-        }
+        commandMemberService
+            .runCatching {
+                log.info { "멤버 마지막 로그인 시각 변경 시작" }
+                putLastAccessTime(email)
+            }.onSuccess {
+                log.info { "멤버 마지막 로그인 시각 변경 성공" }
+            }.onFailure { e ->
+                log.warn { "멤버 마지막 로그인 시각 변경 실패: ${e.message}" }
+            }
     }
 
-    private fun sendTokenResponse(response: HttpServletResponse, accessToken: String, refreshToken: String) {
-        val loginVO = LoginResponseVO(
-            accessToken = accessToken,
-            refreshToken = refreshToken,
-        )
+    private fun sendTokenResponse(
+        response: HttpServletResponse,
+        accessToken: String,
+        refreshToken: String,
+    ) {
+        val loginVO =
+            LoginResponseVO(
+                accessToken = accessToken,
+                refreshToken = refreshToken,
+            )
         val responseDTO = ResponseDTO.ok(loginVO)
         sendJsonResponse(response, responseDTO)
     }
 
-    private fun sendErrorResponse(response: HttpServletResponse, errorCode: ErrorCode) {
+    private fun sendErrorResponse(
+        response: HttpServletResponse,
+        errorCode: ErrorCode,
+    ) {
         val responseDTO = ResponseDTO.fail(CommonException(errorCode))
         sendJsonResponse(response, responseDTO)
     }
 
-    private fun sendJsonResponse(response: HttpServletResponse, responseDTO: ResponseDTO<*>) {
+    private fun sendJsonResponse(
+        response: HttpServletResponse,
+        responseDTO: ResponseDTO<*>,
+    ) {
         val json = ObjectMapper().writeValueAsString(responseDTO)
         response.contentType = "application/json"
         response.characterEncoding = "UTF-8"
         response.writer.write(json)
     }
 
-    private fun validateClaims(claims: Claims, token: String, type: TokenType): Boolean {
+    private fun validateClaims(
+        claims: Claims,
+        token: String,
+        type: TokenType,
+    ): Boolean {
         log.info { "claims 유효성 검사 시작" }
         // isser 검증
         val issuer = claims.issuer
@@ -188,13 +213,15 @@ class JwtFilter(
             return false
         }
 
-        val prefix = when (type) {
-            TokenType.ACCESS_TOKEN -> REDIS_AT_PREFIX
-            TokenType.REFRESH_TOKEN -> REDIS_RT_PREFIX
-        }
+        val prefix =
+            when (type) {
+                TokenType.ACCESS_TOKEN -> REDIS_AT_PREFIX
+                TokenType.REFRESH_TOKEN -> REDIS_RT_PREFIX
+            }
         // redis에 저장된 at와 비교
-        val redisToken = redisTemplate.opsForValue().get("$prefix$email")
-            ?: throw CommonException(ErrorCode.EXPIRED_TOKEN_ERROR)
+        val redisToken =
+            redisTemplate.opsForValue().get("$prefix$email")
+                ?: throw CommonException(ErrorCode.EXPIRED_TOKEN_ERROR)
         if (redisToken != token) {
             log.warn { "redis에 저장된 $type 과 일치하지 않음" }
             throw CommonException(ErrorCode.INVALID_TOKEN_ERROR)
@@ -211,11 +238,12 @@ class JwtFilter(
         log.info { "auth 통과" }
 
         // SecurityContext에 설정
-        val authentication = UsernamePasswordAuthenticationToken(
-            email,
-            member.password,
-            member.authorities,
-        )
+        val authentication =
+            UsernamePasswordAuthenticationToken(
+                email,
+                member.password,
+                member.authorities,
+            )
         log.info { "securityContextHolder에게 맡길 authentication: $authentication" }
         SecurityContextHolder.getContext().authentication = authentication
         log.info { "securityContextHolder에 저장 성공" }

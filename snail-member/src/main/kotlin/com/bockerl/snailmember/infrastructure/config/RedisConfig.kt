@@ -1,8 +1,9 @@
 package com.bockerl.snailmember.infrastructure.config
 
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.TempMember
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.github.oshai.kotlinlogging.KotlinLogging
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -17,6 +18,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.connection.RedisSentinelConfiguration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
 import java.time.Duration

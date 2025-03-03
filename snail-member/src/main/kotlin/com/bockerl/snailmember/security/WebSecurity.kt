@@ -2,6 +2,7 @@ package com.bockerl.snailmember.security
 
 import com.bockerl.snailmember.member.command.application.service.CommandMemberService
 import com.bockerl.snailmember.member.query.service.QueryMemberService
+import com.bockerl.snailmember.security.config.CustomLogoutSuccessfulHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
@@ -26,12 +27,12 @@ class WebSecurity(
     private val environment: Environment,
     private val jwtUtils: JwtUtils,
 ) {
-
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         val authenticationManagerBuilder =
             http.getSharedObject(AuthenticationManagerBuilder::class.java) as AuthenticationManagerBuilder
-        authenticationManagerBuilder.userDetailsService(queryMemberService)
+        authenticationManagerBuilder
+            .userDetailsService(queryMemberService)
             .passwordEncoder(passwordEncoder())
         val authenticationManager = authenticationManagerBuilder.build()
         return http
@@ -41,31 +42,35 @@ class WebSecurity(
                 headers.frameOptions { frame ->
                     frame.sameOrigin()
                 }
-            }
-            .logout { logout ->
+            }.logout { logout ->
                 logout.logoutUrl("/api/member/logout")
-                logout.logoutSuccessUrl("/api/member/login")
-                // logout.logoutSuccessHandler(customLogoutHandler)  // 핸들러 설정 시
-            }
-//             예외 발생 시, 처리할 exceptionHandler 추가
-            .exceptionHandling { exceptions ->
+                logout.addLogoutHandler(CustomLogoutHandler(redisTemplate, jwtUtils))
+                logout.logoutSuccessHandler(CustomLogoutSuccessfulHandler())
+            }.exceptionHandling { exceptions ->
                 exceptions.authenticationEntryPoint(authenticationEntryPoint)
-            }
-            .authorizeHttpRequests { auth ->
-                auth.requestMatchers("/swagger-ui/**").permitAll()
-                    .requestMatchers("/swagger-resources/**").permitAll()
-                    .requestMatchers("/v3/api-docs/**").permitAll()
-                    .requestMatchers("/api/member/login").permitAll()
-                    .requestMatchers("/api/registration/**").permitAll()
-                    .requestMatchers("/api/user/oauth2/**").permitAll()
-                    .requestMatchers("/favicon.ico").permitAll()
-                    .requestMatchers("/api/member/health").permitAll()
-                    .anyRequest().authenticated()
-            }
-            .sessionManagement { session ->
+            }.authorizeHttpRequests { auth ->
+                auth
+                    .requestMatchers("/swagger-ui/**")
+                    .permitAll()
+                    .requestMatchers("/swagger-resources/**")
+                    .permitAll()
+                    .requestMatchers("/v3/api-docs/**")
+                    .permitAll()
+                    .requestMatchers("/api/member/login")
+                    .permitAll()
+                    .requestMatchers("/api/registration/**")
+                    .permitAll()
+                    .requestMatchers("/api/user/oauth2/**")
+                    .permitAll()
+                    .requestMatchers("/favicon.ico")
+                    .permitAll()
+                    .requestMatchers("/api/member/health")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated()
+            }.sessionManagement { session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            }
-            .authenticationManager(authenticationManager)
+            }.authenticationManager(authenticationManager)
             .addFilterBefore(
                 JwtFilter(
                     queryMemberService,
@@ -87,13 +92,14 @@ class WebSecurity(
     fun passwordEncoder() = BCryptPasswordEncoder(10)
 
     fun getAuthenticationFilter(authenticationManager: AuthenticationManager): AuthenticationFilter {
-        val authenticationFilter = AuthenticationFilter(
-            queryMemberService = queryMemberService,
-            commandMemberService = commandMemberService,
-            authenticationManager = authenticationManager,
-            redisTemplate = redisTemplate,
-            environment = environment,
-        )
+        val authenticationFilter =
+            AuthenticationFilter(
+                queryMemberService = queryMemberService,
+                commandMemberService = commandMemberService,
+                authenticationManager = authenticationManager,
+                redisTemplate = redisTemplate,
+                environment = environment,
+            )
         authenticationFilter.setFilterProcessesUrl("/api/member/login")
         return authenticationFilter
     }

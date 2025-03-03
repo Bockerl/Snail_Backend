@@ -27,7 +27,6 @@ class QueryMemberController(
     private val queryMemberService: QueryMemberService,
     private val memberConverter: MemberConverter,
 ) {
-
     @Operation(
         summary = "Health Check 메서드",
         description = "서버의 health check를 합니다.",
@@ -75,7 +74,9 @@ class QueryMemberController(
         ],
     )
     @GetMapping("/{memberId}")
-    fun getMemberByMemberId(@PathVariable memberId: String): ResponseDTO<*> {
+    fun getMemberByMemberId(
+        @PathVariable memberId: String,
+    ): ResponseDTO<*> {
         val memberDTO: MemberDTO = queryMemberService.selectMemberByMemberId(memberId)
         return ResponseDTO.ok(memberConverter.dtoToResponseVO(memberDTO))
     }

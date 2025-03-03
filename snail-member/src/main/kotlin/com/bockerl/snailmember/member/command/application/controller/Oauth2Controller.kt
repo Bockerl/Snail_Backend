@@ -29,25 +29,26 @@ class Oauth2Controller(
         @RequestParam(value = "error", required = false) error: String?,
         @RequestParam(value = "error_description", required = false) errorDescription: String?,
         @RequestParam(value = "state", required = false) state: String?,
-    ): ResponseDTO<*> = when {
-        error != null -> {
-            logger.error { "카카오 로그인 취소/에러 발생 - error: $error, description: $errorDescription" }
-            ResponseDTO.ok("카카오 로그인 취소")
-        }
+    ): ResponseDTO<*> =
+        when {
+            error != null -> {
+                logger.error { "카카오 로그인 취소/에러 발생 - error: $error, description: $errorDescription" }
+                ResponseDTO.ok("카카오 로그인 취소")
+            }
 
-        code != null -> {
-            logger.info { "카카오 로그인 시작 - code: $code" }
-            val kakaoTokenDTO = kakaoOauth2Service.kakaoLogin(code)
-            val kakaoTokenVO = authConverter.loginDTOToVO(kakaoTokenDTO)
-            // jwt 토근과 회원 vo 객체에 발행할 예정
-            ResponseDTO.ok(kakaoTokenVO)
-        }
+            code != null -> {
+                logger.info { "카카오 로그인 시작 - code: $code" }
+                val kakaoTokenDTO = kakaoOauth2Service.kakaoLogin(code)
+                val kakaoTokenVO = authConverter.loginDTOToVO(kakaoTokenDTO)
+                // jwt 토근과 회원 vo 객체에 발행할 예정
+                ResponseDTO.ok(kakaoTokenVO)
+            }
 
-        else -> {
-            logger.error { "카카오 로그인 콜백 - code, error 모두 null" }
-            throw CommonException(ErrorCode.KAKAO_AUTH_ERROR)
+            else -> {
+                logger.error { "카카오 로그인 콜백 - code, error 모두 null" }
+                throw CommonException(ErrorCode.KAKAO_AUTH_ERROR)
+            }
         }
-    }
 
     @GetMapping("/google/code")
     fun googleLogin(
@@ -55,24 +56,25 @@ class Oauth2Controller(
         @RequestParam(value = "error", required = false) error: String?,
         @RequestParam(value = "error_description", required = false) errorDescription: String?,
         @RequestParam(value = "state", required = false) state: String?,
-    ): ResponseDTO<*> = when {
-        error != null -> {
-            logger.error { "구글 로그인 취소/에러 발생 - error: $error, description: $errorDescription" }
-            ResponseDTO.ok("구글 로그인 취소")
-        }
+    ): ResponseDTO<*> =
+        when {
+            error != null -> {
+                logger.error { "구글 로그인 취소/에러 발생 - error: $error, description: $errorDescription" }
+                ResponseDTO.ok("구글 로그인 취소")
+            }
 
-        code != null -> {
-            logger.info { "구글 로그인 시작 - code: $code" }
-            val googleToken = googleOauth2Service.googleLogin(code)
-            // jwt 토큰과 회원 vo 객체 발행할 예정
-            ResponseDTO.ok(googleToken)
-        }
+            code != null -> {
+                logger.info { "구글 로그인 시작 - code: $code" }
+                val googleToken = googleOauth2Service.googleLogin(code)
+                // jwt 토큰과 회원 vo 객체 발행할 예정
+                ResponseDTO.ok(googleToken)
+            }
 
-        else -> {
-            logger.error { "구글 로그인 콜백 - code, error 모두 null" }
-            throw CommonException(ErrorCode.GOOGLE_AUTH_ERROR)
+            else -> {
+                logger.error { "구글 로그인 콜백 - code, error 모두 null" }
+                throw CommonException(ErrorCode.GOOGLE_AUTH_ERROR)
+            }
         }
-    }
 
     @GetMapping("/line/code")
     fun lineLogin(
@@ -80,22 +82,23 @@ class Oauth2Controller(
         @RequestParam(value = "error", required = false) error: String?,
         @RequestParam(value = "error_description", required = false) errorDescription: String?,
         @RequestParam(value = "state", required = false) state: String?,
-    ): ResponseDTO<*> = when {
-        error != null -> {
-            logger.error { "라인 로그인 취소/에러 발생 - error: $error, description: $errorDescription" }
-            ResponseDTO.ok("라인 로그인 취소")
-        }
+    ): ResponseDTO<*> =
+        when {
+            error != null -> {
+                logger.error { "라인 로그인 취소/에러 발생 - error: $error, description: $errorDescription" }
+                ResponseDTO.ok("라인 로그인 취소")
+            }
 
-        code != null -> {
-            logger.info { "라인 로그인 시작 - code: $code" }
-            val lineToken = lineOauth2Service.lineLogin(code)
-            // jwt 토근과 회원 vo 객체에 발행할 예정
-            ResponseDTO.ok(lineToken)
-        }
+            code != null -> {
+                logger.info { "라인 로그인 시작 - code: $code" }
+                val lineToken = lineOauth2Service.lineLogin(code)
+                // jwt 토근과 회원 vo 객체에 발행할 예정
+                ResponseDTO.ok(lineToken)
+            }
 
-        else -> {
-            logger.error { "라인 로그인 콜백 - code, error 모두 null" }
-            throw CommonException(ErrorCode.KAKAO_AUTH_ERROR)
+            else -> {
+                logger.error { "라인 로그인 콜백 - code, error 모두 null" }
+                throw CommonException(ErrorCode.KAKAO_AUTH_ERROR)
+            }
         }
-    }
 }

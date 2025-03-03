@@ -24,7 +24,10 @@ class SidoArea(
     val sidoAreaName: String,
 ) {
     companion object {
-        fun create(admCode: String, name: String) = SidoArea(
+        fun create(
+            admCode: String,
+            name: String,
+        ) = SidoArea(
             sidoAreaId = 0,
             sidoAreaAdmCode = admCode,
             sidoAreaName = name,

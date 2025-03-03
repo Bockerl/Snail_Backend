@@ -31,13 +31,14 @@ class RegistrationServiceImplTests :
         val bcryptPasswordEncoder = mockk<BCryptPasswordEncoder>()
 
         // test 서비스 설정
-        val registrationService = RegistrationServiceImpl(
-            authService = authService,
-            tempRepository,
-            memberRepository = memberRepository,
-            activityAreaRepository = activityAreaRepository,
-            bcryptPasswordEncoder = bcryptPasswordEncoder,
-        )
+        val registrationService =
+            RegistrationServiceImpl(
+                authService = authService,
+                tempRepository,
+                memberRepository = memberRepository,
+                activityAreaRepository = activityAreaRepository,
+                bcryptPasswordEncoder = bcryptPasswordEncoder,
+            )
 
         // 1. 회원가입 초기화 테스트
         Given("새로운 사용자가 이메일 회원가입을 하려고 할 때") {
@@ -76,9 +77,10 @@ class RegistrationServiceImplTests :
                 every { memberRepository.findMemberByMemberEmail(request.memberEmail) } returns existingMember
 
                 Then("이미 존재하는 회원 예외를 반환한다.") {
-                    val exception = shouldThrow<CommonException> {
-                        registrationService.initiateRegistration(request)
-                    }
+                    val exception =
+                        shouldThrow<CommonException> {
+                            registrationService.initiateRegistration(request)
+                        }
                     exception.errorCode shouldBe ErrorCode.EXIST_USER
                 }
             }
@@ -104,9 +106,10 @@ class RegistrationServiceImplTests :
                 every { tempRepository.find(redisId) } returns wrongTempMember
 
                 Then("잘못된 권한 예외가 발생해야 한다.") {
-                    val exception = shouldThrow<CommonException> {
-                        registrationService.createEmailRefreshCode(redisId)
-                    }
+                    val exception =
+                        shouldThrow<CommonException> {
+                            registrationService.createEmailRefreshCode(redisId)
+                        }
                     exception.errorCode shouldBe ErrorCode.UNAUTHORIZED_ACCESS
                 }
             }
@@ -115,9 +118,10 @@ class RegistrationServiceImplTests :
                 every { tempRepository.find(redisId) } returns null
 
                 Then("세션 만료 예외가 발생해야 한다.") {
-                    val exception = shouldThrow<CommonException> {
-                        registrationService.createEmailRefreshCode(redisId)
-                    }
+                    val exception =
+                        shouldThrow<CommonException> {
+                            registrationService.createEmailRefreshCode(redisId)
+                        }
                     exception.errorCode shouldBe ErrorCode.EXPIRED_SIGNUP_SESSION
                 }
             }
@@ -159,9 +163,10 @@ class RegistrationServiceImplTests :
                 every { tempRepository.find(TEST_REDIS_ID) } returns null
 
                 Then("세션 만료 예외가 발생해야 한다.") {
-                    val exception = shouldThrow<CommonException> {
-                        registrationService.verifyEmailCode(request)
-                    }
+                    val exception =
+                        shouldThrow<CommonException> {
+                            registrationService.verifyEmailCode(request)
+                        }
                     exception.errorCode shouldBe ErrorCode.EXPIRED_SIGNUP_SESSION
                 }
             }
@@ -171,9 +176,10 @@ class RegistrationServiceImplTests :
                 every { tempRepository.find(TEST_REDIS_ID) } returns wrongTempMember
 
                 Then("잘못된 권한 예외가 발생한다.") {
-                    val exception = shouldThrow<CommonException> {
-                        registrationService.verifyEmailCode(request)
-                    }
+                    val exception =
+                        shouldThrow<CommonException> {
+                            registrationService.verifyEmailCode(request)
+                        }
                     exception.errorCode shouldBe ErrorCode.UNAUTHORIZED_ACCESS
                 }
             }
@@ -182,9 +188,10 @@ class RegistrationServiceImplTests :
         // 휴대폰 인증 코드 생성
         Given("이메일을 인증한 사용자가") {
             val request = createPhoneRequestDTO()
-            val tempMember = createTempMember(
-                signUpStep = SignUpStep.EMAIL_VERIFIED,
-            )
+            val tempMember =
+                createTempMember(
+                    signUpStep = SignUpStep.EMAIL_VERIFIED,
+                )
 
             When("핸드폰 인증 코드 생성을 요청하면") {
                 every { tempRepository.find(request.redisId) } returns tempMember
@@ -213,23 +220,26 @@ class RegistrationServiceImplTests :
                 every { tempRepository.find(request.redisId) } returns null
 
                 Then("세션 만료 예외가 발생한다.") {
-                    val exception = shouldThrow<CommonException> {
-                        registrationService.createPhoneVerificationCode(request)
-                    }
+                    val exception =
+                        shouldThrow<CommonException> {
+                            registrationService.createPhoneVerificationCode(request)
+                        }
                     exception.errorCode shouldBe ErrorCode.EXPIRED_SIGNUP_SESSION
                 }
             }
 
             When("잘못된 순서로 휴대폰 인증 코드 생성 요청을 하면") {
-                val wrongTempMember = tempMember.copy(
-                    signUpStep = SignUpStep.PHONE_VERIFIED,
-                )
+                val wrongTempMember =
+                    tempMember.copy(
+                        signUpStep = SignUpStep.PHONE_VERIFIED,
+                    )
                 every { tempRepository.find(TEST_REDIS_ID) } returns wrongTempMember
 
                 Then("잘못된 권한 예외가 발생한다.") {
-                    val exception = shouldThrow<CommonException> {
-                        registrationService.createPhoneVerificationCode(request)
-                    }
+                    val exception =
+                        shouldThrow<CommonException> {
+                            registrationService.createPhoneVerificationCode(request)
+                        }
 
                     exception.errorCode shouldBe ErrorCode.UNAUTHORIZED_ACCESS
                 }
@@ -239,9 +249,10 @@ class RegistrationServiceImplTests :
         // 휴대폰 인증 코드 재요청 테스트
         Given("사용자가 휴대폰 인증 코드를 재요청할 때") {
             val redisId = TEST_REDIS_ID
-            val tempMember = createTempMember(
-                signUpStep = SignUpStep.EMAIL_VERIFIED,
-            )
+            val tempMember =
+                createTempMember(
+                    signUpStep = SignUpStep.EMAIL_VERIFIED,
+                )
             every { tempRepository.find(redisId) } returns tempMember
             every { authService.createPhoneVerificationCode(tempMember.phoneNumber) } returns VERIFICATION_CODE
 
@@ -257,23 +268,26 @@ class RegistrationServiceImplTests :
                 every { tempRepository.find(redisId) } returns null
 
                 Then("세션 만료 예외가 발생한다.") {
-                    val exception = shouldThrow<CommonException> {
-                        registrationService.createPhoneRefreshCode(redisId)
-                    }
+                    val exception =
+                        shouldThrow<CommonException> {
+                            registrationService.createPhoneRefreshCode(redisId)
+                        }
                     exception.errorCode shouldBe ErrorCode.EXPIRED_SIGNUP_SESSION
                 }
             }
 
             When("잘못된 순서로 요청을 하면") {
-                val wrongTempMember = tempMember.copy(
-                    signUpStep = SignUpStep.PHONE_VERIFIED,
-                )
+                val wrongTempMember =
+                    tempMember.copy(
+                        signUpStep = SignUpStep.PHONE_VERIFIED,
+                    )
                 every { tempRepository.find(redisId) } returns wrongTempMember
 
                 Then("잘못된 권한 예외가 발생한다.") {
-                    val exception = shouldThrow<CommonException> {
-                        registrationService.createPhoneRefreshCode(redisId)
-                    }
+                    val exception =
+                        shouldThrow<CommonException> {
+                            registrationService.createPhoneRefreshCode(redisId)
+                        }
                     exception.errorCode shouldBe ErrorCode.UNAUTHORIZED_ACCESS
                 }
             }
@@ -282,9 +296,10 @@ class RegistrationServiceImplTests :
         // 휴대폰 인증 요청 테스트
         Given("휴대폰 인증 요청한 사용자가") {
             val request = createPhoneVerifyRequestDTO()
-            val tempMember = createTempMember(
-                signUpStep = SignUpStep.EMAIL_VERIFIED,
-            )
+            val tempMember =
+                createTempMember(
+                    signUpStep = SignUpStep.EMAIL_VERIFIED,
+                )
 
             When("유효한 코드로 휴대폰 인증을 하면") {
                 every { tempRepository.find(request.redisId) } returns tempMember
@@ -321,9 +336,10 @@ class RegistrationServiceImplTests :
         // 비밀번호 입력 테스트
         Given("휴대폰을 인증한 사용자가") {
             val request = createPassWordRequestDTO()
-            val tempMember = createTempMember(
-                signUpStep = SignUpStep.PHONE_VERIFIED,
-            )
+            val tempMember =
+                createTempMember(
+                    signUpStep = SignUpStep.PHONE_VERIFIED,
+                )
 
             When("비밀번호 입력을 하면") {
                 every { tempRepository.find(request.redisId) } returns tempMember
@@ -351,9 +367,10 @@ class RegistrationServiceImplTests :
                 every { tempRepository.find(request.redisId) } returns null
 
                 Then("세션 만료 예외를 반환한다.") {
-                    val exception = shouldThrow<CommonException> {
-                        registrationService.postPassword(request)
-                    }
+                    val exception =
+                        shouldThrow<CommonException> {
+                            registrationService.postPassword(request)
+                        }
                     exception.errorCode shouldBe ErrorCode.EXPIRED_SIGNUP_SESSION
                 }
             }
@@ -362,9 +379,10 @@ class RegistrationServiceImplTests :
         // 활동지역 등록(회원가입 완료) 테스트
         Given("비밀번호를 입력한 사용자가") {
             val request = createActivityAreaRequestDTO()
-            val tempMember = createTempMember(
-                signUpStep = SignUpStep.PASSWORD_VERIFIED,
-            )
+            val tempMember =
+                createTempMember(
+                    signUpStep = SignUpStep.PASSWORD_VERIFIED,
+                )
             val memberSlot = slot<Member>()
 
             When("활동지역을 등록하고 회원가입을 완료하면") {
@@ -418,17 +436,19 @@ class RegistrationServiceImplTests :
             }
 
             When("주 활동지역과 직장 활동지역이 일치하면") {
-                val request = createActivityAreaRequestDTO(
-                    workplaceArea = TEST_PRIMARY_AREA,
-                )
+                val request =
+                    createActivityAreaRequestDTO(
+                        workplaceArea = TEST_PRIMARY_AREA,
+                    )
 
                 every { tempRepository.find(request.redisId) } returns tempMember
                 every { memberRepository.save(any()) } answers { firstArg<Member>().apply { memberId = 1L } }
 
                 Then("권한 없음 예외가 발생한다.") {
-                    val exception = shouldThrow<CommonException> {
-                        registrationService.postActivityArea(request)
-                    }
+                    val exception =
+                        shouldThrow<CommonException> {
+                            registrationService.postActivityArea(request)
+                        }
                     exception.errorCode shouldBe ErrorCode.UNAUTHORIZED_ACCESS
                 }
             }

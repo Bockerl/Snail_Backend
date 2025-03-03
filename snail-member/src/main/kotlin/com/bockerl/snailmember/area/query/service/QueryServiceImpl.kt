@@ -15,6 +15,7 @@ class QueryServiceImpl(
     private val siggAreasMapper: SiggAreaMapper,
 ) : QueryAreaService {
     private val logger = KotlinLogging.logger {}
+
     override fun selectAreaByKeyword(requestDTO: AreaKeywordRequestDTO): AreaKeywordResponseDTO {
         logger.info { "키워드 기반 동네 검색 서비스 메서드 시작" }
         val keyword = requestDTO.areaSearchKeyword

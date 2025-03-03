@@ -109,8 +109,10 @@ async def chat(input: str = Form(...), file: Optional[UploadFile] = File(None), 
             ocr_text = pytesseract.image_to_string(image, lang="kor+eng")
             input_data.messages.append(ocr_text)
             result["ocr_text"] = ocr_text
-                
-        
+            
+        # 벡터 DB에서 관련 문서 검색
+        query = input_data.messages[-1]  # 최신 메시지 사용
+
         # 챗봇 응답만 생성 프롬프팅 Test
         result["chatbot_response"] = chat_chain.invoke(input_data.messages)
 

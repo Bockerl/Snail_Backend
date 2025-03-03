@@ -33,6 +33,18 @@ def get_vector_db():
 # 글로벌 변수로 벡터 DB 객체 선언 (싱글턴 패턴으로 관리)
 vector_db = None
 
+# 벡터 DB를 가져오고 retriever 및 qa_chain 설정
+vector_db = get_vector_db()
+retriever = vector_db.as_retriever()
+
+# 검색 기반 QA 체인 (벡터 DB 활용)
+qa_chain = RetrievalQA.from_chain_type(
+    llm=llm, 
+    chain_type="map_reduce", 
+    retriever=retriever,
+    return_source_documents=True
+)
+
 # 벡터 DB 메시지 저장 함수
 def save_to_vector_db(messages, document_type, conversation_id, vector_db):
     try:

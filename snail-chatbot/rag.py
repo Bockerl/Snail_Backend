@@ -101,3 +101,58 @@ def extract_text_from_excel(excel_path):
         logger.error(f"엑셀 텍스트 추출 실패: {excel_path}, 오류: {e}")
     return text
 
+# PDF/Excel 파일을 벡터 DB에 저장 
+def save_files_to_vector_db():
+    try:
+        vector_db = get_vector_db()  # 벡터 DB 인스턴스 가져오기
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=300, chunk_overlap=50)  # 청크 분할 설정
+
+        for file_name in os.listdir(PDF_DIR):
+            file_path = os.path.join(PDF_DIR, file_name)
+            text = ""
+            document_type = None  # 문서 타입 초기화
+
+            # 파일 확장자 확인 후 텍스트 추출 및 문서 타입 설정
+            if file_name.endswith(".pdf"):
+                text = extract_text_from_pdf(file_path)
+                document_type = "pdf"
+            elif file_name.endswith(".xls") or file_name.endswith(".xlsx"):
+                text = extract_text_from_excel(file_path)
+                document_type = "excel"
+            else:
+                logger.warning(f"지원하지 않는 파일 형식: {file_name}")
+                continue
+
+            # 파일에 타입이 설정되지 않으면 skip
+            if not document_type:
+                logger.warning(f"파일 타입을 알 수 없습니다: {file_name}")
+                continue
+
+            # 청크 단위로 분할
+            text_chunks = text_splitter.split_text(text)
+
+            # 각 청크를 벡터화 및 저장
+            for chunk in text_chunks:
+                vectors = embeddings.embed_documents([chunk])  # 임베딩 생성
+                doc_id = str(uuid.uuid4())  # 고유 ID 생성
+
+                metadata = {
+                    "id": doc_id,
+                    "type": document_type,  # 'pdf', 'excel'
+                    "source": file_name,  # 파일명 저장
+                    "timestamp": datetime.datetime.now().isoformat()
+                }
+
+                document = Document(page_content=chunk, metadata=metadata)
+
+                # 벡터 DB에 저장
+                vector_db.add_documents(documents=[document], embeddings=vectors, ids=[doc_id])
+
+                logger.info(f"Document saved: {doc_id}, Source: {file_name}")
+                
+                # documents = vector_db.get()
+                # logger.info(f"전체 조회: {documents}")  # 벡터 db에 저장된 전체 정보 출력
+
+        logger.info("벡터 DB에 문서 저장 완료")
+    except Exception as e:
+        logger.error(f"벡터 DB 저장 중 오류 발생: {e}") 

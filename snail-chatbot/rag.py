@@ -73,3 +73,31 @@ def save_to_vector_db(messages, document_type, conversation_id, vector_db):
         logger.info("벡터 DB에 메시지 저장 성공")
     except Exception as e:
         logger.error(f"벡터 DB 저장 중 오류 발생: {e}")
+
+
+####################################### PDF 파일에서 텍스트 추출 
+
+def extract_text_from_pdf(pdf_path):
+    try:
+        loader = PyPDFLoader(pdf_path)  # PyPDFLoader로 PDF 로드
+        pages = loader.load()  # 페이지 단위로 로드된 문서
+        text = ""
+        for page in pages:
+            text += page.page_content  # 각 페이지의 내용 합치기
+    except Exception as e:
+        logger.error(f"PDF 텍스트 추출 실패: {pdf_path}, 오류: {e}")
+        text = ""
+    return text
+
+# 엑셀 파일에서 텍스트 추출 (모든 시트 포함)
+def extract_text_from_excel(excel_path):
+    text = ""
+    try:
+        xls = pd.ExcelFile(excel_path)
+        for sheet_name in xls.sheet_names:
+            df = pd.read_excel(xls, sheet_name=sheet_name, dtype=str)  # 모든 시트를 문자열로 변환
+            text += df.to_string(index=False, header=False) + "\n"
+    except Exception as e:
+        logger.error(f"엑셀 텍스트 추출 실패: {excel_path}, 오류: {e}")
+    return text
+

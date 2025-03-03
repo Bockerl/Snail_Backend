@@ -14,10 +14,12 @@ import io
 import os
 from langchain_chroma import Chroma  # 최신 패키지로 임포트
 from langchain_ollama import OllamaEmbeddings
-from langchain.schema import Document
 import uuid 
 import logging
 import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
+from data import fetch_data_prec,fetch_data_law,fetch_data_ordin
+from rag import save_files_to_vector_db,save_to_vector_db,get_vector_db
 
 
 # 환경 설정 파일 로딩
@@ -32,9 +34,6 @@ logger = logging.getLogger(__name__)
 
 logger.info("서버가 시작되었습니다!")
 
-# 글로벌 변수로 벡터 DB 객체 선언 (싱글턴 패턴으로 관리)
-vector_db = None
-
 # 현재 시간 가져오기
 timestamp = datetime.datetime.now().isoformat()  # ISO 형식으로 날짜 및 시간 반환
 
@@ -43,19 +42,35 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tessera
 
 # Chroma 벡터 DB 설정
 CHROMA_DB_DIR = "vectorstore"
+PDF_DIR = "pdfs"
 embeddings = OllamaEmbeddings(model="llama3.1-instruct-8b:latest")
 
 # 기존 DB 디렉토리 삭제
-if os.path.exists(CHROMA_DB_DIR):
-    import shutil
-    shutil.rmtree(CHROMA_DB_DIR)  # 디렉토리 및 그 안의 내용 모두 삭제
+#if os.path.exists(CHROMA_DB_DIR):
+#    import shutil
+#    shutil.rmtree(CHROMA_DB_DIR)  # 디렉토리 및 그 안의 내용 모두 삭제
     
 os.makedirs(CHROMA_DB_DIR, exist_ok=True)
+
+##################################### 30분 마다 스케줄러 생성 
+scheduler = BackgroundScheduler()
+
+def fetch_all_data():
+    fetch_data_prec()
+    fetch_data_law()
+    fetch_data_ordin()
+    
+     # fetch_all_data가 완료된 후에 save_files_to_vector_db 호출
+    save_files_to_vector_db()
+
+# 국가법령정보 엑셀 업데이트
+scheduler.add_job(fetch_all_data, trigger='interval', hours=24)
+
 
 # CORS 미들웨어 설정
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"], # 배포시 도메인
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -72,54 +87,6 @@ async def playground():
     return {"message": "Welcome to the Playground!"}
 
 ########### 대화형 인터페이스 ###########
-# 벡터 DB 초기화 함수 (한 번만 실행)
-def get_vector_db():
-    global vector_db
-    if vector_db is None:
-        vector_db = Chroma(embedding_function=embeddings, persist_directory=CHROMA_DB_DIR)
-        logger.info("벡터 DB 연결 완료")
-    return vector_db
-
-# 벡터 DB 저장 함수
-def save_to_vector_db(messages, document_type, conversation_id, vector_db):
-    try:
-        # 벡터 DB 객체 가져오기 (get_vector_db 호출)
-        vector_db = get_vector_db()
-        
-        # 각 메시지별로 벡터화 및 저장
-        for message in messages:
-            vectors = embeddings.embed_documents([message])
-
-            # 고유 ID 생성 (UUID 사용)
-            doc_id = str(uuid.uuid4())  # UUID를 사용하여 고유 ID 생성
-
-            # 메타데이터 추가
-            metadata = {
-                "id": doc_id,
-                "type": document_type,  # 'message', 'pdf', 'web'
-                "source": "user_input",
-                "conversation_id": conversation_id,  # 대화 ID 추가
-                "timestamp": datetime.datetime.now().isoformat()
-            }
-
-            # Document 객체 생성
-            document = Document(page_content=message, metadata=metadata)
-
-            # 벡터 DB에 문서 추가
-            vector_db.add_documents(
-                documents=[document],  # Document 객체 전달
-                embeddings=vectors,
-                ids=[doc_id]  # 고유 ID 전달
-            )
-            
-            logger.info(f"Document saved: {doc_id}, Message: {message}") # 실행된 고유id와 메시지 출력
-            
-            documents = vector_db.get()
-            logger.info(f"전체 조회: {documents}") # 벡터 db에 저장된 전체 메시지 정보 출력
-
-        logger.info("벡터 DB에 메시지 저장 성공")
-    except Exception as e:
-        logger.error(f"벡터 DB 저장 중 오류 발생: {e}")
 
 # 입력 데이터 모델
 class InputChat(BaseModel):
@@ -142,8 +109,19 @@ async def chat(input: str = Form(...), file: Optional[UploadFile] = File(None), 
             ocr_text = pytesseract.image_to_string(image, lang="kor+eng")
             input_data.messages.append(ocr_text)
             result["ocr_text"] = ocr_text
+            
+        # # 벡터 DB에서 관련 문서 검색
+        # query = input_data.messages[-1]  # 최신 메시지 사용
+        # docs = retriever.invoke(query)
 
-        # 챗봇 응답 생성
+        # # 검색된 문서를 LLM 입력에 추가
+        # context = "\n\n".join([doc.page_content for doc in docs]) if docs else "관련 정보 없음"
+        # input_data.messages.append(f"🔍 참고 정보:\n{context}")
+
+        # # 챗봇 응답 생성
+        # result["chatbot_response"] = chat_chain.invoke(input_data.messages)    
+        
+        # 챗봇 응답만 생성 프롬프팅 Test
         result["chatbot_response"] = chat_chain.invoke(input_data.messages)
 
         # 벡터 DB에 메시지 저장
@@ -167,4 +145,10 @@ add_routes(
 
 # 서버 실행 설정
 if __name__ == "__main__":
+    scheduler.start()
+
+    # 데이터 가져오는 함수 실행
+    # fetch_all_data()
+
+    # FastAPI 서버 실행
     uvicorn.run(app, host="0.0.0.0", port=8000)

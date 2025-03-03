@@ -135,3 +135,19 @@ def fetch_data_generic(target_type, keywords):
                     })
 
     return rows
+
+# 판례, 법령, 조례 데이터 처리 함수들
+def fetch_data_prec():
+    rows = fetch_data_generic("prec", ["외국인", "다문화"])
+    df = pd.DataFrame(rows)
+    df.to_excel(os.path.join(PDF_DIR, "판례.xlsx"), index=False)
+
+def fetch_data_law():
+    rows = fetch_data_generic("law", ["외국인", "다문화"])
+    df = pd.DataFrame(rows)
+    df.to_excel(os.path.join(PDF_DIR, "법령.xlsx"), index=False)
+
+def fetch_data_ordin():
+    rows = fetch_data_generic("ordin", ["외국인", "다문화"])
+    df = pd.DataFrame(rows)
+    df.to_excel(os.path.join(PDF_DIR, "조례,규칙.xlsx"), index=False)

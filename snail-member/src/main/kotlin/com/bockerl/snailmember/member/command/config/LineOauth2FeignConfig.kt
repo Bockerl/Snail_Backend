@@ -7,13 +7,13 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class LineOauth2FeignConfig {
-
     // 필요한 경우 중첩된 객체 구조 처리
     @Bean
-    fun lineFeignEncoder(): Encoder = Encoder { obj, _, template ->
-        when (obj) {
-            is String -> template.body(obj)
-            else -> throw EncodeException("Only String type is supported")
+    fun lineFeignEncoder(): Encoder =
+        Encoder { obj, _, template ->
+            when (obj) {
+                is String -> template.body(obj)
+                else -> throw EncodeException("Only String type is supported")
+            }
         }
-    }
 }

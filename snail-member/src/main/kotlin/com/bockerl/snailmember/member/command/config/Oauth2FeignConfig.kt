@@ -22,16 +22,17 @@ class Oauth2FeignConfig {
     fun feignLoggerLevel(): Logger.Level = Logger.Level.FULL
 
     @Bean
-    fun requestInterceptor(): RequestInterceptor = RequestInterceptor { template ->
-        logger.info { "Feign request URL: ${template.url()}" }
-        logger.info { "Feign request method: ${template.method()}" }
-        logger.info { "Feign request headers: ${template.headers()}" }
-        // 바이트 배열을 문자열로 변환하여 로깅
-        template.body()?.let { body ->
-            val bodyContent = String(body, Charset.forName("UTF-8"))
-            logger.info { "Feign request body content: $bodyContent" }
+    fun requestInterceptor(): RequestInterceptor =
+        RequestInterceptor { template ->
+            logger.info { "Feign request URL: ${template.url()}" }
+            logger.info { "Feign request method: ${template.method()}" }
+            logger.info { "Feign request headers: ${template.headers()}" }
+            // 바이트 배열을 문자열로 변환하여 로깅
+            template.body()?.let { body ->
+                val bodyContent = String(body, Charset.forName("UTF-8"))
+                logger.info { "Feign request body content: $bodyContent" }
+            }
         }
-    }
 
     // Content-Type 헤더를 'application/x-www-form-urlencoded'로 설정
     // key=value 형식으로 데이터 변환
@@ -48,7 +49,10 @@ class Oauth2FeignConfig {
         private val log = KotlinLogging.logger {}
         private val defaultErrorDecoder = feign.codec.ErrorDecoder.Default()
 
-        override fun decode(methodKey: String, response: Response): Exception {
+        override fun decode(
+            methodKey: String,
+            response: Response,
+        ): Exception {
             if (response.status() >= 400) {
                 log.error { "Oauth2 API error: ${response.body()?.asReader()?.readText()}" }
                 return CommonException(ErrorCode.OAUTH2_API_CLIENT_ERROR)

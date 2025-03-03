@@ -46,13 +46,14 @@ class RegistrationServiceImplMockTests : TestSupport() {
 
     @BeforeEach
     fun setUp() {
-        registrationService = RegistrationServiceImpl(
-            authService,
-            tempMemberRepository,
-            memberRepository,
-            activityAreaRepository,
-            bcryptPasswordEncoder,
-        )
+        registrationService =
+            RegistrationServiceImpl(
+                authService,
+                tempMemberRepository,
+                memberRepository,
+                activityAreaRepository,
+                bcryptPasswordEncoder,
+            )
     }
 
     companion object {
@@ -406,11 +407,12 @@ class RegistrationServiceImplMockTests : TestSupport() {
         @DisplayName("활동지역 설정 성공 - 이메일 회원 가입 성공")
         fun activityAreaVerification_success() {
             // given
-            val request = ActivityAreaRequestDTO(
-                redisId = TEST_REDIS_ID,
-                primaryFormattedId = TEST_PRIMARY_AREA,
-                workplaceFormattedId = TEST_WORKPLACE_AREA,
-            )
+            val request =
+                ActivityAreaRequestDTO(
+                    redisId = TEST_REDIS_ID,
+                    primaryFormattedId = TEST_PRIMARY_AREA,
+                    workplaceFormattedId = TEST_WORKPLACE_AREA,
+                )
             val tempMember =
                 TempMember(
                     redisId = TEST_REDIS_ID,

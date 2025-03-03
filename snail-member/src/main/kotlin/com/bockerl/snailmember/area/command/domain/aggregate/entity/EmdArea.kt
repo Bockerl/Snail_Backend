@@ -33,10 +33,19 @@ class EmdArea(
     @JdbcTypeCode(SqlTypes.JSON)
     var ReeAreas: List<ReeArea> = listOf(),
 ) {
-    data class ReeArea(val reeAreaAdmCode: String, val reeAreasName: String, val fullName: String)
+    data class ReeArea(
+        val reeAreaAdmCode: String,
+        val reeAreasName: String,
+        val fullName: String,
+    )
 
     companion object {
-        fun create(siggAreaId: Long, admCode: String, areaName: String, fullName: String) = EmdArea(
+        fun create(
+            siggAreaId: Long,
+            admCode: String,
+            areaName: String,
+            fullName: String,
+        ) = EmdArea(
             emdAreaId = 0,
             siggAreaId = siggAreaId,
             emdAreaAdmCode = admCode,

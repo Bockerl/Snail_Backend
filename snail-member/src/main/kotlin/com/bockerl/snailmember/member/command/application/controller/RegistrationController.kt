@@ -53,7 +53,9 @@ class RegistrationController(
         ],
     )
     @PostMapping("/initiation/email")
-    fun postEmailRegistration(@RequestBody requestVO: EmailRequestVO): ResponseDTO<*> {
+    fun postEmailRegistration(
+        @RequestBody requestVO: EmailRequestVO,
+    ): ResponseDTO<*> {
         val requestDTO = authConverter.emailRequestVOToDTO(requestVO)
         val redisId = registrationService.initiateRegistration(requestDTO)
         return ResponseDTO.ok(redisId)
@@ -78,7 +80,9 @@ class RegistrationController(
         ],
     )
     @PostMapping("/verification/email/refresh/{redisId}")
-    fun postEmailRefreshCode(@PathVariable redisId: String): ResponseDTO<*> {
+    fun postEmailRefreshCode(
+        @PathVariable redisId: String,
+    ): ResponseDTO<*> {
         registrationService.createEmailRefreshCode(redisId)
         return ResponseDTO.ok("메일 인증 코드가 재발급되었습니다.")
     }
@@ -102,7 +106,9 @@ class RegistrationController(
         ],
     )
     @PostMapping("/verification/email")
-    fun postEmailVerification(@RequestBody requestVO: EmailVerifyRequestVO): ResponseDTO<*> {
+    fun postEmailVerification(
+        @RequestBody requestVO: EmailVerifyRequestVO,
+    ): ResponseDTO<*> {
         val requestDTO = authConverter.emailVerifyRequestVOToDTO(requestVO)
         val redisId = registrationService.verifyEmailCode(requestDTO)
         return ResponseDTO.ok(redisId)
@@ -127,7 +133,9 @@ class RegistrationController(
         ],
     )
     @PostMapping("/initiation/phone")
-    fun postPhoneRegistration(@RequestBody requestVO: PhoneRequestVO): SingleMessageSentResponse? {
+    fun postPhoneRegistration(
+        @RequestBody requestVO: PhoneRequestVO,
+    ): SingleMessageSentResponse? {
         val requestDTO = authConverter.phoneRequestVOToDTO(requestVO)
         val verificationCode = registrationService.createPhoneVerificationCode(requestDTO)
         // 발신번호 및 수신번호는 반드시 01012345678 형태로 입력되어야 함
@@ -161,7 +169,9 @@ class RegistrationController(
         ],
     )
     @PostMapping("/verification/phone/refresh")
-    fun postPhoneRefreshCode(@RequestBody requestVO: PhoneRequestVO): SingleMessageSentResponse? {
+    fun postPhoneRefreshCode(
+        @RequestBody requestVO: PhoneRequestVO,
+    ): SingleMessageSentResponse? {
         val requestDTO = authConverter.phoneRequestVOToDTO(requestVO)
         val refreshCode = registrationService.createPhoneRefreshCode(requestDTO)
         val message =
@@ -194,7 +204,9 @@ class RegistrationController(
         ],
     )
     @PostMapping("/verification/phone")
-    fun postPhoneVerification(@RequestBody requestVO: PhoneVerifyRequestVO): ResponseDTO<*> {
+    fun postPhoneVerification(
+        @RequestBody requestVO: PhoneVerifyRequestVO,
+    ): ResponseDTO<*> {
         val requestDTO = authConverter.phoneVerifyRequestVOToDTO(requestVO)
         val redisId = registrationService.verifyPhoneCode(requestDTO)
         return ResponseDTO.ok(redisId)
@@ -219,7 +231,9 @@ class RegistrationController(
         ],
     )
     @PostMapping("/password")
-    fun postPasswordRegistration(@RequestBody requestVO: PasswordRequestVO): ResponseDTO<*> {
+    fun postPasswordRegistration(
+        @RequestBody requestVO: PasswordRequestVO,
+    ): ResponseDTO<*> {
         val requestDTO = authConverter.passwordRequestVOToDTO(requestVO)
         val redisId = registrationService.postPassword(requestDTO)
         return ResponseDTO.ok(redisId)
@@ -244,7 +258,9 @@ class RegistrationController(
         ],
     )
     @PostMapping("/activity_area")
-    fun postActivityAreas(@RequestBody requestVO: ActivityAreaRequestVO): ResponseDTO<*> {
+    fun postActivityAreas(
+        @RequestBody requestVO: ActivityAreaRequestVO,
+    ): ResponseDTO<*> {
         val requestDTO = authConverter.activityAreaRequestVOToDTO(requestVO)
         registrationService.postActivityArea(requestDTO)
         return ResponseDTO.ok("회원가입에 성공했습니다.")

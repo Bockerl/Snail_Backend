@@ -20,11 +20,12 @@ class KaKaoOauth2ServiceImplTests :
         val memberRepository = mockk<MemberRepository>()
         val kakaoAuthClient = mockk<KaKaoAuthClient>()
         // 테스트 구현체
-        val kakaoOauth2Service = KaKaoOauth2ServiceImpl(
-            memberRepository = memberRepository,
-            kakaoAuthClient = kakaoAuthClient,
-            loginProperties = loginProperties,
-        )
+        val kakaoOauth2Service =
+            KaKaoOauth2ServiceImpl(
+                memberRepository = memberRepository,
+                kakaoAuthClient = kakaoAuthClient,
+                loginProperties = loginProperties,
+            )
 
         Given("카카오 로그인을 요청한 사용자가") {
             val code = TEST_CODE
@@ -39,9 +40,10 @@ class KaKaoOauth2ServiceImplTests :
             } returns response
         }
 
-        fun String.toLocalDateOrNow(): LocalDate = try {
-            LocalDate.parse(this, DateTimeFormatter.ofPattern("yyyyMMdd"))
-        } catch (e: Exception) {
-            LocalDate.now()
-        }
+        fun String.toLocalDateOrNow(): LocalDate =
+            try {
+                LocalDate.parse(this, DateTimeFormatter.ofPattern("yyyyMMdd"))
+            } catch (e: Exception) {
+                LocalDate.now()
+            }
     })

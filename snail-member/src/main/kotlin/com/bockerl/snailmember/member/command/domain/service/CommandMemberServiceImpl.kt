@@ -6,26 +6,33 @@ import com.bockerl.snailmember.member.command.application.service.CommandMemberS
 import com.bockerl.snailmember.member.command.domain.repository.MemberRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 @Service
-class CommandMemberServiceImpl(private val memberRepository: MemberRepository) : CommandMemberService {
+class CommandMemberServiceImpl(
+    private val memberRepository: MemberRepository,
+) : CommandMemberService {
     private val logger = KotlinLogging.logger {}
+
+    @Transactional
     override fun putLastAccessTime(memberEmail: String) {
-        val member = memberRepository.findMemberByMemberEmail(memberEmail)
-            ?: throw CommonException(ErrorCode.NOT_FOUND_MEMBER)
+        val member =
+            memberRepository.findMemberByMemberEmail(memberEmail)
+                ?: throw CommonException(ErrorCode.NOT_FOUND_MEMBER)
 
         member.let {
             logger.info { "이메일 로그인 성공 후, 마지막 로그인 시간 업데이트 시작, email: $memberEmail" }
             member.lastAccessTime = LocalDateTime.now()
-            memberRepository.runCatching {
-                memberRepository.save(member)
-            }.onSuccess {
-                logger.info { "마지막 로그인 시간 업데이트 성공 - email: $memberEmail" }
-            }.onFailure {
-                logger.error { "마지막 로그인 시간 업데이트 실패 - email: $memberEmail" }
-                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
-            }
+            memberRepository
+                .runCatching {
+                    memberRepository.save(member)
+                }.onSuccess {
+                    logger.info { "마지막 로그인 시간 업데이트 성공 - email: $memberEmail" }
+                }.onFailure {
+                    logger.error { "마지막 로그인 시간 업데이트 실패 - email: $memberEmail" }
+                    throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+                }
         }
     }
 }

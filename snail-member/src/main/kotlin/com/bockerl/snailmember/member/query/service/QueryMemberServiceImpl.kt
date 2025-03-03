@@ -17,10 +17,13 @@ import org.springframework.security.authentication.LockedException
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
-class QueryMemberServiceImpl(private val memberMapper: MemberMapper, private val memberConverter: MemberConverter) :
-    QueryMemberService {
+class QueryMemberServiceImpl(
+    private val memberMapper: MemberMapper,
+    private val memberConverter: MemberConverter,
+) : QueryMemberService {
     private val logger = KotlinLogging.logger {}
 
     override fun selectMemberByMemberId(memberId: String): MemberDTO {
@@ -31,6 +34,7 @@ class QueryMemberServiceImpl(private val memberMapper: MemberMapper, private val
         return memberConverter.entityToDTO(member)
     }
 
+    @Transactional(readOnly = true)
     override fun loadUserByUsername(username: String?): UserDetails {
         val email = username ?: throw BadCredentialsException("이메일이 제공되지 않았습니다")
         val member =

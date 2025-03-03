@@ -17,7 +17,10 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("api/area")
-class QueryAreaController(private val queryAreaService: QueryAreaService, private val areaConverter: AreaConverter) {
+class QueryAreaController(
+    private val queryAreaService: QueryAreaService,
+    private val areaConverter: AreaConverter,
+) {
     @Operation(
         summary = "키워드 기반 동네 검색",
         description = "키워드를 바탕으로 최소 군구, 최대 읍면동 단위의 동네를 검색합니다.",
@@ -37,7 +40,9 @@ class QueryAreaController(private val queryAreaService: QueryAreaService, privat
         ],
     )
     @GetMapping("/keyword")
-    fun getAreaByKeyword(@RequestParam("area_search_keyword") keyword: String): ResponseDTO<*> {
+    fun getAreaByKeyword(
+        @RequestParam("area_search_keyword") keyword: String,
+    ): ResponseDTO<*> {
         // 유효성 검사
         val requestVO = AreaKeywordRequestVO(keyword)
         requestVO.apply {

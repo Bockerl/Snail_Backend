@@ -51,7 +51,10 @@ class AuthServiceImpl(
 
     // 인증 메일을 보내는 메서드
     @Transactional
-    fun sendVerificationEmail(email: String, code: String) {
+    fun sendVerificationEmail(
+        email: String,
+        code: String,
+    ) {
         logger.info { "인증 코드 메일 전송 메서드 시작($email): $code" }
         val message =
             SimpleMailMessage().apply {
@@ -91,7 +94,11 @@ class AuthServiceImpl(
 
     // redis에 TTL(5분)으로 코드를 저장하는 공통 메서드
     @Transactional
-    fun saveVerificationCode(thing: String, code: String, type: VerificationType) {
+    fun saveVerificationCode(
+        thing: String,
+        code: String,
+        type: VerificationType,
+    ) {
         val key =
             when (type) {
                 VerificationType.EMAIL -> "$EMAIL_PREFIX$thing"
@@ -105,7 +112,11 @@ class AuthServiceImpl(
 
     // 공통 인증 메서드
     @Transactional
-    override fun verifyCode(thing: String, verificationCode: String, type: VerificationType) {
+    override fun verifyCode(
+        thing: String,
+        verificationCode: String,
+        type: VerificationType,
+    ) {
         logger.info { "$type 인증 메서드 시작 - $type:$thing, code:$verificationCode" }
         val key =
             when (type) {
@@ -126,7 +137,10 @@ class AuthServiceImpl(
     private fun generateCode(): String = Random.nextInt(10000, 99999).toString()
 
     // redis에 이미 존재하는 코드 삭제하는 공통 메서드
-    fun deleteExVerificationCode(redisId: String, type: VerificationType) {
+    fun deleteExVerificationCode(
+        redisId: String,
+        type: VerificationType,
+    ) {
         val key =
             when (type) {
                 VerificationType.EMAIL -> "$EMAIL_PREFIX$redisId"

@@ -43,21 +43,22 @@ fun createMember(
     memberPassword: String = TEST_PASSWORD,
     memberNickname: String = TEST_NICKNAME,
     memberStatus: MemberStatus = MemberStatus.ROLE_USER,
-): Member = Member(
-    memberId = memberId,
-    memberEmail = memberEmail,
-    memberPhoneNumber = memberPhone,
-    memberPassword = memberPassword,
-    memberBirth = LocalDate.now(),
-    memberNickName = memberNickname,
-    memberStatus = memberStatus,
-    memberPhoto = "default",
-    memberGender = Gender.MALE,
-    memberLanguage = Language.KOR,
-    memberRegion = "default",
-    signupPath = SignUpPath.EMAIL,
-    selfIntroduction = "default",
-)
+): Member =
+    Member(
+        memberId = memberId,
+        memberEmail = memberEmail,
+        memberPhoneNumber = memberPhone,
+        memberPassword = memberPassword,
+        memberBirth = LocalDate.now(),
+        memberNickName = memberNickname,
+        memberStatus = memberStatus,
+        memberPhoto = "default",
+        memberGender = Gender.MALE,
+        memberLanguage = Language.KOR,
+        memberRegion = "default",
+        signupPath = SignUpPath.EMAIL,
+        selfIntroduction = "default",
+    )
 
 fun createTempMember(
     redisId: String = TEST_REDIS_ID,
@@ -67,41 +68,48 @@ fun createTempMember(
     password: String = TEST_PASSWORD,
     email: String = TEST_EMAIL,
     signUpStep: SignUpStep = SignUpStep.INITIAL,
-): TempMember = TempMember(
-    redisId = redisId,
-    nickName = nickname,
-    birth = birth,
-    phoneNumber = phoneNumber,
-    password = password,
-    email = email,
-    signUpStep = signUpStep,
-)
+): TempMember =
+    TempMember(
+        redisId = redisId,
+        nickName = nickname,
+        birth = birth,
+        phoneNumber = phoneNumber,
+        password = password,
+        email = email,
+        signUpStep = signUpStep,
+    )
 
-fun createInitialTempMember(): TempMember = TempMember(
-    email = TEST_EMAIL,
-    nickName = TEST_NICKNAME,
-    birth = TEST_BIRTH,
-)
+fun createInitialTempMember(): TempMember =
+    TempMember(
+        email = TEST_EMAIL,
+        nickName = TEST_NICKNAME,
+        birth = TEST_BIRTH,
+    )
 
 fun createEmailRequestDTO(
     email: String = TEST_EMAIL,
     nickname: String = TEST_NICKNAME,
     birth: Timestamp = TEST_BIRTH,
-): EmailRequestDTO = EmailRequestDTO(
-    memberEmail = email,
-    memberNickName = nickname,
-    memberBirth = birth,
-)
+): EmailRequestDTO =
+    EmailRequestDTO(
+        memberEmail = email,
+        memberNickName = nickname,
+        memberBirth = birth,
+    )
 
 fun createEmailVerifyRequestDTO(
     redisId: String = TEST_REDIS_ID,
     code: String = VERIFICATION_CODE,
-): EmailVerifyRequestDTO = EmailVerifyRequestDTO(
-    redisId = redisId,
-    verificationCode = code,
-)
+): EmailVerifyRequestDTO =
+    EmailVerifyRequestDTO(
+        redisId = redisId,
+        verificationCode = code,
+    )
 
-fun createPhoneRequestDTO(redisId: String = TEST_REDIS_ID, phoneNumber: String = TEST_PHONE): PhoneRequestDTO =
+fun createPhoneRequestDTO(
+    redisId: String = TEST_REDIS_ID,
+    phoneNumber: String = TEST_PHONE,
+): PhoneRequestDTO =
     PhoneRequestDTO(
         redisId = redisId,
         phoneNumber = phoneNumber,
@@ -110,12 +118,16 @@ fun createPhoneRequestDTO(redisId: String = TEST_REDIS_ID, phoneNumber: String =
 fun createPhoneVerifyRequestDTO(
     redisId: String = TEST_REDIS_ID,
     code: String = VERIFICATION_CODE,
-): PhoneVerifyRequestDTO = PhoneVerifyRequestDTO(
-    redisId = redisId,
-    verificationCode = code,
-)
+): PhoneVerifyRequestDTO =
+    PhoneVerifyRequestDTO(
+        redisId = redisId,
+        verificationCode = code,
+    )
 
-fun createPassWordRequestDTO(redisId: String = TEST_REDIS_ID, password: String = TEST_PASSWORD): PasswordRequestDTO =
+fun createPassWordRequestDTO(
+    redisId: String = TEST_REDIS_ID,
+    password: String = TEST_PASSWORD,
+): PasswordRequestDTO =
     PasswordRequestDTO(
         redisId = redisId,
         password = password,
@@ -125,11 +137,12 @@ fun createActivityAreaRequestDTO(
     redisId: String = TEST_REDIS_ID,
     primaryArea: String = TEST_PRIMARY_AREA,
     workplaceArea: String = TEST_WORKPLACE_AREA,
-): ActivityAreaRequestDTO = ActivityAreaRequestDTO(
-    redisId = redisId,
-    primaryFormattedId = primaryArea,
-    workplaceFormattedId = workplaceArea,
-)
+): ActivityAreaRequestDTO =
+    ActivityAreaRequestDTO(
+        redisId = redisId,
+        primaryFormattedId = primaryArea,
+        workplaceFormattedId = workplaceArea,
+    )
 
 fun createKaKaoTokenResponseDTO(
     token: String = TEST_TOKEN_TYPE,
@@ -138,11 +151,12 @@ fun createKaKaoTokenResponseDTO(
     idToken: String = TEST_ID_TOKEN,
     expiresIn: Int = 0,
     refreshExpiresIn: Int = 0,
-): KaKaoTokenResponseDTO = KaKaoTokenResponseDTO(
-    tokenType = token,
-    accessToken = accessToken,
-    refreshToken = refreshToken,
-    expiresIn = expiresIn,
-    refreshTokenExpiresIn = refreshExpiresIn,
-    idToken = idToken,
-)
+): KaKaoTokenResponseDTO =
+    KaKaoTokenResponseDTO(
+        tokenType = token,
+        accessToken = accessToken,
+        refreshToken = refreshToken,
+        expiresIn = expiresIn,
+        refreshTokenExpiresIn = refreshExpiresIn,
+        idToken = idToken,
+    )

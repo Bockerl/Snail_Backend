@@ -25,10 +25,11 @@ class AuthServiceImplTests :
         val mailSender = mockk<JavaMailSender>()
         val redisTemplate = mockk<RedisTemplate<String, String>>()
         // test 구현체
-        val authService = AuthServiceImpl(
-            redisTemplate,
-            mailSender,
-        )
+        val authService =
+            AuthServiceImpl(
+                redisTemplate,
+                mailSender,
+            )
 
         afterTest {
             val valOps = mockk<ValueOperations<String, String>>()
@@ -92,9 +93,10 @@ class AuthServiceImplTests :
                 every { redisTemplate.opsForValue().get("$EMAIL_PREFIX$email") } returns null
 
                 Then("만료된 코드 예외가 발생한다.") {
-                    val exception = shouldThrow<CommonException> {
-                        authService.verifyCode(email, code, VerificationType.EMAIL)
-                    }
+                    val exception =
+                        shouldThrow<CommonException> {
+                            authService.verifyCode(email, code, VerificationType.EMAIL)
+                        }
                     exception.errorCode shouldBe ErrorCode.EXPIRED_CODE
                 }
             }
@@ -104,9 +106,10 @@ class AuthServiceImplTests :
                 every { redisTemplate.opsForValue().get("$EMAIL_PREFIX$email") } returns wrongCode
 
                 Then("유효하지 않은 코드 예외가 발생한다.") {
-                    val exception = shouldThrow<CommonException> {
-                        authService.verifyCode(email, code, VerificationType.EMAIL)
-                    }
+                    val exception =
+                        shouldThrow<CommonException> {
+                            authService.verifyCode(email, code, VerificationType.EMAIL)
+                        }
                     exception.errorCode shouldBe ErrorCode.INVALID_CODE
                 }
             }
@@ -156,9 +159,10 @@ class AuthServiceImplTests :
                 every { redisTemplate.opsForValue().get("$PHONE_PREFIX$phone") } returns null
 
                 Then("만료된 코드 예외가 발생한다.") {
-                    val exception = shouldThrow<CommonException> {
-                        authService.verifyCode(phone, code, VerificationType.PHONE)
-                    }
+                    val exception =
+                        shouldThrow<CommonException> {
+                            authService.verifyCode(phone, code, VerificationType.PHONE)
+                        }
                     exception.errorCode shouldBe ErrorCode.EXPIRED_CODE
                 }
             }
@@ -168,9 +172,10 @@ class AuthServiceImplTests :
                 every { redisTemplate.opsForValue().get("$PHONE_PREFIX$phone") } returns wrongCode
 
                 Then("유효하지 않은 코드 예외가 발생한다.") {
-                    val exception = shouldThrow<CommonException> {
-                        authService.verifyCode(phone, code, VerificationType.PHONE)
-                    }
+                    val exception =
+                        shouldThrow<CommonException> {
+                            authService.verifyCode(phone, code, VerificationType.PHONE)
+                        }
                     exception.errorCode shouldBe ErrorCode.INVALID_CODE
                 }
             }

@@ -16,5 +16,7 @@ interface LineAuthClient {
         value = ["/oauth2/v2.1/token"],
         consumes = ["application/x-www-form-urlencoded"],
     )
-    fun getAccessToken(@RequestBody formData: String): LineTokenResponseDTO
+    fun getAccessToken(
+        @RequestBody formData: String,
+    ): LineTokenResponseDTO
 }

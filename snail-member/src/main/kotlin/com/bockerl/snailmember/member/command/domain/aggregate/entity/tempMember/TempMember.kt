@@ -35,26 +35,34 @@ data class TempMember(
         // Redis 키 생성을 위한 상수
         private const val KEY_PREFIX = "temp:member:"
 
-        fun initiate(email: String, nickName: String, birth: Timestamp): TempMember = TempMember(
-            nickName = nickName,
-            birth = birth,
-            email = email,
-        )
+        fun initiate(
+            email: String,
+            nickName: String,
+            birth: Timestamp,
+        ): TempMember =
+            TempMember(
+                nickName = nickName,
+                birth = birth,
+                email = email,
+            )
 
         // Redis 키 생성 메서드
         fun createRedisKey(redisId: String): String = "$KEY_PREFIX$redisId"
     }
 
-    fun verifyEmail(): TempMember = copy(
-        signUpStep = SignUpStep.EMAIL_VERIFIED,
-    )
+    fun verifyEmail(): TempMember =
+        copy(
+            signUpStep = SignUpStep.EMAIL_VERIFIED,
+        )
 
-    fun verifyPhoneNumber(): TempMember = copy(
-        signUpStep = SignUpStep.PHONE_VERIFIED,
-    )
+    fun verifyPhoneNumber(): TempMember =
+        copy(
+            signUpStep = SignUpStep.PHONE_VERIFIED,
+        )
 
-    fun verifyPassword(password: String): TempMember = copy(
-        password = password,
-        signUpStep = SignUpStep.PASSWORD_VERIFIED,
-    )
+    fun verifyPassword(password: String): TempMember =
+        copy(
+            password = password,
+            signUpStep = SignUpStep.PASSWORD_VERIFIED,
+        )
 }

@@ -93,13 +93,14 @@ class RegistrationServiceImpl(
         val updatedTempMember = tempMember.verifyEmail()
         logger.info { "이메일 인증 성공 후 tempMember: $tempMember" }
         // 이메일 인증 성공 상태로 임시회원 상태 업데이트
-        tempMemberRepository.runCatching {
-            update(redisId, updatedTempMember)
-        }.onSuccess {
-            logger.info { "redis에 임시회원 이메일 인증 업데이트 성공 - redisId: $redisId" }
-        }.onFailure {
-            logger.warn { "redis에 tempMember 저장 중 오류 발생, redisId: $redisId, error: $it" }
-        }
+        tempMemberRepository
+            .runCatching {
+                update(redisId, updatedTempMember)
+            }.onSuccess {
+                logger.info { "redis에 임시회원 이메일 인증 업데이트 성공 - redisId: $redisId" }
+            }.onFailure {
+                logger.warn { "redis에 tempMember 저장 중 오류 발생, redisId: $redisId, error: $it" }
+            }
         return redisId
     }
 
@@ -109,8 +110,9 @@ class RegistrationServiceImpl(
         val redisId = requestDTO.redisId
         logger.info { "휴대폰 인증 시작 - redisId: $redisId" }
         // redis에서 tempMember조회
-        val tempMember = tempMemberRepository.find(redisId)
-            ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
+        val tempMember =
+            tempMemberRepository.find(redisId)
+                ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
         logger.info { "redis에서 조회된 tempMember: $tempMember" }
         // 휴대폰 인증 순서인지 확인
         if (tempMember.signUpStep != SignUpStep.EMAIL_VERIFIED) {
@@ -121,13 +123,14 @@ class RegistrationServiceImpl(
         val verificationCode = authService.createPhoneVerificationCode(requestDTO.phoneNumber)
         // 임시 회원의 번호에 휴대폰 번호 등록
         tempMember.phoneNumber = requestDTO.phoneNumber
-        tempMemberRepository.runCatching {
-            update(redisId, tempMember)
-        }.onSuccess {
-            logger.info { "redis에 임시회원 휴대폰 번호 업데이트 성공 - redisId: $redisId" }
-        }.onFailure {
-            logger.warn { "redis에 tempMember 저장 중 오류 발생, redisId: $redisId, error: $it" }
-        }
+        tempMemberRepository
+            .runCatching {
+                update(redisId, tempMember)
+            }.onSuccess {
+                logger.info { "redis에 임시회원 휴대폰 번호 업데이트 성공 - redisId: $redisId" }
+            }.onFailure {
+                logger.warn { "redis에 tempMember 저장 중 오류 발생, redisId: $redisId, error: $it" }
+            }
         logger.info { "휴대폰 인증 코드 발송 성공" }
         return verificationCode
     }
@@ -138,8 +141,9 @@ class RegistrationServiceImpl(
         logger.info { "휴대폰 인증 코드 재요청 시작" }
         val redisId = requestDTO.redisId
         logger.info { "휴대폰 인증 시작 - redisId: $redisId" }
-        val tempMember = tempMemberRepository.find(redisId)
-            ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
+        val tempMember =
+            tempMemberRepository.find(redisId)
+                ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
         logger.info { "redis에서 조회된 tempMember: $tempMember" }
         if (tempMember.signUpStep != SignUpStep.EMAIL_VERIFIED) {
             logger.error { "휴대폰 인증 순서가 아닌 상태에서 인증 요청이 날라온 에러 발생 - redisId: $redisId" }
@@ -156,8 +160,9 @@ class RegistrationServiceImpl(
         val redisId = requestDTO.redisId
         logger.info { "이메일 인증 시작 - redisId: $redisId" }
         // redis에서 tempMember 조회
-        val tempMember = tempMemberRepository.find(redisId)
-            ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
+        val tempMember =
+            tempMemberRepository.find(redisId)
+                ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
         logger.info { "redis에서 조회된 tempMember: $tempMember" }
         // 휴대폰 인증 순서인지 확인
         if (tempMember.signUpStep != SignUpStep.EMAIL_VERIFIED) {
@@ -170,14 +175,15 @@ class RegistrationServiceImpl(
         // 인증된 상태로 임시회원 변경
         val updatedMember = tempMember.verifyPhoneNumber()
         // 임시 회원 저장
-        tempMemberRepository.runCatching {
-            update(redisId, updatedMember)
-        }.onSuccess {
-            logger.info { "redis에 임시회원 휴대폰 번호 업데이트 성공 - redisId: $redisId" }
-        }.onFailure {
-            logger.info { "redis에 임시회원 휴대폰 번호 업데이트 실패 - redisId: $redisId" }
-            throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
-        }
+        tempMemberRepository
+            .runCatching {
+                update(redisId, updatedMember)
+            }.onSuccess {
+                logger.info { "redis에 임시회원 휴대폰 번호 업데이트 성공 - redisId: $redisId" }
+            }.onFailure {
+                logger.info { "redis에 임시회원 휴대폰 번호 업데이트 실패 - redisId: $redisId" }
+                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+            }
         return redisId
     }
 
@@ -187,8 +193,9 @@ class RegistrationServiceImpl(
         val redisId = requestDTO.redisId
         logger.info { "비밀번호 입력 시작 - redisId: $redisId" }
         // redis에서 tempMember 조회
-        val tempMember = tempMemberRepository.find(redisId)
-            ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
+        val tempMember =
+            tempMemberRepository.find(redisId)
+                ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
         logger.info { "redis에서 조회된 tempMember: $tempMember" }
         // 비밀번호 입력 순서인지 확인
         if (tempMember.signUpStep != SignUpStep.PHONE_VERIFIED) {
@@ -197,14 +204,15 @@ class RegistrationServiceImpl(
         }
         // 비밀번호 입력한 임시회원 상태로 변경
         val updateMember = tempMember.verifyPassword(requestDTO.password)
-        tempMemberRepository.runCatching {
-            update(redisId, updateMember)
-        }.onSuccess {
-            logger.info { "redis에 임시회원 비밀번호 업데이트 성공 - redisId: $redisId" }
-        }.onFailure {
-            logger.info { "redis에 임시회원 비밀번호 업데이트 실패 - redisId: $redisId" }
-            throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
-        }
+        tempMemberRepository
+            .runCatching {
+                update(redisId, updateMember)
+            }.onSuccess {
+                logger.info { "redis에 임시회원 비밀번호 업데이트 성공 - redisId: $redisId" }
+            }.onFailure {
+                logger.info { "redis에 임시회원 비밀번호 업데이트 실패 - redisId: $redisId" }
+                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+            }
         return redisId
     }
 
@@ -214,8 +222,9 @@ class RegistrationServiceImpl(
         val redisId = requestDTO.redisId
         logger.info { "활동지역 등록 시작 - redisId: $redisId" }
         // redis에서 tempMember 조회
-        val tempMember = tempMemberRepository.find(redisId)
-            ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
+        val tempMember =
+            tempMemberRepository.find(redisId)
+                ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
         logger.info { "redis에서 조회된 tempMember: $tempMember" }
         // 활동지역 등록 순서인지 확인
         if (tempMember.signUpStep != SignUpStep.PASSWORD_VERIFIED) {
@@ -223,51 +232,57 @@ class RegistrationServiceImpl(
             throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
         }
         // 실제 회원 생성 후 등록
-        val newMember = Member(
-            memberEmail = tempMember.email,
-            memberNickName = tempMember.nickName,
-            // tempMember의 timestamp를 localDate로 변환
-            memberBirth = tempMember.birth.toLocalDateTime().toLocalDate(),
-            // 비밀번호 암호화
-            memberPassword = bcryptPasswordEncoder.encode(tempMember.password),
-            memberPhoneNumber = tempMember.phoneNumber,
-            memberPhoto = "",
-            memberGender = Gender.UNKNOWN,
-            memberLanguage = Language.KOR,
-            memberRegion = "",
-            memberStatus = MemberStatus.ROLE_USER,
-            signupPath = SignUpPath.EMAIL,
-            selfIntroduction = "",
-        )
-        memberRepository.runCatching {
-            save(newMember)
-        }.onSuccess {
-            logger.info { "메인 DB에 새 회원 저장 성공 - newMember: $newMember" }
-        }.onFailure {
-            logger.warn { "메인 DB에 새 회원 저장 실패 - newMember: $newMember" }
-            throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
-        }
-        val primaryId = extractDigits(requestDTO.primaryFormattedId)
-            .also { logger.info { "추출된 primaryAreaId: $it" } }
+        val newMember =
+            Member(
+                memberEmail = tempMember.email,
+                memberNickName = tempMember.nickName,
+                // tempMember의 timestamp를 localDate로 변환
+                memberBirth = tempMember.birth.toLocalDateTime().toLocalDate(),
+                // 비밀번호 암호화
+                memberPassword = bcryptPasswordEncoder.encode(tempMember.password),
+                memberPhoneNumber = tempMember.phoneNumber,
+                memberPhoto = "",
+                memberGender = Gender.UNKNOWN,
+                memberLanguage = Language.KOR,
+                memberRegion = "",
+                memberStatus = MemberStatus.ROLE_USER,
+                signupPath = SignUpPath.EMAIL,
+                selfIntroduction = "",
+            )
+        memberRepository
+            .runCatching {
+                save(newMember)
+            }.onSuccess {
+                logger.info { "메인 DB에 새 회원 저장 성공 - newMember: $newMember" }
+            }.onFailure {
+                logger.warn { "메인 DB에 새 회원 저장 실패 - newMember: $newMember" }
+                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+            }
+        val primaryId =
+            extractDigits(requestDTO.primaryFormattedId)
+                .also { logger.info { "추출된 primaryAreaId: $it" } }
         // 활동지역 db에 저장
         // 1. 주 지역은 반드시 존재하므로 그냥 저장
-        val primaryArea = ActivityArea(
-            id = ActivityArea.ActivityId(
-                memberId = newMember.memberId ?: throw CommonException(ErrorCode.NOT_FOUND_USER_ID),
-                emdAreasId = primaryId,
-            ),
-            areaType = AreaType.PRIMARY,
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now(),
-        ).also { logger.info { "새로 생성된 메인 활동 지역: $it" } }
-        activityAreaRepository.runCatching {
-            save(primaryArea)
-        }.onSuccess {
-            logger.info { "메인 DB에 새 메인 활동 지역 저장 성공 - primaryArea: $primaryArea" }
-        }.onFailure {
-            logger.warn { "메인 DB에 새 메인 활동 지역 저장 실패 - primaryArea: $primaryArea" }
-            throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
-        }
+        val primaryArea =
+            ActivityArea(
+                id =
+                    ActivityArea.ActivityId(
+                        memberId = newMember.memberId ?: throw CommonException(ErrorCode.NOT_FOUND_USER_ID),
+                        emdAreasId = primaryId,
+                    ),
+                areaType = AreaType.PRIMARY,
+                createdAt = LocalDateTime.now(),
+                updatedAt = LocalDateTime.now(),
+            ).also { logger.info { "새로 생성된 메인 활동 지역: $it" } }
+        activityAreaRepository
+            .runCatching {
+                save(primaryArea)
+            }.onSuccess {
+                logger.info { "메인 DB에 새 메인 활동 지역 저장 성공 - primaryArea: $primaryArea" }
+            }.onFailure {
+                logger.warn { "메인 DB에 새 메인 활동 지역 저장 실패 - primaryArea: $primaryArea" }
+                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+            }
         // 2. 직장 근처는 let을 통해 저장
         requestDTO.workplaceFormattedId?.let { secondaryId ->
             logger.info { "직장 근처 활동 지역 저장 시작, secondaryId: $secondaryId" }
@@ -275,32 +290,36 @@ class RegistrationServiceImpl(
                 logger.error { "주 활동 지역과 직장 근처 활동 지역이 같은 종류로 등록되는 에러 발생, secondaryId: $secondaryId" }
                 throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
             }
-            val workplaceArea = ActivityArea(
-                id = ActivityArea.ActivityId(
-                    memberId = newMember.memberId ?: throw CommonException(ErrorCode.NOT_FOUND_USER_ID),
-                    emdAreasId = extractDigits(secondaryId),
-                ),
-                areaType = AreaType.WORKPLACE,
-                createdAt = LocalDateTime.now(),
-                updatedAt = LocalDateTime.now(),
-            ).also { logger.info { "새로 생성된 직장 근처 활동 지역: $it" } }
-            activityAreaRepository.runCatching {
-                save(workplaceArea)
+            val workplaceArea =
+                ActivityArea(
+                    id =
+                        ActivityArea.ActivityId(
+                            memberId = newMember.memberId ?: throw CommonException(ErrorCode.NOT_FOUND_USER_ID),
+                            emdAreasId = extractDigits(secondaryId),
+                        ),
+                    areaType = AreaType.WORKPLACE,
+                    createdAt = LocalDateTime.now(),
+                    updatedAt = LocalDateTime.now(),
+                ).also { logger.info { "새로 생성된 직장 근처 활동 지역: $it" } }
+            activityAreaRepository
+                .runCatching {
+                    save(workplaceArea)
+                }.onSuccess {
+                    logger.info { "메인 DB에 새 직장 활동 지역 저장 성공 - workplaceArea: $workplaceArea" }
+                }.onFailure {
+                    logger.warn { "메인 DB에 새 직장 활동 지역 저장 실패 - workplaceArea: $workplaceArea" }
+                    throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+                }
+        }
+        tempMemberRepository
+            .runCatching {
+                delete(redisId)
             }.onSuccess {
-                logger.info { "메인 DB에 새 직장 활동 지역 저장 성공 - workplaceArea: $workplaceArea" }
+                logger.info { "redis에 저장된 임시 회원 삭제 성공 - redisId: $redisId" }
             }.onFailure {
-                logger.warn { "메인 DB에 새 직장 활동 지역 저장 실패 - workplaceArea: $workplaceArea" }
+                logger.info { "redis에 저장된 임시 회원 삭제 실패 - redisId: $redisId" }
                 throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
             }
-        }
-        tempMemberRepository.runCatching {
-            delete(redisId)
-        }.onSuccess {
-            logger.info { "redis에 저장된 임시 회원 삭제 성공 - redisId: $redisId" }
-        }.onFailure {
-            logger.info { "redis에 저장된 임시 회원 삭제 실패 - redisId: $redisId" }
-            throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
-        }
         logger.info { "회원 가입 종료 - 회원 가입 성공" }
     }
 

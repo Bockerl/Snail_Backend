@@ -408,7 +408,7 @@ class RegistrationServiceImplMockTests : TestSupport() {
         fun activityAreaVerification_success() {
             // given
             val request =
-                ActivityAreaRequestDTO(
+                ActivityAreaRegisterRequestDTO(
                     redisId = TEST_REDIS_ID,
                     primaryFormattedId = TEST_PRIMARY_AREA,
                     workplaceFormattedId = TEST_WORKPLACE_AREA,

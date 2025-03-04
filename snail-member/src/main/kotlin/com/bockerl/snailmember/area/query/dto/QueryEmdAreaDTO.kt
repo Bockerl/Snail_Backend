@@ -11,8 +11,8 @@ data class QueryEmdAreaDTO(
     val reeAreas: List<ReeArea> = listOf(),
 ) {
     val formattedEmdId: String
-        get() = "Emd-${emdAreaId.toString().padStart(8, '0') ?: "00000000"}"
+        get() = "EMD-${emdAreaId.toString().padStart(8, '0')}"
 
     val formattedSiggId: String
-        get() = "Sig-${siggAreaId.toString().padStart(8, '0') ?: "00000000"}"
+        get() = "SIG-${siggAreaId.toString().padStart(8, '0')}"
 }

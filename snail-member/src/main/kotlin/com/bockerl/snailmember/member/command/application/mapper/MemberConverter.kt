@@ -4,36 +4,17 @@
  */
 package com.bockerl.snailmember.member.command.application.mapper
 
-import com.bockerl.snailmember.member.command.application.dto.MemberDTO
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.Member
+import com.bockerl.snailmember.member.command.application.dto.request.ActivityAreaRequestDTO
+import com.bockerl.snailmember.member.command.domain.aggregate.vo.request.ActivityAreaRequestVO
 import com.bockerl.snailmember.member.command.domain.aggregate.vo.response.MemberResponseVO
+import com.bockerl.snailmember.member.query.dto.MemberQueryDTO
 import org.springframework.stereotype.Component
 
 @Component
 class MemberConverter {
-    // Entity to DTO 변환
-    fun entityToDTO(entity: Member): MemberDTO =
-        MemberDTO(
-            memberId = entity.formattedId,
-            memberEmail = entity.memberEmail,
-            memberPassword = entity.memberPassword,
-            memberNickName = entity.memberNickName,
-            memberPhoto = entity.memberPhoto,
-            memberLanguage = entity.memberLanguage,
-            createdAt = entity.createdAt,
-            updatedAt = entity.updatedAt,
-            memberStatus = entity.memberStatus,
-            memberGender = entity.memberGender,
-            memberRegion = entity.memberRegion,
-            memberPhoneNumber = entity.memberPhoneNumber,
-            memberBirth = entity.memberBirth,
-            lastAccessTime = entity.lastAccessTime,
-            selfIntroduction = entity.selfIntroduction,
-        )
-
-    fun dtoToResponseVO(dto: MemberDTO): MemberResponseVO =
+    fun dtoToResponseVO(dto: MemberQueryDTO): MemberResponseVO =
         MemberResponseVO(
-            memberId = dto.memberId,
+            memberId = dto.formattedId,
             memberEmail = dto.memberEmail,
             memberPassword = dto.memberPassword,
             memberNickName = dto.memberNickName,
@@ -48,5 +29,13 @@ class MemberConverter {
             memberBirth = dto.memberBirth,
             lastAccessTime = dto.lastAccessTime,
             selfIntroduction = dto.selfIntroduction,
+        )
+
+    // 활동지역 변경 혹은 oauth 회원을 위한 vo to dto
+    fun activityAreaRequestVOToDTO(requestVO: ActivityAreaRequestVO): ActivityAreaRequestDTO =
+        ActivityAreaRequestDTO(
+            memberId = requestVO.validMemberId,
+            primaryId = requestVO.validPrimaryId,
+            workplaceId = requestVO.workplaceId,
         )
 }

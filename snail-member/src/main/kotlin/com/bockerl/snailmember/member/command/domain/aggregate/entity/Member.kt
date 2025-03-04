@@ -75,10 +75,6 @@ data class Member(
     @Column(name = "last_access_time", nullable = false)
     var lastAccessTime: LocalDateTime? = LocalDateTime.now()
 
-    // 포맷된 PK를 위한 transient(EX: MEM-00000001) 우선은 8자리(천만이 최대)로 설정했습니다.
-    val formattedId: String
-        get() = "MEM-${memberId?.toString()?.padStart(8, '0') ?: "00000000"}"
-
     // 프로필 업데이트 메서드
     fun updateProfile(
         nickname: String? = null,

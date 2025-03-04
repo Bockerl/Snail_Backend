@@ -66,6 +66,8 @@ class WebSecurity(
                     .permitAll()
                     .requestMatchers("/api/member/health")
                     .permitAll()
+                    .requestMatchers("/api/area/")
+                    .permitAll()
                     .anyRequest()
                     .authenticated()
             }.sessionManagement { session ->

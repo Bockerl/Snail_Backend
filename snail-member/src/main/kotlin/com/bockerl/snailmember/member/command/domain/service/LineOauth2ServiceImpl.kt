@@ -134,7 +134,7 @@ class LineOauth2ServiceImpl(
                 memberEmail = email,
                 memberPhoneNumber = "FromLine",
                 memberPhoto = "",
-                memberStatus = MemberStatus.ROLE_USER,
+                memberStatus = MemberStatus.ROLE_TEMP,
                 memberRegion = "",
                 memberLanguage = Language.KOR,
                 memberGender = Gender.UNKNOWN,

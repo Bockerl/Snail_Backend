@@ -1,6 +1,6 @@
 package com.bockerl.snailmember.member.command.application.service
 
-import com.bockerl.snailmember.member.command.application.dto.request.ActivityAreaRequestDTO
+import com.bockerl.snailmember.member.command.application.dto.request.ActivityAreaRegisterRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.EmailRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.EmailVerifyRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.PasswordRequestDTO
@@ -22,5 +22,5 @@ interface RegistrationService {
 
     fun postPassword(requestDTO: PasswordRequestDTO): String
 
-    fun postActivityArea(requestDTO: ActivityAreaRequestDTO)
+    fun postActivityArea(requestDTO: ActivityAreaRegisterRequestDTO)
 }

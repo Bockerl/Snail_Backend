@@ -129,7 +129,7 @@ class KaKaoOauth2ServiceImpl(
                 memberEmail = email,
                 memberPhoneNumber = "FromKaKao",
                 memberPhoto = "",
-                memberStatus = MemberStatus.ROLE_USER,
+                memberStatus = MemberStatus.ROLE_TEMP,
                 memberRegion = "",
                 memberLanguage = Language.KOR,
                 memberGender = Gender.UNKNOWN,

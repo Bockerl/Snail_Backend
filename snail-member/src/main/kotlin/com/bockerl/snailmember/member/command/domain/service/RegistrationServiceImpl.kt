@@ -218,7 +218,7 @@ class RegistrationServiceImpl(
 
     // 6. 활동지역 등록(회원가입 완료)
     @Transactional
-    override fun postActivityArea(requestDTO: ActivityAreaRequestDTO) {
+    override fun postActivityArea(requestDTO: ActivityAreaRegisterRequestDTO) {
         val redisId = requestDTO.redisId
         logger.info { "활동지역 등록 시작 - redisId: $redisId" }
         // redis에서 tempMember 조회

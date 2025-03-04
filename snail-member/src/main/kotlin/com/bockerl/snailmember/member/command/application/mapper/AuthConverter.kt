@@ -48,11 +48,11 @@ class AuthConverter {
             redisId = requestVO.redisId ?: throw CommonException(ErrorCode.INVALID_INPUT_VALUE),
         )
 
-    // 활동지역 vo to dto
-    fun activityAreaRequestVOToDTO(requestVO: ActivityAreaRequestVO): ActivityAreaRequestDTO =
-        ActivityAreaRequestDTO(
+    // 회원가입 활동지역 vo to dto
+    fun activityAreaRegisterRequestVOToDTO(requestVO: ActivityAreaRegisterRequestVO): ActivityAreaRegisterRequestDTO =
+        ActivityAreaRegisterRequestDTO(
             redisId = requestVO.redisId ?: throw CommonException(ErrorCode.INVALID_INPUT_VALUE),
-            primaryFormattedId = requestVO.primaryFormattedId ?: throw CommonException(ErrorCode.INVALID_INPUT_VALUE),
+            primaryFormattedId = requestVO.validPrimaryId,
             // 직장 장소는 입력을 안 할 수도 있으므로 nullable
             workplaceFormattedId = requestVO.workplaceFormattedId,
         )

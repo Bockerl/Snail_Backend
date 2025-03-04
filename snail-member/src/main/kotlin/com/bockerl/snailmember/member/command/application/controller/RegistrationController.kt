@@ -259,9 +259,9 @@ class RegistrationController(
     )
     @PostMapping("/activity_area")
     fun postActivityAreas(
-        @RequestBody requestVO: ActivityAreaRequestVO,
+        @RequestBody requestVO: ActivityAreaRegisterRequestVO,
     ): ResponseDTO<*> {
-        val requestDTO = authConverter.activityAreaRequestVOToDTO(requestVO)
+        val requestDTO = authConverter.activityAreaRegisterRequestVOToDTO(requestVO)
         registrationService.postActivityArea(requestDTO)
         return ResponseDTO.ok("회원가입에 성공했습니다.")
     }

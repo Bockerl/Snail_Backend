@@ -33,7 +33,8 @@ class CommandBoardCommentServiceImpl(
 
         commandBoardCommentRepository.save(boardComment)
         // 설명. 데이터 변경시 해당하는 해당 게시글 댓글들 캐시 초기화
-        cacheManager.getCache("boardComments/${commandBoardCommentCreateDTO.boardId}")?.clear()
+        cacheManager.getCache("boardComments:comment/${commandBoardCommentCreateDTO.boardId}")?.clear()
+        cacheManager.getCache("boardComments:member/${commandBoardCommentCreateDTO.memberId}")?.clear()
     }
 
     @Transactional
@@ -60,7 +61,8 @@ class CommandBoardCommentServiceImpl(
 
         commandFileDTO?.let { commandFileService.createSingleFile(file, commandFileDTO) }
 
-        cacheManager.getCache("boardComments/${commandBoardCommentCreateByGifDTO.boardId}")?.clear()
+        cacheManager.getCache("boardComments:comment/${commandBoardCommentCreateByGifDTO.boardId}")?.clear()
+        cacheManager.getCache("boardComments:member/${commandBoardCommentCreateByGifDTO.memberId}")?.clear()
     }
 
     @Transactional
@@ -88,7 +90,8 @@ class CommandBoardCommentServiceImpl(
             commandFileService.deleteFile(commandFileDTO)
         }
 
-        cacheManager.getCache("boardComments/${commandBoardCommentDeleteDTO.boardId}")?.clear()
+        cacheManager.getCache("boardComments:comment/${commandBoardCommentDeleteDTO.boardId}")?.clear()
+        cacheManager.getCache("boardComments:member/${commandBoardCommentDeleteDTO.memberId}")?.clear()
     }
 
     fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()

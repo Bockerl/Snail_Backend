@@ -26,7 +26,7 @@ class QueryBoardCommentServiceImpl(
         pageSize: Int,
     ): List<QueryBoardCommentResponseVO?> {
         // 설명. 캐시 prefix
-        val cacheName = "boardComments/$boardId"
+        val cacheName = "boardComments:comment/$boardId"
         val key = if (lastId != null) "$lastId" + "_" + "$pageSize" else "first"
 
         redisTemplate.opsForValue().get("$cacheName:$key")?.let {
@@ -72,7 +72,7 @@ class QueryBoardCommentServiceImpl(
         pageSize: Int,
     ): List<QueryBoardCommentResponseVO?> {
         // 설명. 캐시 prefix
-        val cacheName = "boardComments/$memberId"
+        val cacheName = "boardComments:member/$memberId"
         val key = if (lastId != null) "$lastId" + "_" + "$pageSize" else "first"
 
         redisTemplate.opsForValue().get("$cacheName:$key")?.let {

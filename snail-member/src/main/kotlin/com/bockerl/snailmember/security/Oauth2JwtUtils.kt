@@ -67,11 +67,11 @@ class Oauth2JwtUtils(
         claims["memberId"] = customMember.memberId
         claims["memberPhoto"] = customMember.memberPhoto
         // AccessToken 생성
-        val accessTokenExpiration = System.currentTimeMillis() + accessExpiration
+        val accessTokenExpiration = System.currentTimeMillis() + accessExpiration * 1000
         val accessToken = generateToken(claims, accessTokenExpiration)
         // Redis에 저장
         saveToken(email, accessToken, TokenType.ACCESS_TOKEN)
-        logger.info { "AccessToken 생성 완료" }
+        logger.info { "AccessToken 생성 완료: $accessToken" }
         return accessToken
     }
 
@@ -93,9 +93,10 @@ class Oauth2JwtUtils(
                     subject = email
                     this["auth"] = authority
                 }
-            val refreshTokenExpiration = System.currentTimeMillis() + refreshExpiration
+            val refreshTokenExpiration = System.currentTimeMillis() + refreshExpiration * 1000
             val refreshToken = generateToken(refreshClaims, refreshTokenExpiration)
             saveToken(email, refreshToken, TokenType.REFRESH_TOKEN)
+            logger.info { "새 refreshToken 생성 완료: $refreshToken" }
             return refreshToken
         }
     }

@@ -18,12 +18,12 @@ class FileEventConsumerImpl(
 ) : FileEventConsumer {
     private val logger = KotlinLogging.logger {}
 
-    @Transactional
-    @KafkaListener(
-        topics = ["file-events"],
-        groupId = "snail-member",
-        containerFactory = "kafkaListenerContainerFactory",
-    )
+    //    @Transactional
+    //    @KafkaListener(
+    //        topics = ["file-events"],
+    //        groupId = "snail-member",
+    //        containerFactory = "kafkaListenerContainerFactory",
+    //    )
     fun consumeCreate(
         @Payload event: BaseFileCreatedEvent,
         @Header(KafkaHeaders.RECEIVED_PARTITION) partition: Int,

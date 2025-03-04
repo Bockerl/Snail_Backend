@@ -91,7 +91,7 @@ class JwtUtils(
         accessClaims["memberNickname"] = member.memberNickname
         accessClaims["memberId"] = member.memberId
         accessClaims["memberPhoto"] = member.memberPhoto
-        val accessTokenExpiration = System.currentTimeMillis() + accessExpiration
+        val accessTokenExpiration = System.currentTimeMillis() + accessExpiration * 1000
         val accessToken =
             Jwts
                 .builder()
@@ -111,7 +111,7 @@ class JwtUtils(
         logger.info { "새로운 rt 생성 시작" }
         val email = claims.subject ?: throw CommonException(ErrorCode.TOKEN_TYPE_ERROR)
         // rt는 claim 그대로 사용 가능
-        val refreshTokenExpiration = System.currentTimeMillis() + refreshExpiration
+        val refreshTokenExpiration = System.currentTimeMillis() + refreshExpiration * 1000
         val refreshToken =
             Jwts
                 .builder()

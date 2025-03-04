@@ -202,16 +202,18 @@ class JwtFilter(
             log.warn { "유효하지 않은 발행처: $issuer" }
             return false
         }
-        log.info { "isser 통과" }
+        log.info { "issuer 통과" }
         // subject 추출
         val email = claims.subject ?: throw CommonException(ErrorCode.TOKEN_MALFORMED_ERROR)
         log.info { "subject 통과, sub: $email" }
         // auth 추출
-        val auth = claims["auth"] as? List<*> ?: throw CommonException(ErrorCode.TOKEN_MALFORMED_ERROR)
-        if (auth.isEmpty()) {
+        val auth = claims["auth"] as? String ?: throw CommonException(ErrorCode.TOKEN_AUTH_ERROR)
+        log.info { "auth: $auth" }
+        if (auth.isBlank()) {
             log.warn { "권한 정보가 없는 $type" }
             return false
         }
+        log.info { "auth 통과, auth: $auth" }
 
         val prefix =
             when (type) {
@@ -219,9 +221,13 @@ class JwtFilter(
                 TokenType.REFRESH_TOKEN -> REDIS_RT_PREFIX
             }
         // redis에 저장된 at와 비교
+        log.info { "redis로 조회할 key: $prefix$email" }
         val redisToken =
             redisTemplate.opsForValue().get("$prefix$email")
-                ?: throw CommonException(ErrorCode.EXPIRED_TOKEN_ERROR)
+                ?: {
+                    logger.info { "$prefix$email 로 조회된 토큰이 없음" }
+                    throw CommonException(ErrorCode.EXPIRED_TOKEN_ERROR)
+                }
         if (redisToken != token) {
             log.warn { "redis에 저장된 $type 과 일치하지 않음" }
             throw CommonException(ErrorCode.INVALID_TOKEN_ERROR)
@@ -230,9 +236,8 @@ class JwtFilter(
         // auth 검증
         val member = queryMemberService.loadUserByUsername(email)
         val memberAuth = member.authorities.firstOrNull()?.authority
-        val tokenAuth = auth[0].toString()
-        if (tokenAuth != memberAuth) {
-            log.warn { "토큰의 권한($tokenAuth)과 멤버 본래 권한($memberAuth)이 일치하지 않음" }
+        if (auth != memberAuth) {
+            log.warn { "토큰의 권한($auth)과 멤버 본래 권한($memberAuth)이 일치하지 않음" }
             return false
         }
         log.info { "auth 통과" }

@@ -1,7 +1,7 @@
 package com.bockerl.snailmember.area.query.service
 
 import com.bockerl.snailmember.area.query.dto.request.AreaKeywordRequestDTO
-import com.bockerl.snailmember.area.query.dto.response.AreaKeywordResponseDTO
+import com.bockerl.snailmember.area.query.dto.response.AreaResponseDTO
 import com.bockerl.snailmember.area.query.repository.ActivityAreaMapper
 import com.bockerl.snailmember.area.query.repository.EmdAreaMapper
 import com.bockerl.snailmember.area.query.repository.SiggAreaMapper
@@ -16,7 +16,7 @@ class QueryServiceImpl(
 ) : QueryAreaService {
     private val logger = KotlinLogging.logger {}
 
-    override fun selectAreaByKeyword(requestDTO: AreaKeywordRequestDTO): AreaKeywordResponseDTO {
+    override fun selectAreaByKeyword(requestDTO: AreaKeywordRequestDTO): AreaResponseDTO {
         logger.info { "키워드 기반 동네 검색 서비스 메서드 시작" }
         val keyword = requestDTO.areaSearchKeyword
         logger.info { "검색 키워드: $keyword" }
@@ -25,7 +25,7 @@ class QueryServiceImpl(
         logger.info { "조회된 시군구 리스트: $siggAreas" }
         val emdAreas = emdAreasMapper.selectEmdAreasByKeyword(keyword)
         logger.info { "조회된 읍면동 리스트: $emdAreas" }
-        return AreaKeywordResponseDTO(
+        return AreaResponseDTO(
             siggAreas = siggAreas,
             emdReeAreas = emdAreas,
         )

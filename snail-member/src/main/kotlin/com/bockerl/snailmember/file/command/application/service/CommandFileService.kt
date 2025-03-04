@@ -5,7 +5,11 @@
 
 package com.bockerl.snailmember.file.command.application.service
 
-import com.bockerl.snailmember.file.command.application.dto.*
+import com.bockerl.snailmember.file.command.application.dto.CommandFileCreateDTO
+import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
+import com.bockerl.snailmember.file.command.application.dto.CommandFileDeleteDTO
+import com.bockerl.snailmember.file.command.application.dto.CommandFileWithGatheringCreateDTO
+import com.bockerl.snailmember.file.command.application.dto.CommandFileWithGatheringDTO
 import org.springframework.web.multipart.MultipartFile
 
 interface CommandFileService {

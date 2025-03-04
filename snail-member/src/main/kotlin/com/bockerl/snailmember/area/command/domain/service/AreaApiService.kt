@@ -6,6 +6,7 @@ import com.bockerl.snailmember.area.command.domain.aggregate.entity.SiggArea
 import com.bockerl.snailmember.area.command.domain.repository.EmdAreaRepository
 import com.bockerl.snailmember.area.command.domain.repository.SidoAreaRepository
 import com.bockerl.snailmember.area.command.domain.repository.SiggAreaRepository
+import com.bockerl.snailmember.area.query.dto.response.VWWorldAddressResponseDTO
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -62,6 +63,37 @@ class AreaApiService(
             logger.error(e) { "지역 데이터 수집 중 오류 발생: ${e.message}" }
             throw e
         }
+    }
+
+    fun fetchApiByPosition(
+        longitude: Double,
+        latitude: Double,
+    ): String {
+        logger.info { "검색할 위치 - x: $longitude, y: $latitude" }
+        val jsonResponse =
+            executeApiCall(
+                baseUrl = "https://api.vworld.kr/req/address",
+                parameters =
+                    mapOf(
+                        "service" to "address",
+                        "request" to "GetAddress",
+                        "version" to "2.0",
+                        "crs" to "epsg:4326",
+                        "point" to "$longitude,$latitude",
+                        "format" to "json",
+                        "type" to "parcel",
+                        "simple" to "false",
+                        "key" to key,
+                    ),
+                logPrefix = "client 위치",
+            )
+        logger.info { "api로 넘어온 jsonResponse: $jsonResponse" }
+        val addressResponse =
+            objectMapper.readValue(jsonResponse, VWWorldAddressResponseDTO::class.java)
+        return addressResponse.response.result
+            .firstOrNull()
+            ?.structure
+            ?.level4LC ?: throw CommonException(ErrorCode.NOT_FOUND_LEVEL4CL)
     }
 
     private fun loadSidoAreas(): String =

@@ -4,7 +4,8 @@ import com.bockerl.snailmember.area.command.application.mapper.AreaConverter
 import com.bockerl.snailmember.area.query.service.QueryAreaService
 import com.bockerl.snailmember.area.query.vo.request.AreaKeywordRequestVO
 import com.bockerl.snailmember.area.query.vo.request.AreaPositionRequestVO
-import com.bockerl.snailmember.area.query.vo.response.AreaResponseVO
+import com.bockerl.snailmember.area.query.vo.response.AreaKeywordResponseVO
+import com.bockerl.snailmember.area.query.vo.response.AreaPositionResponseVO
 import com.bockerl.snailmember.common.ResponseDTO
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.swagger.v3.oas.annotations.Operation
@@ -37,7 +38,7 @@ class QueryAreaController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = AreaResponseVO::class),
+                        schema = Schema(implementation = AreaKeywordResponseVO::class),
                     ),
                 ],
             ),
@@ -63,18 +64,18 @@ class QueryAreaController(
     }
 
     @Operation(
-        summary = "키워드 기반 동네 검색",
-        description = "키워드를 바탕으로 최소 군구, 최대 읍면동 단위의 동네를 검색합니다.",
+        summary = "위치 기반 동네 검색",
+        description = "위치를 바탕으로 읍면동 단위의 동네를 검색합니다.",
     )
     @ApiResponses(
         value = [
             ApiResponse(
                 responseCode = "200",
-                description = "키워드 기반 동네 검색 성공",
+                description = "위치 기반 동네 검색 성공",
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = AreaResponseVO::class),
+                        schema = Schema(implementation = AreaPositionResponseVO::class),
                     ),
                 ],
             ),
@@ -93,7 +94,7 @@ class QueryAreaController(
         }
         val requestDTO = areaConverter.areaPositionVOToDTO(requestVO)
         val responseDTO = queryAreaService.selectAreaByPosition(requestDTO)
-        val responseVO = areaConverter.areaResponseDTOToVO(responseDTO)
+        val responseVO = areaConverter.areaPositionDTOToVO(responseDTO)
         return ResponseDTO.ok(responseVO)
     }
 }

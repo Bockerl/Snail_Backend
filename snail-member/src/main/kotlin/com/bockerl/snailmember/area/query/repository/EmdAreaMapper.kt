@@ -7,4 +7,6 @@ import org.apache.ibatis.annotations.Mapper
 interface EmdAreaMapper {
     // 읍면동 + 리 검색, TypeHandler 사용
     fun selectEmdAreasByKeyword(keyword: String): List<QueryEmdAreaDTO>
+
+    fun selectEmdAreasByAdmCode(admCode: String): List<QueryEmdAreaDTO>
 }

@@ -5,7 +5,7 @@ import com.bockerl.snailmember.area.query.vo.QuerySiggAreaVO
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.v3.oas.annotations.media.Schema
 
-data class AreaResponseVO(
+data class AreaKeywordResponseVO(
     @field:Schema(description = "시군구 검색 결과 리스트", type = "List")
     @JsonProperty("sigg_areas")
     val siggAreas: List<QuerySiggAreaVO>,

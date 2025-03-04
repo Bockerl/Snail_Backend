@@ -87,16 +87,16 @@ class AuthenticationFilter(
                 ?: throw CommonException(ErrorCode.NOT_FOUND_ENV)
 
         val customMember = authResult.principal as CustomMember
-        val roles = authResult.authorities.map { it.authority }
-        val accessTokenExpiration = System.currentTimeMillis() + accessExpiration
-        val refreshTokenExpiration = System.currentTimeMillis() + refreshExpiration
+        val authority = customMember.authorities.firstOrNull()?.authority
+        val accessTokenExpiration = System.currentTimeMillis() + accessExpiration * 1000
+        val refreshTokenExpiration = System.currentTimeMillis() + refreshExpiration * 1000
 
         // accessToken에 memberEmail, memberNickname, memberPhoto 넣을 예정
         val accessClaims =
             Jwts.claims().apply {
                 subject = customMember.memberEmail
             }
-        accessClaims["auth"] = roles
+        accessClaims["auth"] = authority
         accessClaims["memberNickname"] = customMember.memberNickname
         accessClaims["memberId"] = customMember.memberId
         accessClaims["memberPhoto"] = customMember.memberPhoto
@@ -105,7 +105,7 @@ class AuthenticationFilter(
             Jwts.claims().apply {
                 subject = customMember.memberEmail
             }
-        refreshClaims["auth"] = roles
+        refreshClaims["auth"] = authority
 
         val accessToken: String =
             Jwts

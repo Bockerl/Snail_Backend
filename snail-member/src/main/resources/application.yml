@@ -62,11 +62,6 @@ spring:
                     - ${REDIS_PORT1}
                     - ${REDIS_PORT2}
                     - ${REDIS_PORT3}
-        mongodb:
-            host: ${DATABASE_HOST}
-            port: ${MONGO_DATABASE_PORT}
-            database: ${MONGO_DATABASE_NAME}
-            auto-index-creation: true
 
 mybatis:
     mapper-locations: classpath:/com/bockerl/snailmember/mapper/**/*.xml

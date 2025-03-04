@@ -63,6 +63,7 @@ enum class ErrorCode(
     NOT_FOUND_BOARD(40415, HttpStatus.NOT_FOUND, "해당 게시글이 존재하지 않습니다"),
     NOT_FOUND_FILE(40415, HttpStatus.NOT_FOUND, "해당 파일이 존재하지 않습니다"),
     NOT_FOUND_BOARD_COMMENT(40415, HttpStatus.NOT_FOUND, "해당 게시글 댓글이 존재하지 않습니다"),
+    NOT_FOUND_BOARD_RECOMMENT(40416, HttpStatus.NOT_FOUND, "해당 게시글 대댓글이 존재하지 않습니다"),
 
     // 429: 요청 과다 (Too Many Requests)
     TOO_MANY_REQUESTS(42900, HttpStatus.TOO_MANY_REQUESTS, "요청 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요."),

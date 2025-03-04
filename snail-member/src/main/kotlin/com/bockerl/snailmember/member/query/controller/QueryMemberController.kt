@@ -44,7 +44,7 @@ class QueryMemberController(
     )
     @GetMapping("/{memberId}")
     fun getMemberByMemberId(
-        @PathVariable memberId: Long,
+        @PathVariable memberId: String,
     ): ResponseDTO<*> {
         val memberDTO: MemberDTO = queryMemberService.selectMemberByMemberId(memberId)
         return ResponseDTO.ok(memberConverter.dtoToResponseVO(memberDTO))

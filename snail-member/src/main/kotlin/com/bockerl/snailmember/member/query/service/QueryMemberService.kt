@@ -7,5 +7,5 @@ package com.bockerl.snailmember.member.query.service
 import com.bockerl.snailmember.member.command.application.dto.MemberDTO
 
 interface QueryMemberService {
-    fun selectMemberByMemberId(memberId: Long): MemberDTO
+    fun selectMemberByMemberId(memberId: String): MemberDTO
 }

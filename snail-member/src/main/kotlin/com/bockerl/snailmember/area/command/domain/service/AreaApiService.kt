@@ -1,4 +1,4 @@
-package com.bockerl.snailmember.area.command.domain.aggregate.service
+package com.bockerl.snailmember.area.command.domain.service
 
 import com.bockerl.snailmember.area.command.domain.aggregate.entity.EmdArea
 import com.bockerl.snailmember.area.command.domain.aggregate.entity.SidoArea

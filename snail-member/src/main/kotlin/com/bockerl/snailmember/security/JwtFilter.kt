@@ -36,9 +36,6 @@ class JwtFilter(
     }
 
     // 환경 변수 관리
-    private val refreshTokenExpiration =
-        environment.getProperty("REFRESH_TOKEN_EXPIRATION")?.toLong()
-            ?: throw CommonException(ErrorCode.NOT_FOUND_ENV)
     private val tokenIssuer =
         environment.getProperty("TOKEN_ISSUER")
             ?: throw CommonException(ErrorCode.NOT_FOUND_ENV)
@@ -53,7 +50,8 @@ class JwtFilter(
             path.startsWith("/api/user/oauth2") or
             path.startsWith("/favicon.ico") or
             path.startsWith("/v3/api-docs") or
-            path.startsWith("/api/member/health")
+            path.startsWith("/api/member/health") or
+            path.startsWith("/api/area/")
     }
 
     override fun doFilterInternal(

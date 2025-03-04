@@ -6,6 +6,7 @@ package com.bockerl.snailmember.member.command.domain.aggregate.entity
 
 enum class MemberStatus {
     ROLE_USER,
+    ROLE_TEMP,
     ROLE_ADMIN,
     ROLE_BLACKLIST,
 }

@@ -5,8 +5,8 @@
 package com.bockerl.snailmember.member.query.controller
 
 import com.bockerl.snailmember.common.ResponseDTO
-import com.bockerl.snailmember.member.command.application.dto.MemberDTO
 import com.bockerl.snailmember.member.command.application.mapper.MemberConverter
+import com.bockerl.snailmember.member.query.dto.MemberQueryDTO
 import com.bockerl.snailmember.member.query.service.QueryMemberService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -67,7 +67,7 @@ class QueryMemberController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = MemberDTO::class),
+                        schema = Schema(implementation = MemberQueryDTO::class),
                     ),
                 ],
             ),
@@ -77,7 +77,7 @@ class QueryMemberController(
     fun getMemberByMemberId(
         @PathVariable memberId: String,
     ): ResponseDTO<*> {
-        val memberDTO: MemberDTO = queryMemberService.selectMemberByMemberId(memberId)
+        val memberDTO: MemberQueryDTO = queryMemberService.selectMemberByMemberId(memberId)
         return ResponseDTO.ok(memberConverter.dtoToResponseVO(memberDTO))
     }
 }

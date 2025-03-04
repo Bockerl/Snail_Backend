@@ -23,7 +23,7 @@ class AreaDataInitializer(
                 logger.info("지역 데이터가 이미 존재합니다. 초기화를 건너뜁니다.")
             }
         } catch (e: Exception) {
-            logger.error("지역 데이터 초기화 중 오류가 발생했습니다: ${e.message}", e)
+            logger.error { "지역 데이터 초기화 중 오류가 발생했습니다: ${e.message}" }
             // 애플리케이션 시작에 필수적인 데이터라면 예외를 다시 던져서 시작을 중단할 수 있습니다.
             // throw e
         }

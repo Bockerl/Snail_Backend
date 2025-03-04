@@ -2,7 +2,7 @@
 
 package com.bockerl.snailmember.utils
 
-import com.bockerl.snailmember.member.command.application.dto.request.ActivityAreaRequestDTO
+import com.bockerl.snailmember.member.command.application.dto.request.ActivityAreaRegisterRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.EmailRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.EmailVerifyRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.PasswordRequestDTO
@@ -137,8 +137,8 @@ fun createActivityAreaRequestDTO(
     redisId: String = TEST_REDIS_ID,
     primaryArea: String = TEST_PRIMARY_AREA,
     workplaceArea: String = TEST_WORKPLACE_AREA,
-): ActivityAreaRequestDTO =
-    ActivityAreaRequestDTO(
+): ActivityAreaRegisterRequestDTO =
+    ActivityAreaRegisterRequestDTO(
         redisId = redisId,
         primaryFormattedId = primaryArea,
         workplaceFormattedId = workplaceArea,

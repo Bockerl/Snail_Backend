@@ -126,7 +126,7 @@ class CommandBoardRecommentLikeServiceImpl(
 
             boardRecommentLikeRepository.saveAll(boardRecommentLikeListEntities)
         } catch (ex: DataIntegrityViolationException) {
-            logger.error("Bulk insert 실패: ${ex.message}. 개별 처리 시도합니다.")
+            logger.error { "Bulk insert 실패: ${ex.message}. 개별 처리 시도합니다." }
             boardRecommentLikeList.forEach { event ->
                 val boardRecommentLikeEntity =
                     BoardRecommentLike(

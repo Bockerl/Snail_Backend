@@ -3,13 +3,9 @@
 package com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.entity
 
 import jakarta.persistence.*
-import kotlinx.datetime.LocalDateTime
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 
-// @Document(collection = "board-comment-like")
-// 설명. 복합키 인덱스 설정해서 중복 삽입 시 예외 발생 설정
-// @CompoundIndex(name = "board-comment-like-id:index", def = "{'boardId': 1, 'memberId': 1}", unique = true)
 @Entity
 @Table(
     name = "board_comment_like",

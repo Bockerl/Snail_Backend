@@ -118,11 +118,11 @@ class CommandBoardCommentLikeServiceImpl(
         try {
             // 설명. entity형으로 변환은 필요하다.
             val boardCommentLikeListEntities =
-                boardCommentLikeList.map { boardLike ->
+                boardCommentLikeList.map { boardCommentLike ->
                     BoardCommentLike(
-                        boardId = extractDigits(boardLike.boardId),
-                        memberId = extractDigits(boardLike.memberId),
-                        boardCommentId = extractDigits(boardLike.boardCommentId),
+                        boardId = extractDigits(boardCommentLike.boardId),
+                        memberId = extractDigits(boardCommentLike.memberId),
+                        boardCommentId = extractDigits(boardCommentLike.boardCommentId),
                     )
                 }
 

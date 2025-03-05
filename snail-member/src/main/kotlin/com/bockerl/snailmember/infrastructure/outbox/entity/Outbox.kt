@@ -26,7 +26,7 @@ class Outbox(
     @Column(name = "event_id", unique = true, nullable = false)
     var eventId: Long? = null,
     @Column(name = "aggregate_id", nullable = false)
-    var aggregateId: Long?,
+    var aggregateId: String?,
     @Column(name = "event_type", nullable = false, length = 255)
     @Enumerated(EnumType.STRING)
     var eventType: EventType,

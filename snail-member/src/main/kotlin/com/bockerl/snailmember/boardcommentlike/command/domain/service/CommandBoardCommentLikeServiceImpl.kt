@@ -1,6 +1,5 @@
 package com.bockerl.snailmember.boardcommentlike.command.domain.service
 
-import com.bockerl.snailmember.board.query.service.QueryBoardService
 import com.bockerl.snailmember.boardcommentlike.command.application.dto.CommandBoardCommentLikeDTO
 import com.bockerl.snailmember.boardcommentlike.command.application.service.CommandBoardCommentLikeService
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.entity.BoardCommentLike
@@ -12,7 +11,6 @@ import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.infrastructure.outbox.dto.OutboxDTO
 import com.bockerl.snailmember.infrastructure.outbox.enums.EventType
 import com.bockerl.snailmember.infrastructure.outbox.service.OutboxService
-import com.bockerl.snailmember.member.query.service.QueryMemberService
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
@@ -27,8 +25,6 @@ import java.time.Duration
 class CommandBoardCommentLikeServiceImpl(
     private val redisTemplate: RedisTemplate<String, String>,
     private val boardCommentLikeRepository: BoardCommentLikeRepository,
-    private val queryMemberService: QueryMemberService,
-    private val queryBoardService: QueryBoardService,
     private val outboxService: OutboxService,
     private val objectMapper: ObjectMapper,
 ) : CommandBoardCommentLikeService {

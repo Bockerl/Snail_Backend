@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
 package com.bockerl.snailmember.common.exception
 
 import com.bockerl.snailmember.common.ResponseDTO
@@ -7,10 +11,10 @@ import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
-import org.springframework.web.servlet.NoHandlerFoundException
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
+import org.springframework.web.servlet.NoHandlerFoundException
 
-@RestControllerAdvice(basePackages = ["com.bockerl.snail.member"])
+@RestControllerAdvice(basePackages = ["com.bockerl.snailmember"])
 class GlobalExceptionHandler {
     // companion object를 사용하여 logger를 정의합니다
     private val log = LoggerFactory.getLogger(this::class.java)

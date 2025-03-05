@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Bockerl
+ * SPDX-License-Identifier: MIT
+ */
 package com.bockerl.snailmember.common.exception
 
 import org.springframework.http.HttpStatus
@@ -21,6 +25,8 @@ enum class ErrorCode(
     INACTIVE_REPLY(40013, HttpStatus.BAD_REQUEST, "해당 대댓글은 삭제돼 있습니다."),
     EMPTY_REQUEST_INPUTSTREAM(40015, HttpStatus.BAD_REQUEST, "요청 본문이 비어 있습니다. 필수 데이터를 포함해야 합니다."),
     TOO_MANY_FILES(40016, HttpStatus.BAD_REQUEST, "파일 업로드 제한 수를 넘었습니다."),
+    ALREADY_LIKED(40017, HttpStatus.BAD_REQUEST, "이미 좋아요가 존재합니다"),
+    ALREADY_UNLIKED(40018, HttpStatus.BAD_REQUEST, "이미 좋아요는 취소되었습니다"),
 
     // 401: 인증 실패 (Unauthorized)
     INVALID_HEADER_VALUE(40100, HttpStatus.UNAUTHORIZED, "올바르지 않은 헤더값입니다."),
@@ -55,6 +61,9 @@ enum class ErrorCode(
     NOT_FOUND_QUES_ANSWER(40411, HttpStatus.NOT_FOUND, "답변이 존재하지 않습니다."),
     NOT_FOUND_REPLY(40414, HttpStatus.NOT_FOUND, "해당 대댓글이 존재하지 않습니다"),
     NOT_FOUND_BOARD(40415, HttpStatus.NOT_FOUND, "해당 게시글이 존재하지 않습니다"),
+    NOT_FOUND_FILE(40415, HttpStatus.NOT_FOUND, "해당 파일이 존재하지 않습니다"),
+    NOT_FOUND_BOARD_COMMENT(40415, HttpStatus.NOT_FOUND, "해당 게시글 댓글이 존재하지 않습니다"),
+    NOT_FOUND_BOARD_RECOMMENT(40416, HttpStatus.NOT_FOUND, "해당 게시글 대댓글이 존재하지 않습니다"),
 
     // 429: 요청 과다 (Too Many Requests)
     TOO_MANY_REQUESTS(42900, HttpStatus.TOO_MANY_REQUESTS, "요청 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요."),
@@ -62,6 +71,7 @@ enum class ErrorCode(
     // 500: 서버 내부 오류 (Internal Server Error)
     INTERNAL_SERVER_ERROR(50000, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다"),
     MAIL_SEND_FAIL(50001, HttpStatus.INTERNAL_SERVER_ERROR, "인증 메일 전송에 실패했습니다."),
+    BLOB_STORAGE_ERROR(50002, HttpStatus.INTERNAL_SERVER_ERROR, "blob storage 파일 업로드에 실패했습니다."),
     ;
 
     companion object {

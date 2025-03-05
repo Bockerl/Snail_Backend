@@ -13,12 +13,18 @@ spring:
         database-platform: org.hibernate.dialect.PostgreSQLDialect
         hibernate:
             ddl-auto: update
+        properties:
+          hibernate:
+              jdbc:
+                lob:
+                    non_contextual_creation: true
     sql:
         init:
             mode: always
     properties:
         hibernate:
             format_sql: true
+
     mail:
         host: smtp.gmail.com
         port: 587
@@ -30,11 +36,6 @@ spring:
                     auth: true
                     starttls:
                         enable: true
-    data:
-        redis:
-            host: ${REDIS_HOST}
-            port: ${REDIS_PORT}
-
 
     cloud:
         azure:
@@ -46,6 +47,23 @@ spring:
         multipart:
             max-file-size: 1MB
             max-request-size: 10MB
+    kafka:
+        bootstrap-servers: ${KAFKA_PORT}
+        consumer:
+            group-id: ${KAFKA_GROUP_ID}
+    data:
+        redis:
+            sentinel:
+                master: ${REDIS_MASTER}
+                nodes:
+                    - ${REDIS_PORT1}
+                    - ${REDIS_PORT2}
+                    - ${REDIS_PORT3}
+        mongodb:
+            host: ${DATABASE_HOST}
+            port: ${MONGO_DATABASE_PORT}
+            database: ${MONGO_DATABASE_NAME}
+            auto-index-creation: true
 
 mybatis:
     mapper-locations: classpath:/com/bockerl/snailmember/mapper/**/*.xml
@@ -60,6 +78,8 @@ springdoc:
 spring.data.jpa.repositories.enabled: true
 logging:
     level:
+#        org.springframework.kafka: DEBUG
+#        org.apache.kafka: DEBUG
         com:
             bockerl:
                 snailmember: DEBUG

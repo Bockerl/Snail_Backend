@@ -37,6 +37,7 @@ data class BoardCommentLike(
     val memberId: Long,
     @Column(name = "board_id", nullable = false)
     val boardId: Long,
+    @Column(name = "board_comment_id", nullable = false)
     val boardCommentId: Long,
 ) {
     @CreationTimestamp

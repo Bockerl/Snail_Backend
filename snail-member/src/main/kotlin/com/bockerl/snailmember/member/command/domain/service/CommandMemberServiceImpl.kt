@@ -52,6 +52,7 @@ class CommandMemberServiceImpl(
                     throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
                 }
         }
+        // 수정 이벤트 발행
     }
 
     @Transactional
@@ -122,6 +123,7 @@ class CommandMemberServiceImpl(
                     throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
                 }
         }
+        // 수정 이벤트 발행
     }
 
     override fun patchProfile(
@@ -171,6 +173,7 @@ class CommandMemberServiceImpl(
                     member.apply { memberPhoto = result[0].fileUrl!! }
                 }
             }
+            // 수정 이벤트 발행
         }
 
     private fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()

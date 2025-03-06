@@ -51,8 +51,8 @@ class AuthenticationFilter(
             // 인증 토큰 생성
             val authToken =
                 UsernamePasswordAuthenticationToken(
-                    member.memberEmail,
-                    credential.memberPassword,
+                    member,
+                    null,
                     member.authorities,
                 )
             log.info { "생성된 인증 토큰: $authToken" }

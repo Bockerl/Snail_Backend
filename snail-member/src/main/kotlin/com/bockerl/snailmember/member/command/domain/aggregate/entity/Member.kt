@@ -77,34 +77,4 @@ data class Member(
 
     val formattedId: String
         get() = "MEM-${memberId?.toString()?.padStart(8, '0') ?: "00000000"}"
-
-    // 프로필 업데이트 메서드
-    fun updateProfile(
-        nickname: String? = null,
-        photo: String? = null,
-        gender: Gender? = null,
-        birth: LocalDate? = null,
-        introduction: String? = null,
-    ) {
-        nickname?.let { this.memberNickname = it }
-        photo?.let { this.memberPhoto = it }
-        gender?.let { this.memberGender = it }
-        birth?.let { this.memberBirth = it }
-        introduction?.let { this.selfIntroduction = it }
-    }
-
-    // 이메일 업데이트 메서드
-    fun updateEmail(email: String? = null) {
-        email?.let { this.memberEmail = it }
-    }
-
-    // 휴대폰 번호 업데이트 메서드
-    fun updatePhoneNumber(phoneNumber: String? = null) {
-        phoneNumber?.let { this.memberPhoneNumber = it }
-    }
-
-    // 마지막 접속시간 업데이트 메서드
-    fun updateLastAccessTime(lastAccessTime: LocalDateTime? = null) {
-        lastAccessTime?.let { this.lastAccessTime = it }
-    }
 }

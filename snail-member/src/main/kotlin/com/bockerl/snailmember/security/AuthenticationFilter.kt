@@ -4,8 +4,8 @@ import com.bockerl.snailmember.common.ResponseDTO
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.service.CommandMemberService
-import com.bockerl.snailmember.member.command.domain.aggregate.vo.request.MemberEmailLoginRequestVO
-import com.bockerl.snailmember.member.command.domain.aggregate.vo.response.LoginResponseVO
+import com.bockerl.snailmember.member.command.domain.vo.request.MemberEmailLoginRequestVO
+import com.bockerl.snailmember.member.command.domain.vo.response.LoginResponseVO
 import com.bockerl.snailmember.member.query.service.QueryMemberService
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging

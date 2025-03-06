@@ -6,6 +6,7 @@ import com.bockerl.snailmember.common.ResponseDTO
 import com.bockerl.snailmember.member.command.application.mapper.AuthConverter
 import com.bockerl.snailmember.member.command.application.service.RegistrationService
 import com.bockerl.snailmember.member.command.domain.aggregate.vo.request.*
+import com.bockerl.snailmember.member.command.domain.vo.request.*
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema

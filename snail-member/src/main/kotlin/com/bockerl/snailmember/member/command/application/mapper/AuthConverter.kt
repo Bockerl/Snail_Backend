@@ -7,7 +7,8 @@ import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.dto.request.*
 import com.bockerl.snailmember.member.command.application.dto.response.LoginResponseDTO
 import com.bockerl.snailmember.member.command.domain.aggregate.vo.request.*
-import com.bockerl.snailmember.member.command.domain.aggregate.vo.response.LoginResponseVO
+import com.bockerl.snailmember.member.command.domain.vo.request.*
+import com.bockerl.snailmember.member.command.domain.vo.response.LoginResponseVO
 import org.springframework.stereotype.Component
 
 @Component

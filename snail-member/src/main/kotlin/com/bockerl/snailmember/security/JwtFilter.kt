@@ -242,8 +242,8 @@ class JwtFilter(
         // SecurityContext에 설정
         val authentication =
             UsernamePasswordAuthenticationToken(
-                email,
-                member.password,
+                member,
+                null,
                 member.authorities,
             )
         log.info { "securityContextHolder에게 맡길 authentication: $authentication" }

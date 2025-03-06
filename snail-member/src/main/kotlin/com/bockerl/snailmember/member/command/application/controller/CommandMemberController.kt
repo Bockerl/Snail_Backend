@@ -5,18 +5,22 @@
 package com.bockerl.snailmember.member.command.application.controller
 
 import com.bockerl.snailmember.common.ResponseDTO
+import com.bockerl.snailmember.infrastructure.config.OpenApiBody
 import com.bockerl.snailmember.member.command.application.mapper.MemberConverter
 import com.bockerl.snailmember.member.command.application.service.CommandMemberService
 import com.bockerl.snailmember.member.command.domain.vo.request.ActivityAreaRequestVO
 import com.bockerl.snailmember.member.command.domain.vo.request.ProfileRequestVO
+import com.bockerl.snailmember.security.CustomMember
+import com.bockerl.snailmember.security.config.CurrentMemberId
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Encoding
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.http.MediaType
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -54,24 +58,60 @@ class CommandMemberController(
     @PostMapping("/activity_area")
     fun postActivityArea(
         @RequestBody requestVO: ActivityAreaRequestVO,
-        @AuthenticationPrincipal jwt: Jwt,
+        authentication: Authentication,
     ): ResponseDTO<*> {
         logger.info { "활동지역 설정 요청 controller에 도착" }
-        val memberId: String = jwt.getClaimAsString("memberId")
-        logger.info { "controller에 도착한 memberId: $memberId" }
+        val customMember = authentication.principal as CustomMember
+        logger.info { "controller에 도착한 memberId: ${customMember.memberId}" }
         val requestDTO = memberConverter.activityAreaRequestVOToDTO(requestVO)
-        commandMemberService.postActivityArea(memberId, requestDTO)
+        commandMemberService.postActivityArea(customMember.memberId, requestDTO)
         return ResponseDTO.ok("활동지역 설정 성공")
     }
 
-    @PatchMapping("/profile")
+    @Operation(
+        summary = "프로필 수정",
+        description = """
+        계정의 프로필 정보를 수정합니다.
+        프로필 이미지는 선택사항이며, 10MB 이하의 이미지 파일만 업로드 가능합니다.
+    """,
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "프로필 수정 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = ResponseDTO::class),
+                    ),
+                ],
+            ),
+        ],
+    )
+    @OpenApiBody(
+        content = [
+            Content(
+                encoding = [
+                    Encoding(
+                        name = "profileRequestVO",
+                        contentType = MediaType.APPLICATION_JSON_VALUE,
+                    ),
+                    Encoding(
+                        name = "file",
+                        contentType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                    ),
+                ],
+            ),
+        ],
+    )
+    @PatchMapping("/profile", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun patchProfile(
-        @RequestBody requestVO: ProfileRequestVO,
+        @RequestPart("profileRequestVO") requestVO: ProfileRequestVO,
         @RequestPart("file", required = false) file: MultipartFile?,
-        @AuthenticationPrincipal jwt: Jwt,
+        @CurrentMemberId memberId: String,
     ): ResponseDTO<*> {
         logger.info { "프로필 변경 요청 controller에 도착" }
-        val memberId: String = jwt.getClaimAsString("memberId")
         logger.info { "controller에 도착한 memberId: $memberId" }
         val requestDTO = memberConverter.profileRequestVOToDTO(requestVO, file)
         commandMemberService.patchProfile(memberId, requestDTO, file)

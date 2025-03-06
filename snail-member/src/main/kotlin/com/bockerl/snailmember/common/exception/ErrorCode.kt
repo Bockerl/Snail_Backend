@@ -54,6 +54,7 @@ enum class ErrorCode(
     GOOGLE_AUTH_ERROR(40119, HttpStatus.UNAUTHORIZED, "구글 로그인 중 오류가 발생했습니다."),
     LINE_AUTH_ERROR(40120, HttpStatus.UNAUTHORIZED, "라인 로그인 중 오류가 발생했습니다."),
     COOKIE_ERROR(40121, HttpStatus.UNAUTHORIZED, "쿠키가 없거나 비어있습니다."),
+    INVALID_AUTHENTICATION(40122, HttpStatus.UNAUTHORIZED, "SecurityContextHolder에서 authentication 객체가 없습니다."),
 
     // 403: 권한 부족 (Forbidden)
     FORBIDDEN_ROLE(40300, HttpStatus.FORBIDDEN, "요청한 리소스에 대한 권한이 없습니다."),
@@ -61,6 +62,7 @@ enum class ErrorCode(
     BLACK_LIST_ROLE(40302, HttpStatus.FORBIDDEN, "이 계정은 현재 사용이 제한되어 있습니다."),
 
     // 404: 리소스를 찾을 수 없음 (Not Found)
+    NOT_FOUND_ENV(40000, HttpStatus.NOT_FOUND, "환경 변수가 발견되지 않았습니다."),
     NOT_FOUND_MEMBER(40401, HttpStatus.NOT_FOUND, "회원이 존재하지 않습니다."),
     NOT_FOUND_SIDO(40402, HttpStatus.NOT_FOUND, "존재하지 않는 시도(Sido)입니다."),
     NOT_FOUND_SIGG(40403, HttpStatus.NOT_FOUND, "존재하지 않는 시군구(Sigg)입니다."),

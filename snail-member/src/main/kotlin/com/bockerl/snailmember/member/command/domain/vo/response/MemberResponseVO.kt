@@ -2,7 +2,7 @@
  * Copyright 2025 Bockerl
  * SPDX-License-Identifier: MIT
  */
-package com.bockerl.snailmember.member.command.domain.aggregate.vo.response
+package com.bockerl.snailmember.member.command.domain.vo.response
 
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.Gender
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.Language

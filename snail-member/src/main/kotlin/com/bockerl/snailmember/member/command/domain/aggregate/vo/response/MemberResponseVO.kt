@@ -23,7 +23,7 @@ data class MemberResponseVO(
     @JsonProperty(namespace = "memberPassword")
     val memberPassword: String? = null,
     @field:Schema(description = "멤버 닉네임", example = "Lin XaoMing", type = "String")
-    @JsonProperty(namespace = "memberNickName")
+    @JsonProperty(namespace = "memberNickname")
     val memberNickName: String? = null,
     @field:Schema(description = "멤버 프로필 사진", example = "snail.PNG", type = "String")
     @JsonProperty(namespace = "memberPhoto")

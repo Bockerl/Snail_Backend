@@ -43,8 +43,8 @@ class QueryBoardLikeServiceImpl(
         // 4. ResponseVO 매핑
         return members.map { member ->
             QueryBoardLikeMemberIdsResponseVO(
-                memberNickname = member.memberNickName,
-                memberId = member.memberId,
+                memberNickname = member.memberNickname,
+                memberId = member.formattedId,
                 memberPhoto = member.memberPhoto,
             )
         }

@@ -13,7 +13,6 @@ import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.Table
 import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.LocalDateTime
 
@@ -25,13 +24,10 @@ class ActivityArea(
     val id: ActivityId? = null,
     @Enumerated(EnumType.STRING)
     @Column(name = "area_type", nullable = false)
-    val areaType: AreaType? = null,
+    var areaType: AreaType? = null,
     @CreatedDate
     @Column(name = "created_at", nullable = false)
-    val createdAt: LocalDateTime? = null,
-    @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
-    val updatedAt: LocalDateTime? = null,
+    val createdAt: LocalDateTime = LocalDateTime.now(),
 ) {
     @Embeddable
     data class ActivityId(

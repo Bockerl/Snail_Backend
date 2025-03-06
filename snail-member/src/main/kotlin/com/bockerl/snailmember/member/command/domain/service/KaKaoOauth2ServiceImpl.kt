@@ -133,7 +133,7 @@ class KaKaoOauth2ServiceImpl(
                 memberRegion = "",
                 memberLanguage = Language.KOR,
                 memberGender = Gender.UNKNOWN,
-                memberNickName = kakaoResponse.nickname ?: UUID.randomUUID().toString(),
+                memberNickname = kakaoResponse.nickname ?: UUID.randomUUID().toString(),
                 memberBirth = birth,
                 memberPassword = UUID.randomUUID().toString(),
                 signupPath = SignUpPath.Kakao,

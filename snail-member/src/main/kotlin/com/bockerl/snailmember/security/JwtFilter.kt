@@ -211,7 +211,6 @@ class JwtFilter(
             log.warn { "권한 정보가 없는 $type" }
             return false
         }
-        log.info { "auth 통과, auth: $auth" }
 
         val prefix =
             when (type) {

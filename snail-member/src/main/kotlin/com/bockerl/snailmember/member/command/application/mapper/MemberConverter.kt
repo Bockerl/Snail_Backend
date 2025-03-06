@@ -4,6 +4,8 @@
  */
 package com.bockerl.snailmember.member.command.application.mapper
 
+import com.bockerl.snailmember.common.exception.CommonException
+import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.dto.request.ActivityAreaRequestDTO
 import com.bockerl.snailmember.member.command.domain.aggregate.vo.request.ActivityAreaRequestVO
 import com.bockerl.snailmember.member.command.domain.aggregate.vo.response.MemberResponseVO
@@ -17,7 +19,7 @@ class MemberConverter {
             memberId = dto.formattedId,
             memberEmail = dto.memberEmail,
             memberPassword = dto.memberPassword,
-            memberNickName = dto.memberNickName,
+            memberNickName = dto.memberNickname,
             memberPhoto = dto.memberPhoto,
             memberLanguage = dto.memberLanguage,
             createdAt = dto.createdAt,
@@ -32,10 +34,24 @@ class MemberConverter {
         )
 
     // 활동지역 변경 혹은 oauth 회원을 위한 vo to dto
-    fun activityAreaRequestVOToDTO(requestVO: ActivityAreaRequestVO): ActivityAreaRequestDTO =
-        ActivityAreaRequestDTO(
-            memberId = requestVO.validMemberId,
-            primaryId = requestVO.validPrimaryId,
+    fun activityAreaRequestVOToDTO(requestVO: ActivityAreaRequestVO): ActivityAreaRequestDTO {
+        val memberId = requestVO.memberId
+        val primaryId = requestVO.primaryId
+
+        if (memberId.isNullOrBlank() || !memberId.startsWith("MEM")) {
+            throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT)
+        }
+
+        if (primaryId.isNullOrBlank() ||
+            !primaryId.startsWith("EMD") ||
+            primaryId == requestVO.workplaceId
+        ) {
+            throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT)
+        }
+        return ActivityAreaRequestDTO(
+            memberId = requestVO.memberId,
+            primaryId = requestVO.primaryId,
             workplaceId = requestVO.workplaceId,
         )
+    }
 }

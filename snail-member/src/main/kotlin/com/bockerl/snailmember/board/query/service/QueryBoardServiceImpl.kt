@@ -135,7 +135,7 @@ class QueryBoardServiceImpl(
             updatedAt = dto.updatedAt,
             active = dto.active,
             memberPhoto = memberDTO.memberPhoto,
-            memberNickname = memberDTO.memberNickName,
+            memberNickname = memberDTO.memberNickname,
             memberId = dto.formatedMemberId,
         )
     }

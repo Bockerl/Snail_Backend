@@ -15,7 +15,7 @@ class MemberQueryDTO(
     @field:Schema(description = "멤버 비밀번호", example = "snail123", type = "String")
     val memberPassword: String,
     @field:Schema(description = "멤버 닉네임", example = "Lin XaoMing", type = "String")
-    val memberNickName: String,
+    val memberNickname: String,
     @field:Schema(description = "멤버 프로필 사진", example = "snail.PNG", type = "String")
     val memberPhoto: String? = null,
     @field:Schema(description = "선호 언어", example = "KOR", type = "String")

@@ -136,7 +136,7 @@ class GoogleOauth2ServiceImpl(
                 memberRegion = "",
                 memberLanguage = Language.KOR,
                 memberGender = Gender.UNKNOWN,
-                memberNickName = googleResponse.name ?: UUID.randomUUID().toString(),
+                memberNickname = googleResponse.name ?: UUID.randomUUID().toString(),
                 memberBirth = LocalDate.now(),
                 memberPassword = UUID.randomUUID().toString(),
                 signupPath = SignUpPath.Google,

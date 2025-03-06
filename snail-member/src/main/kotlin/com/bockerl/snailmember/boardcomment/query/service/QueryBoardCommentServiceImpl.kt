@@ -127,7 +127,7 @@ class QueryBoardCommentServiceImpl(
             createdAt = dto.createdAt,
             updatedAt = dto.updatedAt,
             memberPhoto = memberDTO.memberPhoto,
-            memberNickname = memberDTO.memberNickName,
+            memberNickname = memberDTO.memberNickname,
             boardCommentGif = "",
         )
     }

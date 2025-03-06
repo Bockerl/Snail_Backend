@@ -235,7 +235,7 @@ class RegistrationServiceImpl(
         val newMember =
             Member(
                 memberEmail = tempMember.email,
-                memberNickName = tempMember.nickName,
+                memberNickname = tempMember.nickName,
                 // tempMember의 timestamp를 localDate로 변환
                 memberBirth = tempMember.birth.toLocalDateTime().toLocalDate(),
                 // 비밀번호 암호화
@@ -272,7 +272,6 @@ class RegistrationServiceImpl(
                     ),
                 areaType = AreaType.PRIMARY,
                 createdAt = LocalDateTime.now(),
-                updatedAt = LocalDateTime.now(),
             ).also { logger.info { "새로 생성된 메인 활동 지역: $it" } }
         activityAreaRepository
             .runCatching {
@@ -299,7 +298,6 @@ class RegistrationServiceImpl(
                         ),
                     areaType = AreaType.WORKPLACE,
                     createdAt = LocalDateTime.now(),
-                    updatedAt = LocalDateTime.now(),
                 ).also { logger.info { "새로 생성된 직장 근처 활동 지역: $it" } }
             activityAreaRepository
                 .runCatching {

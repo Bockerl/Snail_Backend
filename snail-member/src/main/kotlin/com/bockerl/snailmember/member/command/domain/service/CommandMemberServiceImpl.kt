@@ -8,6 +8,8 @@ import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
 import com.bockerl.snailmember.file.command.application.service.CommandFileService
 import com.bockerl.snailmember.file.command.domain.aggregate.enums.FileTargetType
+import com.bockerl.snailmember.file.query.service.QueryFileService
+import com.bockerl.snailmember.file.query.vo.request.QueryFileRequestVO
 import com.bockerl.snailmember.infrastructure.config.TransactionalConfig
 import com.bockerl.snailmember.member.command.application.dto.request.ActivityAreaRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.ProfileRequestDTO
@@ -24,6 +26,7 @@ class CommandMemberServiceImpl(
     private val memberRepository: MemberRepository,
     private val activityAreaRepository: ActivityAreaRepository,
     private val commandFileService: CommandFileService,
+    private val queryFileService: QueryFileService,
 ) : CommandMemberService {
     private val logger = KotlinLogging.logger {}
 
@@ -157,8 +160,15 @@ class CommandMemberServiceImpl(
                 // 기존 프사가 없다면 생성, 있다면 삭제 후 수정 호출
                 if (member.memberPhoto.isBlank()) {
                     commandFileService.createSingleFile(file, commandFileDTO)
+                    logger.info { "프로필 사진 저장 성공" }
+                    val requestVO = QueryFileRequestVO(FileTargetType.MEMBER, memberId)
+                    val result = queryFileService.readFilesByTarget(requestVO)
+                    member.apply { memberPhoto = result[0].fileUrl!! }
                 } else {
                     commandFileService.updateProfileImage(file, commandFileDTO)
+                    val requestVO = QueryFileRequestVO(FileTargetType.MEMBER, memberId)
+                    val result = queryFileService.readFilesByTarget(requestVO)
+                    member.apply { memberPhoto = result[0].fileUrl!! }
                 }
             }
         }

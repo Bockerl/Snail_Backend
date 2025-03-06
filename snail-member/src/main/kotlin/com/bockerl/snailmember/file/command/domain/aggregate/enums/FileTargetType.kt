@@ -9,5 +9,6 @@ enum class FileTargetType {
     GATHERING_BOARD,
     QUESTION,
     BOARD_COMMENT,
+    BOARD_RECOMMENT,
     MEMBER,
 }

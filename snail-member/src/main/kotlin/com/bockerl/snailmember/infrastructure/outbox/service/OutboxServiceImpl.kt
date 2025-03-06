@@ -16,7 +16,7 @@ class OutboxServiceImpl(
     override fun createOutbox(outBoxDTO: OutboxDTO) {
         val outbox =
             Outbox(
-                aggregateId = extractDigits(outBoxDTO.aggregateId),
+                aggregateId = outBoxDTO.aggregateId,
                 eventType = outBoxDTO.eventType,
                 payload = outBoxDTO.payload,
             )
@@ -32,12 +32,13 @@ class OutboxServiceImpl(
         outboxRepository.save(outbox)
     }
 
+    @Transactional
     override fun createOutboxes(outboxDTOs: List<OutboxDTO>) {
         val outboxes =
             outboxDTOs.map { outboxDTO ->
                 val outbox =
                     Outbox(
-                        aggregateId = extractDigits(outboxDTO.aggregateId),
+                        aggregateId = outboxDTO.aggregateId,
                         eventType = outboxDTO.eventType,
                         payload = outboxDTO.payload,
                     )

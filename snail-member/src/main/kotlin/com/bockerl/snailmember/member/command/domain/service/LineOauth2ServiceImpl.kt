@@ -138,7 +138,7 @@ class LineOauth2ServiceImpl(
                 memberRegion = "",
                 memberLanguage = Language.KOR,
                 memberGender = Gender.UNKNOWN,
-                memberNickName = lineResponse.name ?: UUID.randomUUID().toString(),
+                memberNickname = lineResponse.name ?: UUID.randomUUID().toString(),
                 memberBirth = LocalDate.now(),
                 memberPassword = UUID.randomUUID().toString(),
                 signupPath = SignUpPath.LINE,

@@ -4,8 +4,6 @@ import com.bockerl.snailmember.common.event.BaseFileCreatedEvent
 import com.bockerl.snailmember.file.command.domain.aggregate.event.FileDeletedEvent
 import com.bockerl.snailmember.infrastructure.event.processor.FileEventProcessor
 import io.github.oshai.kotlinlogging.KotlinLogging
-import jakarta.transaction.Transactional
-import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header
@@ -41,12 +39,12 @@ class FileEventConsumerImpl(
         }
     }
 
-    @Transactional
-    @KafkaListener(
-        topics = ["file-events"],
-        groupId = "snail-member",
-        containerFactory = "kafkaListenerContainerFactory",
-    )
+//    @Transactional
+//    @KafkaListener(
+//        topics = ["file-events"],
+//        groupId = "snail-member",
+//        containerFactory = "kafkaListenerContainerFactory",
+//    )
     fun consumeDelete(
         @Payload event: FileDeletedEvent,
         @Header(KafkaHeaders.RECEIVED_PARTITION) partition: Int,

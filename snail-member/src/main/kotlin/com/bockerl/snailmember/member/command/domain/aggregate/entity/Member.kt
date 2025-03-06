@@ -40,7 +40,7 @@ data class Member(
     @Column(name = "member_phone_number", nullable = false, length = 255, unique = true)
     var memberPhoneNumber: String,
     @Column(name = "member_nickname", length = 255, nullable = false)
-    var memberNickName: String,
+    var memberNickname: String,
     @Column(name = "member_password", length = 255, nullable = false)
     var memberPassword: String,
     @Column(name = "member_photo", length = 255, nullable = true)
@@ -75,6 +75,9 @@ data class Member(
     @Column(name = "last_access_time", nullable = false)
     var lastAccessTime: LocalDateTime? = LocalDateTime.now()
 
+    val formattedId: String
+        get() = "MEM-${memberId?.toString()?.padStart(8, '0') ?: "00000000"}"
+
     // 프로필 업데이트 메서드
     fun updateProfile(
         nickname: String? = null,
@@ -83,7 +86,7 @@ data class Member(
         birth: LocalDate? = null,
         introduction: String? = null,
     ) {
-        nickname?.let { this.memberNickName = it }
+        nickname?.let { this.memberNickname = it }
         photo?.let { this.memberPhoto = it }
         gender?.let { this.memberGender = it }
         birth?.let { this.memberBirth = it }

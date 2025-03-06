@@ -6,7 +6,7 @@ import java.sql.Timestamp
 
 data class EmailRequestVO(
     @field:Schema(description = "닉네임", example = "Xin Xin", type = "String")
-    @JsonProperty("memberNickName")
+    @JsonProperty("memberNickname")
     val memberNickName: String? = null,
     @field:Schema(description = "인증 이메일", example = "bockerl@gmail.com", type = "String")
     @JsonProperty("memberEmail")

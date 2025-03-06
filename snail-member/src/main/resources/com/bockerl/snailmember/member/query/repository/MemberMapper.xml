@@ -3,11 +3,11 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.bockerl.snailmember.member.query.repository.MemberMapper">
-    <resultMap id="memberResultMap" type="com.bockerl.snailmember.member.query.dto.MemberQueryDTO">
+    <resultMap id="memberDTOResultMap" type="com.bockerl.snailmember.member.query.dto.MemberQueryDTO">
         <result property="memberId" column="member_id"/>
         <result property="memberEmail" column="member_email"/>
         <result property="memberPassword" column="member_password"/>
-        <result property="memberNickName" column="member_nickname"/>
+        <result property="memberNickname" column="member_nickname"/>
         <result property="memberPhoto" column="member_photo"/>
         <result property="memberLanguage" column="member_language"/>
         <result property="createdAt" column="created_at"/>
@@ -21,7 +21,25 @@
         <result property="selfIntroduction" column="self_introduction"/>
     </resultMap>
 
-    <select id="selectMemberByMemberId" parameterType="Long" resultMap="memberResultMap">
+    <resultMap id="memberResultMap" type="com.bockerl.snailmember.member.command.domain.aggregate.entity.Member">
+        <result property="memberId" column="member_id"/>
+        <result property="memberEmail" column="member_email"/>
+        <result property="memberPassword" column="member_password"/>
+        <result property="memberNickname" column="member_nickname"/>
+        <result property="memberPhoto" column="member_photo"/>
+        <result property="memberLanguage" column="member_language"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="memberStatus" column="member_status"/>
+        <result property="memberGender" column="member_gender"/>
+        <result property="memberRegion" column="member_region"/>
+        <result property="memberPhoneNumber" column="member_phone_number"/>
+        <result property="memberBirth" column="member_birth"/>
+        <result property="lastAccessTime" column="last_access_time"/>
+        <result property="selfIntroduction" column="self_introduction"/>
+    </resultMap>
+
+    <select id="selectMemberByMemberId" parameterType="Long" resultMap="memberDTOResultMap">
         SELECT
         member_id,
         member_email,

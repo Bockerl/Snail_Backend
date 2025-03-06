@@ -48,47 +48,62 @@ class CommandMemberServiceImpl(
         val member =
             memberRepository.findMemberByMemberId(extractDigits(requestDTO.memberId))
                 ?: throw CommonException(ErrorCode.NOT_FOUND_MEMBER)
+        val memberId = member.memberId!!
+        val newEmdId = extractDigits(requestDTO.primaryId)
+        logger.info { "기존 주 활동지역부터 삭제" }
+        activityAreaRepository
+            .runCatching {
+                deleteByMemberIdAndAreaType(memberId, AreaType.PRIMARY)
+            }.onSuccess {
+                logger.info { "기존 주 활동지역 삭제 성공" }
+            }.onFailure {
+                logger.warn { "기존 주 활동지역 삭제 실패" }
+                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+            }
+
+        logger.info { "새로운 주 활동지역 생성" }
+        val primaryId = ActivityArea.ActivityId(memberId, newEmdId)
         val primaryArea =
             ActivityArea(
-                id =
-                    ActivityArea.ActivityId(
-                        memberId = member.memberId!!,
-                        emdAreasId = extractDigits(requestDTO.primaryId),
-                    ),
+                primaryId,
                 areaType = AreaType.PRIMARY,
-                createdAt = LocalDateTime.now(),
-                updatedAt = LocalDateTime.now(),
             )
         activityAreaRepository
             .runCatching {
-                logger.info { "주 활동지역 저장 시작" }
                 save(primaryArea)
             }.onSuccess {
-                logger.info { "주 활동지역 저장 성공" }
+                logger.info { "새로운 주 활동지역 저장 성공" }
             }.onFailure {
-                logger.warn { "주 활동지역 저장 실패 - 지역정보: $primaryArea" }
+                logger.warn { "새로운 주 활동지역 저장 실패" }
                 throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
             }
+
         requestDTO.workplaceId?.let {
+            logger.info { "직장근처 활동지역 수정 시작" }
+            activityAreaRepository
+                .runCatching {
+                    deleteByMemberIdAndAreaType(memberId, AreaType.WORKPLACE)
+                }.onSuccess {
+                    logger.info { "기존 직장근처 활동지역 삭제 성공" }
+                }.onFailure {
+                    logger.warn { "기존 직장근처 활동지역 삭제 실패" }
+                    throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+                }
+            logger.info { "새로운 직장근처 활동지역 생성" }
+            val newEmdId2 = extractDigits(requestDTO.workplaceId)
+            val workplaceId = ActivityArea.ActivityId(memberId, newEmdId2)
             val workplaceArea =
                 ActivityArea(
-                    id =
-                        ActivityArea.ActivityId(
-                            memberId = member.memberId!!,
-                            emdAreasId = extractDigits(requestDTO.workplaceId),
-                        ),
+                    workplaceId,
                     areaType = AreaType.WORKPLACE,
-                    createdAt = LocalDateTime.now(),
-                    updatedAt = LocalDateTime.now(),
                 )
             activityAreaRepository
                 .runCatching {
-                    logger.info { "직장 근처 활동지역 저장 시작" }
                     save(workplaceArea)
                 }.onSuccess {
-                    logger.info { "직장 근처 활동지역 저장 성공" }
+                    logger.info { "새로운 직장근처 활동지역 저장 성공" }
                 }.onFailure {
-                    logger.warn { "직장 근처 활동지역 저장 실패 - 지역 정보: $workplaceArea" }
+                    logger.warn { "새로운 직장근처 활동지역 저장 실패" }
                     throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
                 }
         }

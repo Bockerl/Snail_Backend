@@ -13,7 +13,7 @@ class CustomMember(
         authorities,
     ) {
     val memberId: String = member.formattedId
-    val memberNickname: String = member.memberNickName
+    val memberNickname: String = member.memberNickname
     val memberEmail: String = member.memberEmail
     val memberPhoto: String = member.memberPhoto
 }

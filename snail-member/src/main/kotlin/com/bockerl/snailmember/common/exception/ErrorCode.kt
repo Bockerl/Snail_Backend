@@ -61,7 +61,6 @@ enum class ErrorCode(
     BLACK_LIST_ROLE(40302, HttpStatus.FORBIDDEN, "이 계정은 현재 사용이 제한되어 있습니다."),
 
     // 404: 리소스를 찾을 수 없음 (Not Found)
-    NOT_FOUND_ENV(40400, HttpStatus.NOT_FOUND, "환경 변수가 발견되지 않았습니다."),
     NOT_FOUND_MEMBER(40401, HttpStatus.NOT_FOUND, "회원이 존재하지 않습니다."),
     NOT_FOUND_SIDO(40402, HttpStatus.NOT_FOUND, "존재하지 않는 시도(Sido)입니다."),
     NOT_FOUND_SIGG(40403, HttpStatus.NOT_FOUND, "존재하지 않는 시군구(Sigg)입니다."),
@@ -76,13 +75,8 @@ enum class ErrorCode(
     NOT_FOUND_KAKAO_CLIENT_ID(40412, HttpStatus.NOT_FOUND, "카카오 client id가 존재하지 않습니다."),
     NOT_FOUND_KAKAO_CLIENT_SECRET(40413, HttpStatus.NOT_FOUND, "카카오 client secret이 존재하지 않습니다."),
     NOT_FOUND_BOARD_COMMENT(40414, HttpStatus.NOT_FOUND, "해당 게시글 댓글이 존재하지 않습니다"),
-    NOT_FOUND_INQUIRY(40408, HttpStatus.NOT_FOUND, "문의가 존재하지 않습니다."),
-    NOT_FOUND_QUES_ANSWER(40411, HttpStatus.NOT_FOUND, "답변이 존재하지 않습니다."),
-    NOT_FOUND_REPLY(40414, HttpStatus.NOT_FOUND, "해당 대댓글이 존재하지 않습니다"),
-    NOT_FOUND_BOARD(40415, HttpStatus.NOT_FOUND, "해당 게시글이 존재하지 않습니다"),
-    NOT_FOUND_FILE(40415, HttpStatus.NOT_FOUND, "해당 파일이 존재하지 않습니다"),
-    NOT_FOUND_BOARD_COMMENT(40415, HttpStatus.NOT_FOUND, "해당 게시글 댓글이 존재하지 않습니다"),
-    NOT_FOUND_BOARD_RECOMMENT(40416, HttpStatus.NOT_FOUND, "해당 게시글 대댓글이 존재하지 않습니다"),
+    NOT_FOUND_QUES_ANSWER(40416, HttpStatus.NOT_FOUND, "답변이 존재하지 않습니다."),
+    NOT_FOUND_BOARD_RECOMMENT(40421, HttpStatus.NOT_FOUND, "해당 게시글 대댓글이 존재하지 않습니다"),
 
     // 429: 요청 과다 (Too Many Requests)
     TOO_MANY_REQUESTS(42900, HttpStatus.TOO_MANY_REQUESTS, "요청 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요."),

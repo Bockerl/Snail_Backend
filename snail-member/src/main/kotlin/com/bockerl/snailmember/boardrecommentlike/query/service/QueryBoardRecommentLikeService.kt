@@ -1,3 +1,5 @@
 package com.bockerl.snailmember.boardrecommentlike.query.service
 
-interface QueryBoardRecommentLikeService
+interface QueryBoardRecommentLikeService {
+    fun readBoardRecommentLikeCount(boardRecommentId: String): Long
+}

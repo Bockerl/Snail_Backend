@@ -1,6 +1,6 @@
 package com.bockerl.snailchat.chat.command.domain.service
 
-import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomRequestDto
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomCreateRequestDto
 import com.bockerl.snailchat.chat.command.application.service.CommandChatRoomService
 import com.bockerl.snailchat.chat.command.domain.aggregate.entity.ChatRoom
 import com.bockerl.snailchat.chat.command.domain.aggregate.entity.MemberInfo
@@ -13,7 +13,7 @@ class CommandChatRoomServiceImpl(
     private val commandChatRoomRepository: CommandChatRoomRepository,
 //    private val memberFeignClient: MemberFeignClient,
 ) : CommandChatRoomService {
-    override fun createChatRoom(commandChatRoomRequestDto: CommandChatRoomRequestDto) {
+    override fun createChatRoom(commandChatRoomCreateRequestDto: CommandChatRoomCreateRequestDto) {
         // FeignClient 적용 전 임시데이터
         val creator =
             MemberInfo(
@@ -32,11 +32,11 @@ class CommandChatRoomServiceImpl(
             )
 
         // 개인 채팅방일 경우
-        if (commandChatRoomRequestDto.chatRoomType == CommandChatRoomType.PERSONAL) {
+        if (commandChatRoomCreateRequestDto.chatRoomType == CommandChatRoomType.PERSONAL) {
             val chatRoom =
                 ChatRoom(
-                    chatRoomName = commandChatRoomRequestDto.chatRoomName,
-                    chatRoomType = commandChatRoomRequestDto.chatRoomType,
+                    chatRoomName = participants[0].memberNickname,
+                    chatRoomType = commandChatRoomCreateRequestDto.chatRoomType,
                     creator = creator,
                     participants = participants,
                 )

@@ -1,8 +1,8 @@
 package com.bockerl.snailchat.chat.command.application.service
 
-import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomRequestDto
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomCreateRequestDto
 
 interface CommandChatRoomService {
-    fun createChatRoom(commandChatRoomRequestDto: CommandChatRoomRequestDto) {
+    fun createChatRoom(commandChatRoomCreateRequestDto: CommandChatRoomCreateRequestDto) {
     }
 }

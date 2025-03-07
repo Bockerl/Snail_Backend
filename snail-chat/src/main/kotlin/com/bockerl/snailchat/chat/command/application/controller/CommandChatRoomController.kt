@@ -1,6 +1,6 @@
 package com.bockerl.snailchat.chat.command.application.controller
 
-import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomRequestDto
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomCreateRequestDto
 import com.bockerl.snailchat.chat.command.application.mapper.VoToDtoConverter
 import com.bockerl.snailchat.chat.command.application.service.CommandChatRoomService
 import com.bockerl.snailchat.chat.command.domain.aggregate.vo.request.CommandChatRoomCreateRequestVo
@@ -33,7 +33,7 @@ class CommandChatRoomController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = CommandChatRoomRequestDto::class),
+                        schema = Schema(implementation = CommandChatRoomCreateRequestDto::class),
                     ),
                 ],
             ),

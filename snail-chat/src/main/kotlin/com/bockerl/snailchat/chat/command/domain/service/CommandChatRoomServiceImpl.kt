@@ -15,29 +15,26 @@ class CommandChatRoomServiceImpl(
 ) : CommandChatRoomService {
     override fun createChatRoom(commandChatRoomCreateRequestDto: CommandChatRoomCreateRequestDto) {
         // FeignClient 적용 전 임시데이터
-        val creator =
-            MemberInfo(
-                memberId = "member-0001",
-                memberNickname = "Alice",
-                memberPhoto = "Alice.jpg",
-            )
-
-        val participants =
-            listOf(
-                MemberInfo(
-                    memberId = "member-0002",
-                    memberNickname = "John",
-                    memberPhoto = "John.jpg",
-                ),
-            )
-
-        // 개인 채팅방일 경우
         if (commandChatRoomCreateRequestDto.chatRoomType == CommandChatRoomType.PERSONAL) {
+            val participants =
+                listOf(
+                    MemberInfo(
+                        memberId = "member-0001",
+                        memberNickname = "Alice",
+                        memberPhoto = "Alice.jpg",
+                    ),
+                    MemberInfo(
+                        memberId = "member-0002",
+                        memberNickname = "John",
+                        memberPhoto = "John.jpg",
+                    ),
+                )
+
+            // 개인 채팅방일 경우
             val chatRoom =
                 ChatRoom(
-                    chatRoomName = participants[0].memberNickname,
+                    chatRoomName = participants[1].memberNickname,
                     chatRoomType = commandChatRoomCreateRequestDto.chatRoomType,
-                    creator = creator,
                     participants = participants,
                 )
 

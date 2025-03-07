@@ -14,7 +14,6 @@ data class ChatRoom(
     // val chatRoomRelation: CommandCHatRoomRelationType? = null
     // 알람 여부 - 향후 알림 구현시 추가 예정
     // val chatRoomAlarmStatus: Boolean,
-    val creator: MemberInfo,
     val participants: List<MemberInfo>,
     @CreatedDate
     var createdAt: LocalDateTime? = null,

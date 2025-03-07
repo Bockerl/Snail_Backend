@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -47,6 +49,32 @@ class CommandChatRoomController(
 
         commandChatRoomService.createChatRoom(commandChatRoomRequestDto)
 
+        return ResponseDto.ok(null)
+    }
+
+    @Operation(
+        summary = "채팅방 삭제 & 나가기",
+        description = "사용자가 채팅방을 삭제 or 나가기 한다.(채팅방 정보에서 C",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "채팅방 삭제 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = CommandChatRoomCreateRequestDto::class),
+                    ),
+                ],
+            ),
+        ],
+    )
+    @DeleteMapping("/delete/{chatRoomId}")
+    fun deleteChatRoom(
+        @PathVariable chatRoomId: String,
+    ): ResponseDto<*> {
+        val commandChatRoomDeleteRequestDto = null
         return ResponseDto.ok(null)
     }
 }

@@ -1,6 +1,7 @@
 package com.bockerl.snailchat.chat.command.application.controller
 
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomCreateRequestDto
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomDeleteRequestDto
 import com.bockerl.snailchat.chat.command.application.mapper.VoToDtoConverter
 import com.bockerl.snailchat.chat.command.application.service.CommandChatRoomService
 import com.bockerl.snailchat.chat.command.domain.aggregate.vo.request.CommandChatRoomCreateRequestVo
@@ -45,9 +46,9 @@ class CommandChatRoomController(
     fun createChatRoom(
         @RequestBody commandChatRoomCreateRequestVo: CommandChatRoomCreateRequestVo,
     ): ResponseDto<*> {
-        val commandChatRoomRequestDto = voToDtoConverter.commandChatRoomCreateRequestVoTODto(commandChatRoomCreateRequestVo)
+        val commandChatRoomCreateRequestDto = voToDtoConverter.commandChatRoomCreateRequestVoTODto(commandChatRoomCreateRequestVo)
 
-        commandChatRoomService.createChatRoom(commandChatRoomRequestDto)
+        commandChatRoomService.createChatRoom(commandChatRoomCreateRequestDto)
 
         return ResponseDto.ok(null)
     }
@@ -70,11 +71,16 @@ class CommandChatRoomController(
             ),
         ],
     )
-    @DeleteMapping("/delete/{chatRoomId}")
+    @DeleteMapping("/delete/{chatRoomId}/{memberId}/{memberNickname}") // 향후 msa 설계 완료 후 수정할 계획
     fun deleteChatRoom(
         @PathVariable chatRoomId: String,
+        @PathVariable memberId: String, // 향후 Principal을 통해 memberId를 가져올 예정
+        @PathVariable memberNickname: String,
     ): ResponseDto<*> {
-        val commandChatRoomDeleteRequestDto = null
+        val commandChatRoomDeleteRequestDto = CommandChatRoomDeleteRequestDto(chatRoomId, memberId, memberNickname)
+
+        commandChatRoomService.deleteChatRoom(commandChatRoomDeleteRequestDto)
+
         return ResponseDto.ok(null)
     }
 }

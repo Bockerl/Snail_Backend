@@ -14,7 +14,7 @@ data class ChatMessage(
     @Id
     val chatMessageId: String? = null,
     val chatRoomId: String,
-    val sender: String,
+    val memberId: String,
     val message: String?,
     val messageType: CommandChatMessageType,
 ) {

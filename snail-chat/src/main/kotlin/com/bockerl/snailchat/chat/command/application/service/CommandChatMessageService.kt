@@ -7,4 +7,10 @@ interface CommandChatMessageService {
         chatRoomId: String,
         updateMessageDto: CommandChatMessageRequestDto,
     )
+
+    fun saveLeaveMessage(
+        chatRoomId: String,
+        memberId: String,
+        memberNickname: String,
+    )
 }

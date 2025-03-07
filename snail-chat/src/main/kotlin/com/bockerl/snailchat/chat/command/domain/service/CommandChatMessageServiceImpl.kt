@@ -3,6 +3,7 @@ package com.bockerl.snailchat.chat.command.domain.service
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDto
 import com.bockerl.snailchat.chat.command.application.service.CommandChatMessageService
 import com.bockerl.snailchat.chat.command.domain.aggregate.entity.ChatMessage
+import com.bockerl.snailchat.chat.command.domain.aggregate.enums.CommandChatMessageType
 import com.bockerl.snailchat.chat.command.domain.repository.CommandChatMessageRepository
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
@@ -21,17 +22,32 @@ class CommandChatMessageServiceImpl(
         val chatMessage =
             ChatMessage(
                 chatRoomId = chatRoomId,
-                sender = updateMessageDto.sender,
+                memberId = updateMessageDto.memberId,
                 message = updateMessageDto.message,
                 messageType = updateMessageDto.messageType,
             )
 
         // 전송할 메시지 DB에 저장
         val saveMessage = chatMessageRepository.save(chatMessage)
-
         println(saveMessage)
 
         // 해당 경로를 구독하고 있는 Client들에게 Message 전송
         simpleMessagingTemplate.convertAndSend("/topic/message/$chatRoomId", updateMessageDto)
+    }
+
+    override fun saveLeaveMessage(
+        chatRoomId: String,
+        memberId: String,
+        memberNickname: String,
+    ) {
+        val chatMessage =
+            ChatMessage(
+                chatRoomId = chatRoomId,
+                memberId = memberId,
+                message = "$memberNickname 님이 퇴장하셨습니다.",
+                messageType = CommandChatMessageType.LEAVE,
+            )
+
+        chatMessageRepository.save(chatMessage)
     }
 }

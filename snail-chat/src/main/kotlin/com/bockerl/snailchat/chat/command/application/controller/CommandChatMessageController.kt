@@ -29,7 +29,7 @@ class CommandChatMessageController(
         description =
             """
             Websocket을 통한 Stomp 프로토콜을 이용하여 채팅 메시지를 전송합니다.
-            Client는 /api/chat/{roomId} 경로로 메시지를 전송합니다.
+            Client는 /app/{chatRoomId} 경로로 메시지를 전송합니다.
             """,
     )
     @ApiResponses(
@@ -52,7 +52,7 @@ class CommandChatMessageController(
         sendMessageRequestVo: SendMessageRequestVo,
         simpleMessageHeaderAccessor: SimpMessageHeaderAccessor,
     ) {
-        // Vo -> Dto
+        // Vo -> Dto + 토큰에서 memberId/Nickname/Photo를 받아올 수 있도록 수정해야 함
         val commandChatMessageRequestDto = voToDtoConverter.sendMessageRequestVoToDto(sendMessageRequestVo, chatRoomId)
 
         // messageType이 Enter일 경우에는 처음 등장이므로, Websocket의 세션에 정보 저장 (simpleMessageHeaderAccessor)
@@ -60,10 +60,14 @@ class CommandChatMessageController(
             when (commandChatMessageRequestDto.messageType) {
                 CommandChatMessageType.ENTER -> {
                     simpleMessageHeaderAccessor.sessionAttributes?.apply {
-                        put("username", commandChatMessageRequestDto.sender)
+                        // 향후 Token 완성 후 수정필요
+                        put("memberId", commandChatMessageRequestDto.memberId)
+                        put("memberNickname", commandChatMessageRequestDto.memberNickname)
+                        put("memberPhoto", commandChatMessageRequestDto.memberPhoto)
                         put("chatRoomId", commandChatMessageRequestDto.chatRoomId)
                     }
-                    commandChatMessageRequestDto.copy(message = "${commandChatMessageRequestDto.sender}님이 입장하셨습니다.")
+
+                    commandChatMessageRequestDto.copy(message = "${commandChatMessageRequestDto.memberNickname}님이 입장하셨습니다.")
                 }
                 else -> commandChatMessageRequestDto
             }

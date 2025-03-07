@@ -10,6 +10,7 @@ data class ChatRoom(
     val chatRoomId: String? = null,
     val chatRoomName: String?,
     val chatRoomType: CommandChatRoomType,
+    val chatRoomStatus: Boolean,
     // 그룹 채팅방 메인 & 서브 고려 필요 - 따로 Entity를 뺼지 고민 필요
     // val chatRoomRelation: CommandCHatRoomRelationType? = null
     // 알람 여부 - 향후 알림 구현시 추가 예정

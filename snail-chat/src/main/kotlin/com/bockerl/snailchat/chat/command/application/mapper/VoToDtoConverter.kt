@@ -14,7 +14,9 @@ class VoToDtoConverter {
         chatRoomId: String,
     ) = CommandChatMessageRequestDto(
         chatRoomId = chatRoomId, // DestinationVariable 받아온 chatRoomId 넣어줌
-        sender = requestVo.sender,
+        memberId = requestVo.memberId,
+        memberNickname = requestVo.memberNickname,
+        memberPhoto = requestVo.memberPhoto,
         message = requestVo.message,
         messageType = requestVo.messageType,
     )

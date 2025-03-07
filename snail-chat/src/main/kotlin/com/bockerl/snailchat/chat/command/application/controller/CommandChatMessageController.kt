@@ -7,12 +7,9 @@ import com.bockerl.snailchat.chat.command.application.mapper.VoToDtoConverter
 import com.bockerl.snailchat.chat.command.application.service.CommandChatMessageService
 import com.bockerl.snailchat.chat.command.domain.aggregate.enums.CommandChatMessageType
 import com.bockerl.snailchat.chat.command.domain.aggregate.vo.request.SendMessageRequestVo
-import com.bockerl.snailchat.config.OpenApiBody
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Encoding
 import io.swagger.v3.oas.annotations.media.Schema
-import org.springframework.http.MediaType
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -22,7 +19,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor
 
 @RestController
-@RequestMapping("/api/chat")
+@RequestMapping("/api/chatMessage")
 class CommandChatMessageController(
     private val commandChatMessageService: CommandChatMessageService,
     private val voToDtoConverter: VoToDtoConverter,
@@ -44,18 +41,6 @@ class CommandChatMessageController(
                     Content(
                         mediaType = "application/json",
                         schema = Schema(implementation = CommandChatMessageRequestDto::class),
-                    ),
-                ],
-            ),
-        ],
-    )
-    @OpenApiBody(
-        content = [
-            Content(
-                encoding = [
-                    Encoding(
-                        name = "commandChatMessageVO",
-                        contentType = MediaType.APPLICATION_JSON_VALUE,
                     ),
                 ],
             ),

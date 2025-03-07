@@ -1,17 +1,27 @@
 package com.bockerl.snailchat.chat.command.domain.aggregate.entity
 
+import com.bockerl.snailchat.chat.command.domain.aggregate.enums.CommandChatRoomType
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 
-@Document(collection = "chatRoom")
-class ChatRoom(
+data class ChatRoom(
     @Id
     val chatRoomId: String? = null,
-    val roomName: String,
-    val participants: List<String>,
-) {
+    val chatRoomName: String?,
+    val chatRoomType: CommandChatRoomType,
+    // 그룹 채팅방 메인 & 서브 고려 필요 - 따로 Entity를 뺼지 고민 필요
+    // val chatRoomRelation: CommandCHatRoomRelationType? = null
+    // 알람 여부 - 향후 알림 구현시 추가 예정
+    // val chatRoomAlarmStatus: Boolean,
+    val creator: MemberInfo,
+    val participants: List<MemberInfo>,
     @CreatedDate
-    lateinit var createdAt: LocalDateTime
-}
+    var createdAt: LocalDateTime? = null,
+)
+
+data class MemberInfo(
+    val memberId: String,
+    val memberNickname: String,
+    val memberPhoto: String? = "",
+)

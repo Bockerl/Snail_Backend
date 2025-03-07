@@ -69,10 +69,12 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.testcontainers:testcontainers:1.19.3")
     testImplementation("org.testcontainers:junit-jupiter:1.19.3")
     testImplementation("org.testcontainers:mongodb:1.19.3")
-    testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.10.2")
+    testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring30x:4.6.2")
+
+    // 통합 테스트
+    testImplementation("org.testcontainers:testcontainers:1.19.3")
 
     "developmentOnly"("org.springframework.boot:spring-boot-devtools")
 //    runtimeOnly("org.postgresql:postgresql")

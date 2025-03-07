@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.bockerl.snailchat.chat.command.application.controller
 
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDto

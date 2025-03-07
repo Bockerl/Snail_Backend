@@ -15,9 +15,15 @@ class AuthConverter {
     // 회원가입 요청 vo to dto
     fun emailRequestVOToDTO(requestVO: EmailRequestVO) =
         EmailRequestDTO(
-            memberEmail = requestVO.memberEmail ?: throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT),
-            memberNickName = requestVO.memberNickName ?: throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT),
-            memberBirth = requestVO.memberBirth ?: throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT),
+            memberEmail =
+                requestVO.memberEmail
+                    ?: throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT, "email이 null입니다."),
+            memberNickName =
+                requestVO.memberNickName
+                    ?: throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT, "닉네임이 null입니다."),
+            memberBirth =
+                requestVO.memberBirth
+                    ?: throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT, "생일이 null입니다."),
         )
 
     // 이메일 인증 코드 vo to dto

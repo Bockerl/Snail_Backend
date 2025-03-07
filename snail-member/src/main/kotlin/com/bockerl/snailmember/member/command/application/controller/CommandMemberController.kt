@@ -10,7 +10,6 @@ import com.bockerl.snailmember.member.command.application.mapper.MemberConverter
 import com.bockerl.snailmember.member.command.application.service.CommandMemberService
 import com.bockerl.snailmember.member.command.domain.vo.request.ActivityAreaRequestVO
 import com.bockerl.snailmember.member.command.domain.vo.request.ProfileRequestVO
-import com.bockerl.snailmember.security.CustomMember
 import com.bockerl.snailmember.security.config.CurrentMemberId
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.swagger.v3.oas.annotations.Operation
@@ -20,7 +19,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.http.MediaType
-import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -58,13 +56,11 @@ class CommandMemberController(
     @PostMapping("/activity_area")
     fun postActivityArea(
         @RequestBody requestVO: ActivityAreaRequestVO,
-        authentication: Authentication,
+        @CurrentMemberId memberId: String,
     ): ResponseDTO<*> {
         logger.info { "활동지역 설정 요청 controller에 도착" }
-        val customMember = authentication.principal as CustomMember
-        logger.info { "controller에 도착한 memberId: ${customMember.memberId}" }
         val requestDTO = memberConverter.activityAreaRequestVOToDTO(requestVO)
-        commandMemberService.postActivityArea(customMember.memberId, requestDTO)
+        commandMemberService.postActivityArea(memberId, requestDTO)
         return ResponseDTO.ok("활동지역 설정 성공")
     }
 

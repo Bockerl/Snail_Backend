@@ -46,7 +46,7 @@ class MemberConverter {
             !primaryId.startsWith("EMD") ||
             primaryId == requestVO.workplaceId
         ) {
-            throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT)
+            throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT, "활동지역PK가 유효하지 않습니다.")
         }
         return ActivityAreaRequestDTO(
             primaryId = requestVO.primaryId,
@@ -64,26 +64,27 @@ class MemberConverter {
         val selfIntro = requestVO.selfIntroduction
 
         if (nickName.isNullOrBlank()) {
-            throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT)
+            throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT, "유효하지 않은 닉네임입니다.")
         }
 
         if (birth == null) {
-            throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT)
+            throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT, "생일이 null입니다.")
         }
 
         val today = LocalDate.now()
         val minDate = today.minusYears(120)
+        val maxDate = today.minusYears(14)
 
-        if (birth.isBefore(minDate)) {
-            throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT)
+        if (birth.isBefore(minDate) || birth.isAfter(maxDate)) {
+            throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT, "유효하지 않은 생년월일입니다.")
         }
 
         if (gender == null || gender !in Gender.entries.toTypedArray()) {
-            throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT)
+            throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT, "유효하지 않은 성별값입니다.")
         }
 
         if (selfIntro == null) {
-            throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT)
+            throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT, "자기소개가 null입니다.")
         }
 
         return ProfileRequestDTO(

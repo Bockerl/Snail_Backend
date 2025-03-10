@@ -13,6 +13,7 @@ import com.bockerl.snailmember.member.command.domain.vo.request.ProfileRequestVO
 import com.bockerl.snailmember.security.config.CurrentMemberId
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Encoding
 import io.swagger.v3.oas.annotations.media.Schema
@@ -37,7 +38,10 @@ class CommandMemberController(
 
     @Operation(
         summary = "활동지역 등록",
-        description = "계정의 주 지역과 직장 지역을 등록합니다.",
+        description = """
+        계정의 주 지역과 직장 지역을 등록합니다.
+        주 지역은 필수이고, 직장 지역은 선택입니다.
+    """,
     )
     @ApiResponses(
         value = [
@@ -56,7 +60,7 @@ class CommandMemberController(
     @PostMapping("/activity_area")
     fun postActivityArea(
         @RequestBody requestVO: ActivityAreaRequestVO,
-        @CurrentMemberId memberId: String,
+        @Parameter(hidden = true) @CurrentMemberId memberId: String,
     ): ResponseDTO<*> {
         logger.info { "활동지역 설정 요청 controller에 도착" }
         val requestDTO = memberConverter.activityAreaRequestVOToDTO(requestVO)
@@ -105,7 +109,7 @@ class CommandMemberController(
     fun patchProfile(
         @RequestPart("profileRequestVO") requestVO: ProfileRequestVO,
         @RequestPart("file", required = false) file: MultipartFile?,
-        @CurrentMemberId memberId: String,
+        @Parameter(hidden = true) @CurrentMemberId memberId: String,
     ): ResponseDTO<*> {
         logger.info { "프로필 변경 요청 controller에 도착" }
         logger.info { "controller에 도착한 memberId: $memberId" }

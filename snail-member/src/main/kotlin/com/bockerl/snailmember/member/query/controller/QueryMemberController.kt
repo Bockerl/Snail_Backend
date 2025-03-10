@@ -8,7 +8,11 @@ import com.bockerl.snailmember.common.ResponseDTO
 import com.bockerl.snailmember.member.command.application.mapper.MemberConverter
 import com.bockerl.snailmember.member.query.dto.MemberQueryDTO
 import com.bockerl.snailmember.member.query.service.QueryMemberService
+import com.bockerl.snailmember.member.query.vo.MemberProfileResponseVO
+import com.bockerl.snailmember.security.config.CurrentMemberId
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.media.Schema
@@ -27,6 +31,8 @@ class QueryMemberController(
     private val queryMemberService: QueryMemberService,
     private val memberConverter: MemberConverter,
 ) {
+    private val logger = KotlinLogging.logger {}
+
     @Operation(
         summary = "Health Check 메서드",
         description = "서버의 health check를 합니다.",
@@ -77,7 +83,17 @@ class QueryMemberController(
     fun getMemberByMemberId(
         @PathVariable memberId: String,
     ): ResponseDTO<*> {
+        logger.info { "특정 회원 조회 기능 컨트롤러 도착, memberId: $memberId" }
         val memberDTO: MemberQueryDTO = queryMemberService.selectMemberByMemberId(memberId)
         return ResponseDTO.ok(memberConverter.dtoToResponseVO(memberDTO))
+    }
+
+    fun getMemberProfile(
+        @Parameter(hidden = true) @CurrentMemberId memberId: String,
+    ): ResponseDTO<*> {
+        logger.info { "회원 프로필 조회 기능 컨트롤러 도착, memberId: $memberId" }
+        val responseVO: MemberProfileResponseVO = queryMemberService.selectMemberProfileByMemberId(memberId)
+        val responseDTO = memberConverter.profileResponseVOToDTO(responseVO)
+        return ResponseDTO.ok(responseDTO)
     }
 }

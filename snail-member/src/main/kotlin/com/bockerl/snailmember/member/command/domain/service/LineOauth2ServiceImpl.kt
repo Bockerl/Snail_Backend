@@ -132,7 +132,7 @@ class LineOauth2ServiceImpl(
         val newGoogleMember =
             Member(
                 memberEmail = email,
-                memberPhoneNumber = "FromLine",
+                memberPhoneNumber = UUID.randomUUID().toString(),
                 memberPhoto = "",
                 memberStatus = MemberStatus.ROLE_TEMP,
                 memberRegion = "",

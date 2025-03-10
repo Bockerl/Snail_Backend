@@ -41,7 +41,7 @@ class CommandFileServiceImpl(
     override fun createSingleFile(
         file: MultipartFile,
         commandFileDTO: CommandFileDTO,
-    ) {
+    ): String {
         val fileName = generateUniqueFileName(file.originalFilename)
         val blobClient = blobContainerClient.getBlobClient(fileName)
 
@@ -53,9 +53,9 @@ class CommandFileServiceImpl(
             logger.error { "Blob storage 업로드 실패: 파일명 $fileName, $ex" }
             throw CommonException(ErrorCode.BLOB_STORAGE_ERROR)
         }
-
+        logger.info { "파일 저장 성공: $fileName" }
         val fileUrl = blobClient.blobUrl
-
+        logger.info { "저장된 파일 url: $fileUrl" }
         val event =
             FileCreatedEvent(
                 fileName = fileName,
@@ -88,6 +88,7 @@ class CommandFileServiceImpl(
 //            )
 
 //        commandFileRepository.save(fileEntity)
+        return fileUrl
     }
 
     @Transactional
@@ -260,7 +261,7 @@ class CommandFileServiceImpl(
     override fun updateProfileImage(
         file: MultipartFile,
         commandFileDTO: CommandFileDTO,
-    ) {
+    ): String {
         if (!file.contentType?.startsWith("image/")!!) {
             throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT)
         }
@@ -271,6 +272,7 @@ class CommandFileServiceImpl(
             )
 
         val blobClient = blobContainerClient.getBlobClient(existingFile[0].fileName)
+        logger.info { "삭제하려는 파일명: ${existingFile[0].fileName}" }
 
         try {
             blobClient.delete()
@@ -298,6 +300,7 @@ class CommandFileServiceImpl(
         outboxService.createOutbox(deleteOutBox)
 
         val fileName = generateUniqueFileName(file.originalFilename)
+        logger.info { "새로 저장하려는 파일명: $fileName" }
         blobContainerClient.getBlobClient(fileName)
         try {
             blobClient.upload(file.inputStream, file.size, true)
@@ -306,7 +309,7 @@ class CommandFileServiceImpl(
             throw CommonException(ErrorCode.BLOB_STORAGE_ERROR)
         }
         val fileUrl = blobClient.blobUrl
-
+        logger.info { "blob 저장 성공 - url: $fileUrl" }
 //        val fileEntity =
 //            File(
 //                fileName = fileName,
@@ -337,6 +340,7 @@ class CommandFileServiceImpl(
 
         outboxService.createOutbox(createOutbox)
 //        commandFileRepository.save(fileEntity)
+        return fileUrl
     }
 
     // 설명. 삭제할 파일 삭제 후 새로운 파일 추가

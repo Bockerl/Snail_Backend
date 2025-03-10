@@ -12,13 +12,18 @@ import com.bockerl.snailmember.member.command.domain.aggregate.entity.Gender
 import com.bockerl.snailmember.member.command.domain.vo.request.ActivityAreaRequestVO
 import com.bockerl.snailmember.member.command.domain.vo.request.ProfileRequestVO
 import com.bockerl.snailmember.member.command.domain.vo.response.MemberResponseVO
+import com.bockerl.snailmember.member.query.dto.MemberProfileResponseDTO
 import com.bockerl.snailmember.member.query.dto.MemberQueryDTO
+import com.bockerl.snailmember.member.query.vo.MemberProfileResponseVO
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
 
 @Component
 class MemberConverter {
+    private val logger = KotlinLogging.logger {}
+
     fun dtoToResponseVO(dto: MemberQueryDTO): MemberResponseVO =
         MemberResponseVO(
             memberId = dto.formattedId,
@@ -46,6 +51,7 @@ class MemberConverter {
             !primaryId.startsWith("EMD") ||
             primaryId == requestVO.workplaceId
         ) {
+            logger.warn { "잘못된 형식의 활동번호, PrimaryId: $primaryId WorkplaceId: ${requestVO.workplaceId}" }
             throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT, "활동지역PK가 유효하지 않습니다.")
         }
         return ActivityAreaRequestDTO(
@@ -92,6 +98,20 @@ class MemberConverter {
             birth = birth,
             selfIntroduction = selfIntro,
             gender = gender,
+        )
+    }
+
+    fun profileResponseVOToDTO(responseVO: MemberProfileResponseVO): MemberProfileResponseDTO {
+        val email = responseVO.memberEmail
+        val nickName = responseVO.memberNickname
+        val photo = responseVO.memberPhoto
+        val selfIntroduction = responseVO.selfIntroduction
+
+        return MemberProfileResponseDTO(
+            memberEmail = email,
+            memberNickname = nickName,
+            memberPhoto = photo,
+            selfIntroduction = selfIntroduction,
         )
     }
 }

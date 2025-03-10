@@ -16,11 +16,11 @@ class AreaDataInitializer(
     override fun run(args: ApplicationArguments) {
         try {
             if (areaApiService.isDatabaseEmpty()) {
-                logger.info("지역 데이터베이스가 비어있습니다. API에서 데이터를 가져옵니다.")
+                logger.info { "지역 데이터베이스가 비어있습니다. API에서 데이터를 가져옵니다." }
                 areaApiService.fetchApi()
-                logger.info("지역 데이터 초기화가 완료되었습니다.")
+                logger.info { "지역 데이터 초기화가 완료되었습니다." }
             } else {
-                logger.info("지역 데이터가 이미 존재합니다. 초기화를 건너뜁니다.")
+                logger.info { "지역 데이터가 이미 존재합니다. 초기화를 건너뜁니다." }
             }
         } catch (e: Exception) {
             logger.error { "지역 데이터 초기화 중 오류가 발생했습니다: ${e.message}" }

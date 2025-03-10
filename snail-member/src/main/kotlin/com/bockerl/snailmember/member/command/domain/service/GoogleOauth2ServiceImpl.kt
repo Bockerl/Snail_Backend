@@ -130,7 +130,7 @@ class GoogleOauth2ServiceImpl(
         val newGoogleMember =
             Member(
                 memberEmail = email,
-                memberPhoneNumber = "FromGoogle",
+                memberPhoneNumber = UUID.randomUUID().toString(),
                 memberPhoto = "",
                 memberStatus = MemberStatus.ROLE_TEMP,
                 memberRegion = "",

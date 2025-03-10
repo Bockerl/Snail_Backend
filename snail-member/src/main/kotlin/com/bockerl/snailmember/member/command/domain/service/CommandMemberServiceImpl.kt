@@ -9,7 +9,6 @@ import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
 import com.bockerl.snailmember.file.command.application.service.CommandFileService
 import com.bockerl.snailmember.file.command.domain.aggregate.enums.FileTargetType
 import com.bockerl.snailmember.file.query.service.QueryFileService
-import com.bockerl.snailmember.file.query.vo.request.QueryFileRequestVO
 import com.bockerl.snailmember.infrastructure.config.TransactionalConfig
 import com.bockerl.snailmember.member.command.application.dto.request.ActivityAreaRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.ProfileRequestDTO
@@ -48,8 +47,7 @@ class CommandMemberServiceImpl(
                 }.onSuccess {
                     logger.info { "마지막 로그인 시간 업데이트 성공 - email: $memberEmail" }
                 }.onFailure {
-                    logger.error { "마지막 로그인 시간 업데이트 실패 - email: $memberEmail" }
-                    throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+                    throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "로그인 시간 업데이트 실패 - email: $memberEmail")
                 }
         }
         // 수정 이벤트 발행
@@ -73,8 +71,7 @@ class CommandMemberServiceImpl(
             }.onSuccess {
                 logger.info { "기존 주 활동지역 삭제 성공" }
             }.onFailure {
-                logger.warn { "기존 주 활동지역 삭제 실패" }
-                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "기존 주 활동지역 삭제 실패")
             }
 
         logger.info { "새로운 주 활동지역 생성" }
@@ -90,8 +87,7 @@ class CommandMemberServiceImpl(
             }.onSuccess {
                 logger.info { "새로운 주 활동지역 저장 성공" }
             }.onFailure {
-                logger.warn { "새로운 주 활동지역 저장 실패" }
-                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "새로운 주 활동지역 저장 실패")
             }
 
         requestDTO.workplaceId?.let {
@@ -102,8 +98,7 @@ class CommandMemberServiceImpl(
                 }.onSuccess {
                     logger.info { "기존 직장근처 활동지역 삭제 성공" }
                 }.onFailure {
-                    logger.warn { "기존 직장근처 활동지역 삭제 실패" }
-                    throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+                    throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "기존 직장근처 활동지역 삭제 실패")
                 }
             logger.info { "새로운 직장근처 활동지역 생성" }
             val newEmdId2 = extractDigits(requestDTO.workplaceId)
@@ -119,8 +114,7 @@ class CommandMemberServiceImpl(
                 }.onSuccess {
                     logger.info { "새로운 직장근처 활동지역 저장 성공" }
                 }.onFailure {
-                    logger.warn { "새로운 직장근처 활동지역 저장 실패" }
-                    throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+                    throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "새로운 직장근처 활동지역 저장 실패")
                 }
         }
         // 수정 이벤트 발행
@@ -148,8 +142,7 @@ class CommandMemberServiceImpl(
                 }.onSuccess {
                     logger.info { "프로필 사진 제외 회원 정보 수정 성공" }
                 }.onFailure {
-                    logger.warn { "프로플 사진 제외 회원 정보 수정 실패" }
-                    throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+                    throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "프로플 사진 제외 회원 정보 수정 실패")
                 }
             file?.let {
                 logger.info { "프로필 사진 수정 시작" }
@@ -161,17 +154,22 @@ class CommandMemberServiceImpl(
                     )
                 // 기존 프사가 없다면 생성, 있다면 삭제 후 수정 호출
                 if (member.memberPhoto.isBlank()) {
-                    commandFileService.createSingleFile(file, commandFileDTO)
-                    logger.info { "프로필 사진 저장 성공" }
-                    val requestVO = QueryFileRequestVO(FileTargetType.MEMBER, memberId)
-                    val result = queryFileService.readFilesByTarget(requestVO)
-                    member.apply { memberPhoto = result[0].fileUrl!! }
+                    val fileUrl = commandFileService.createSingleFile(file, commandFileDTO)
+                    logger.info { "프로필 사진 저장 성공 - fileUrl: $fileUrl" }
+                    member.apply { memberPhoto = fileUrl }
                 } else {
-                    commandFileService.updateProfileImage(file, commandFileDTO)
-                    val requestVO = QueryFileRequestVO(FileTargetType.MEMBER, memberId)
-                    val result = queryFileService.readFilesByTarget(requestVO)
-                    member.apply { memberPhoto = result[0].fileUrl!! }
+                    val fileUrl = commandFileService.updateProfileImage(file, commandFileDTO)
+                    logger.info { "프로필 사진 저장 성공 - fileUrl: $fileUrl" }
+                    member.apply { memberPhoto = fileUrl }
                 }
+                memberRepository
+                    .runCatching {
+                        save(member)
+                    }.onSuccess {
+                        logger.info { "프로필 사진 수정 성공" }
+                    }.onFailure {
+                        throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "프로필 사진 수정 실패")
+                    }
             }
             // 수정 이벤트 발행
         }

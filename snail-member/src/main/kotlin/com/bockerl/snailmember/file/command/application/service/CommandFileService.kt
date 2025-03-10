@@ -18,7 +18,7 @@ interface CommandFileService {
     fun createSingleFile(
         file: MultipartFile,
         commandFileDTO: CommandFileDTO,
-    )
+    ): String
 
     fun createFiles(
         files: List<MultipartFile>,
@@ -33,7 +33,7 @@ interface CommandFileService {
     fun updateProfileImage(
         file: MultipartFile,
         commandFileDTO: CommandFileDTO,
-    )
+    ): String
 
     fun updateFiles(
         commandFileDTO: CommandFileDTO,

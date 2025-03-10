@@ -127,7 +127,7 @@ class KaKaoOauth2ServiceImpl(
         val newKaKaoMember =
             Member(
                 memberEmail = email,
-                memberPhoneNumber = "FromKaKao",
+                memberPhoneNumber = UUID.randomUUID().toString(),
                 memberPhoto = "",
                 memberStatus = MemberStatus.ROLE_TEMP,
                 memberRegion = "",

@@ -34,6 +34,7 @@ class CommandFileServiceImpl(
     private val gatheringFileService: CommandGatheringFileService,
     private val objectMapper: ObjectMapper,
     private val outboxService: OutboxService,
+//    @Lazy private val commandMemberService: CommandMemberService,
 ) : CommandFileService {
     private val logger = KotlinLogging.logger {}
 
@@ -655,6 +656,7 @@ class CommandFileServiceImpl(
         outboxService.createOutboxes(outboxEvents)
     }
 
+    @Transactional
     override fun createFileEvent(commandFileCreateDTO: CommandFileCreateDTO) {
         val fileEntity =
             File(
@@ -669,6 +671,7 @@ class CommandFileServiceImpl(
         commandFileRepository.save(fileEntity)
     }
 
+    @Transactional
     override fun createGatheringFileEvent(commandFileWithGatheringCreateDTO: CommandFileWithGatheringCreateDTO) {
         val fileEntity =
             File(
@@ -689,6 +692,7 @@ class CommandFileServiceImpl(
         )
     }
 
+    @Transactional
     override fun deleteFileEvent(commandFileDeleteDTO: CommandFileDeleteDTO) {
         commandFileRepository.updateActiveAndFileUrlByFileTargetIdAndFileTargetType(
             extractDigits(commandFileDeleteDTO.fileTargetId),
@@ -706,5 +710,5 @@ class CommandFileServiceImpl(
 
     private fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
 
-    private fun formattedFileId(fileId: Long): String = "FIL-${fileId.toString().padStart(8, '0') ?: "00000000"}"
+//    private fun formattedFileId(fileId: Long): String = "FIL-${fileId.toString().padStart(8, '0') ?: "00000000"}"
 }

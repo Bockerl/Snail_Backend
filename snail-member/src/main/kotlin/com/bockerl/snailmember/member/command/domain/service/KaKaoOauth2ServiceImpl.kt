@@ -38,11 +38,8 @@ class KaKaoOauth2ServiceImpl(
 
     override fun kakaoLogin(code: String): LoginResponseDTO =
         TransactionalConfig.run {
-            // 코드 기반으로 인증 토큰 요청
             val idToken = requestTokenFromKaKao(code)
-            // 유저 정보를 조회
-            val customMember = TransactionalConfig.run { decodeUserInfoFromToken(idToken) as CustomMember }
-            // rt 및 at 생성해서 넣어두기
+            val customMember = decodeUserInfoFromToken(idToken) as CustomMember
             val responseDTO = jwtUtils.generateJwtResponse(customMember)
             responseDTO
         }

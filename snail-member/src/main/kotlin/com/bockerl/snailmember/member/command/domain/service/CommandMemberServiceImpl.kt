@@ -8,7 +8,6 @@ import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
 import com.bockerl.snailmember.file.command.application.service.CommandFileService
 import com.bockerl.snailmember.file.command.domain.aggregate.enums.FileTargetType
-import com.bockerl.snailmember.file.query.service.QueryFileService
 import com.bockerl.snailmember.infrastructure.config.TransactionalConfig
 import com.bockerl.snailmember.member.command.application.dto.request.ActivityAreaRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.ProfileRequestDTO
@@ -25,7 +24,6 @@ class CommandMemberServiceImpl(
     private val memberRepository: MemberRepository,
     private val activityAreaRepository: ActivityAreaRepository,
     private val commandFileService: CommandFileService,
-    private val queryFileService: QueryFileService,
 ) : CommandMemberService {
     private val logger = KotlinLogging.logger {}
 

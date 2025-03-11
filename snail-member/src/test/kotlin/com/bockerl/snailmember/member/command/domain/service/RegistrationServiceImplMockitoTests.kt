@@ -1,6 +1,6 @@
 @file:Suppress("ktlint:standard:no-wildcard-imports")
 
-package com.bockerl.snailmember.member.command.application.service
+package com.bockerl.snailmember.member.command.domain.service
 
 import com.bockerl.snailmember.area.command.domain.aggregate.entity.ActivityArea
 import com.bockerl.snailmember.area.command.domain.aggregate.entity.AreaType
@@ -9,13 +9,14 @@ import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.config.TestSupport
 import com.bockerl.snailmember.member.command.application.dto.request.*
+import com.bockerl.snailmember.member.command.application.service.AuthService
+import com.bockerl.snailmember.member.command.application.service.RegistrationService
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.Member
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.SignUpStep
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.TempMember
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.VerificationType
 import com.bockerl.snailmember.member.command.domain.repository.MemberRepository
 import com.bockerl.snailmember.member.command.domain.repository.TempMemberRepository
-import com.bockerl.snailmember.member.command.domain.service.RegistrationServiceImpl
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.extension.ExtendWith
@@ -26,7 +27,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.sql.Timestamp
 
 @ExtendWith(MockitoExtension::class)
-class RegistrationServiceImplMockTests : TestSupport() {
+class RegistrationServiceImplMockitoTests : TestSupport() {
     @Mock
     private lateinit var tempMemberRepository: TempMemberRepository
 
@@ -127,12 +128,17 @@ class RegistrationServiceImplMockTests : TestSupport() {
         @DisplayName("이메일 코드 재요청 실패 - 만료된 세션")
         fun emailVerification_refresh_failure_expired() {
             // given
+            val requestDTO =
+                PhoneRequestDTO(
+                    redisId = TEST_REDIS_ID,
+                    phoneNumber = TEST_PHONE,
+                )
             whenever(tempMemberRepository.find(TEST_REDIS_ID)).thenReturn(null)
 
             // when & then
             val exception =
                 assertThrows<CommonException> {
-                    registrationService.createPhoneRefreshCode(TEST_REDIS_ID)
+                    registrationService.createPhoneRefreshCode(requestDTO)
                 }
             assertEquals(exception.errorCode, ErrorCode.EXPIRED_SIGNUP_SESSION)
         }
@@ -306,12 +312,18 @@ class RegistrationServiceImplMockTests : TestSupport() {
                     phoneNumber = TEST_PHONE,
                     signUpStep = SignUpStep.EMAIL_VERIFIED,
                 )
+            val requestDTO =
+                PhoneRequestDTO(
+                    redisId = TEST_REDIS_ID,
+                    phoneNumber = TEST_PHONE,
+                )
+
             whenever(tempMemberRepository.find(TEST_REDIS_ID)).thenReturn(tempMember)
             whenever(authService.createPhoneVerificationCode(TEST_PHONE)).thenReturn(VERIFICATION_CODE)
 
             // when & then
             assertDoesNotThrow {
-                registrationService.createPhoneRefreshCode(TEST_REDIS_ID)
+                registrationService.createPhoneRefreshCode(requestDTO)
             }
             verify(authService).createPhoneVerificationCode(TEST_PHONE)
         }
@@ -443,7 +455,7 @@ class RegistrationServiceImplMockTests : TestSupport() {
                     newMember.memberId == 1L &&
                         newMember.memberEmail == TEST_EMAIL &&
                         newMember.memberBirth == TEST_BIRTH.toLocalDateTime().toLocalDate() &&
-                        newMember.memberNickName == TEST_NICKNAME &&
+                        newMember.memberNickname == TEST_NICKNAME &&
                         newMember.memberPassword == TEST_PASSWORD &&
                         newMember.memberPhoneNumber == TEST_PHONE
                 },

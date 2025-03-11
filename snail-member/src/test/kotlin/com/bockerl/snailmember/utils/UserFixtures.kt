@@ -50,7 +50,7 @@ fun createMember(
         memberPhoneNumber = memberPhone,
         memberPassword = memberPassword,
         memberBirth = LocalDate.now(),
-        memberNickName = memberNickname,
+        memberNickname = memberNickname,
         memberStatus = memberStatus,
         memberPhoto = "default",
         memberGender = Gender.MALE,

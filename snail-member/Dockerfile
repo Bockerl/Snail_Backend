@@ -1,9 +1,28 @@
+# Build stage
+FROM gradle:7.6-jdk17 AS build
+
+WORKDIR /app
+
+# Copy build configuration files
+COPY build.gradle.kts settings.gradle.kts ./
+COPY gradle ./gradle
+
+# Copy source code
+COPY src ./src
+
+# Build application (skipping ktlint and tests as requested)
+RUN gradle bootJar -x ktlintCheck -x test --no-daemon
+
+# Runtime stage
 FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 
-# JAR 파일 복사 - 로컬에서 이미 빌드된 JAR 파일을 사용
-COPY build/libs/*.jar app.jar
+# Copy the built JAR from the build stage
+COPY --from=build /app/build/libs/*.jar app.jar
 
-# 애플리케이션 실행
+# Application configuration
+VOLUME /app/config
+
+# Run the application
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

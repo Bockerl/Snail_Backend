@@ -1,19 +1,19 @@
 @file:Suppress("ktlint:standard:no-wildcard-imports")
 
-package com.bockerl.snailmember.member.command.application.service
+package com.bockerl.snailmember.member.command.domain.service
 
 import com.bockerl.snailmember.area.command.domain.aggregate.entity.ActivityArea
 import com.bockerl.snailmember.area.command.domain.aggregate.entity.AreaType
 import com.bockerl.snailmember.area.command.domain.repository.ActivityAreaRepository
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
+import com.bockerl.snailmember.member.command.application.service.AuthService
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.Member
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.SignUpPath
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.SignUpStep
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.VerificationType
 import com.bockerl.snailmember.member.command.domain.repository.MemberRepository
 import com.bockerl.snailmember.member.command.domain.repository.TempMemberRepository
-import com.bockerl.snailmember.member.command.domain.service.RegistrationServiceImpl
 import com.bockerl.snailmember.utils.*
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
@@ -21,7 +21,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.*
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 
-class RegistrationServiceImplTests :
+class RegistrationServiceImplMockKTests :
     BehaviorSpec({
         // mock 설정
         val authService = mockk<AuthService>()
@@ -249,6 +249,7 @@ class RegistrationServiceImplTests :
         // 휴대폰 인증 코드 재요청 테스트
         Given("사용자가 휴대폰 인증 코드를 재요청할 때") {
             val redisId = TEST_REDIS_ID
+            val phoneRequest = createPhoneRequestDTO(redisId = redisId)
             val tempMember =
                 createTempMember(
                     signUpStep = SignUpStep.EMAIL_VERIFIED,
@@ -257,7 +258,7 @@ class RegistrationServiceImplTests :
             every { authService.createPhoneVerificationCode(tempMember.phoneNumber) } returns VERIFICATION_CODE
 
             When("유효한 RedisId를 제공하면") {
-                registrationService.createPhoneRefreshCode(redisId)
+                registrationService.createPhoneRefreshCode(phoneRequest)
 
                 Then("새로운 인증 코드가 생성된다.") {
                     verify { authService.createPhoneVerificationCode(tempMember.phoneNumber) }
@@ -270,7 +271,7 @@ class RegistrationServiceImplTests :
                 Then("세션 만료 예외가 발생한다.") {
                     val exception =
                         shouldThrow<CommonException> {
-                            registrationService.createPhoneRefreshCode(redisId)
+                            registrationService.createPhoneRefreshCode(phoneRequest)
                         }
                     exception.errorCode shouldBe ErrorCode.EXPIRED_SIGNUP_SESSION
                 }
@@ -286,7 +287,7 @@ class RegistrationServiceImplTests :
                 Then("잘못된 권한 예외가 발생한다.") {
                     val exception =
                         shouldThrow<CommonException> {
-                            registrationService.createPhoneRefreshCode(redisId)
+                            registrationService.createPhoneRefreshCode(phoneRequest)
                         }
                     exception.errorCode shouldBe ErrorCode.UNAUTHORIZED_ACCESS
                 }
@@ -401,7 +402,7 @@ class RegistrationServiceImplTests :
                     memberSlot.captured.memberId shouldBe 1L
                     memberSlot.captured.memberEmail shouldBe TEST_EMAIL
                     memberSlot.captured.memberPassword shouldBe TEST_PASSWORD
-                    memberSlot.captured.memberNickName shouldBe TEST_NICKNAME
+                    memberSlot.captured.memberNickname shouldBe TEST_NICKNAME
                     memberSlot.captured.memberPhoneNumber shouldBe TEST_PHONE
                     memberSlot.captured.signupPath shouldBe SignUpPath.EMAIL
                 }

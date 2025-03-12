@@ -2,6 +2,8 @@ server:
     port: ${SERVER_PORT}
 
 spring:
+    application:
+        name: snail-member-service
     datasource:
         url: jdbc:postgresql://${DATABASE_HOST}:${POSTGRESQL_DATABASE_PORT}/${POSTGRESQL_DATABASE_NAME}
         username: ${DB_USERNAME}
@@ -13,12 +15,18 @@ spring:
         database-platform: org.hibernate.dialect.PostgreSQLDialect
         hibernate:
             ddl-auto: update
+        properties:
+          hibernate:
+              jdbc:
+                lob:
+                    non_contextual_creation: true
     sql:
         init:
             mode: always
     properties:
         hibernate:
             format_sql: true
+
     mail:
         host: smtp.gmail.com
         port: 587
@@ -30,10 +38,6 @@ spring:
                     auth: true
                     starttls:
                         enable: true
-    data:
-        redis:
-            host: ${REDIS_HOST}
-            port: ${REDIS_PORT}
 
 
     cloud:
@@ -46,6 +50,18 @@ spring:
         multipart:
             max-file-size: 1MB
             max-request-size: 10MB
+    kafka:
+        bootstrap-servers: ${KAFKA_PORT}
+        consumer:
+            group-id: ${KAFKA_GROUP_ID}
+    data:
+        redis:
+            sentinel:
+                master: ${REDIS_MASTER}
+                nodes:
+                    - ${REDIS_PORT1}
+                    - ${REDIS_PORT2}
+                    - ${REDIS_PORT3}
 
 mybatis:
     mapper-locations: classpath:/com/bockerl/snailmember/mapper/**/*.xml
@@ -63,3 +79,6 @@ logging:
         com:
             bockerl:
                 snailmember: DEBUG
+        org:
+            springframework:
+                transaction: TRACE

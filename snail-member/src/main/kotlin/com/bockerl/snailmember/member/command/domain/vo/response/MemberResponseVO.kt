@@ -23,7 +23,7 @@ data class MemberResponseVO(
     @JsonProperty(namespace = "memberPassword")
     val memberPassword: String? = null,
     @field:Schema(description = "멤버 닉네임", example = "Lin XaoMing", type = "String")
-    @JsonProperty(namespace = "memberNickName")
+    @JsonProperty(namespace = "memberNickname")
     val memberNickName: String? = null,
     @field:Schema(description = "멤버 프로필 사진", example = "snail.PNG", type = "String")
     @JsonProperty(namespace = "memberPhoto")
@@ -37,7 +37,7 @@ data class MemberResponseVO(
     @field:Schema(description = "계정 수정 시각", example = "2024-12-11 14:45:30", type = "LocalDateTime")
     @JsonProperty(namespace = "updatedAt")
     val updatedAt: LocalDateTime? = null,
-    @field:Schema(description = "멤버 권한", example = "USER", type = "String")
+    @field:Schema(description = "멤버 권한", example = "ROLE_USER", type = "String")
     @JsonProperty(namespace = "memberStatus")
     val memberStatus: MemberStatus? = null,
     @field:Schema(description = "멤버 성별", example = "FEMALE", type = "String")

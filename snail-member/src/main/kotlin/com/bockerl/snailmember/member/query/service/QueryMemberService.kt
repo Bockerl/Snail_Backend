@@ -4,8 +4,9 @@
  */
 package com.bockerl.snailmember.member.query.service
 
-import com.bockerl.snailmember.member.command.application.dto.MemberDTO
+import com.bockerl.snailmember.member.query.dto.MemberQueryDTO
+import org.springframework.security.core.userdetails.UserDetailsService
 
-interface QueryMemberService {
-    fun selectMemberByMemberId(memberId: Long): MemberDTO
+interface QueryMemberService : UserDetailsService {
+    fun selectMemberByMemberId(memberId: String): MemberQueryDTO
 }

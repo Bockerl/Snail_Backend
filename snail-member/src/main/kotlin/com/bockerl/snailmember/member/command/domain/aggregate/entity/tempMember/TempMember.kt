@@ -1,9 +1,11 @@
 package com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.Id
 import org.springframework.data.redis.core.RedisHash
 import java.io.Serializable
-import java.time.LocalDate
+import java.sql.Timestamp
 import java.util.UUID
 
 // 단계적 회원 가입을 위한 임시 회원 클래스입니다.
@@ -13,17 +15,19 @@ data class TempMember(
     @Id
     val redisId: String = UUID.randomUUID().toString(), // 기본값으로 UUID 생성
     val nickName: String,
-    val birth: LocalDate,
+    val birth: Timestamp,
     val email: String,
     var phoneNumber: String = "",
     var password: String = "",
+    @JsonProperty("signUpStep")
     var signUpStep: SignUpStep = SignUpStep.INITIAL,
 ) : Serializable {
     // Jackson을 위한 기본 생성자
-    private constructor() : this(
+    @JsonCreator
+    constructor() : this(
         redisId = UUID.randomUUID().toString(),
         nickName = "",
-        birth = LocalDate.now(),
+        birth = Timestamp(System.currentTimeMillis()),
         email = "",
     )
 
@@ -34,7 +38,7 @@ data class TempMember(
         fun initiate(
             email: String,
             nickName: String,
-            birth: LocalDate,
+            birth: Timestamp,
         ): TempMember =
             TempMember(
                 nickName = nickName,

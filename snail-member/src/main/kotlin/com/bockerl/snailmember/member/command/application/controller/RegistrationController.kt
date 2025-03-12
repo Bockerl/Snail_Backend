@@ -17,11 +17,7 @@ import net.nurigo.sdk.message.request.SingleMessageSendingRequest
 import net.nurigo.sdk.message.response.SingleMessageSentResponse
 import net.nurigo.sdk.message.service.DefaultMessageService
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/registration")
@@ -50,7 +46,7 @@ class RegistrationController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = EmailRequestVO::class),
+                        schema = Schema(implementation = ResponseDTO::class),
                     ),
                 ],
             ),
@@ -77,7 +73,7 @@ class RegistrationController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = EmailVerifyRequestVO::class),
+                        schema = Schema(implementation = ResponseDTO::class),
                     ),
                 ],
             ),
@@ -103,7 +99,7 @@ class RegistrationController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = EmailVerifyRequestVO::class),
+                        schema = Schema(implementation = ResponseDTO::class),
                     ),
                 ],
             ),
@@ -130,7 +126,7 @@ class RegistrationController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = PhoneRequestVO::class),
+                        schema = Schema(implementation = SingleMessageSentResponse::class),
                     ),
                 ],
             ),
@@ -154,12 +150,39 @@ class RegistrationController(
         return response
     }
 
-    @PostMapping("/verification/phone/refresh/{redisId}")
+    @Operation(
+        summary = "핸드폰 인증 코드 재발급",
+        description = "핸드폰 인증 코드를 재발급",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "휴대폰 인증 코드 재발급 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = SingleMessageSentResponse::class),
+                    ),
+                ],
+            ),
+        ],
+    )
+    @PostMapping("/verification/phone/refresh")
     fun postPhoneRefreshCode(
-        @PathVariable redisId: String,
-    ): ResponseDTO<*> {
-        registrationService.createPhoneRefreshCode(redisId)
-        return ResponseDTO.ok("휴대폰 인증 코드가 재발급되었습니다.")
+        @RequestBody requestVO: PhoneRequestVO,
+    ): SingleMessageSentResponse? {
+        val requestDTO = authConverter.phoneRequestVOToDTO(requestVO)
+        val refreshCode = registrationService.createPhoneRefreshCode(requestDTO)
+        val message =
+            Message(
+                from = coolSender,
+                to = requestVO.phoneNumber,
+                text = "[Snail] 인증번호는 [$refreshCode]입니다.",
+                country = "+82",
+            )
+        val response = messageService.sendOne(SingleMessageSendingRequest(message))
+        return response
     }
 
     @Operation(
@@ -174,7 +197,7 @@ class RegistrationController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = PhoneVerifyRequestVO::class),
+                        schema = Schema(implementation = ResponseDTO::class),
                     ),
                 ],
             ),
@@ -201,7 +224,7 @@ class RegistrationController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = PasswordRequestVO::class),
+                        schema = Schema(implementation = ResponseDTO::class),
                     ),
                 ],
             ),
@@ -214,5 +237,32 @@ class RegistrationController(
         val requestDTO = authConverter.passwordRequestVOToDTO(requestVO)
         val redisId = registrationService.postPassword(requestDTO)
         return ResponseDTO.ok(redisId)
+    }
+
+    @Operation(
+        summary = "활동지역 등록",
+        description = "새 계정의 주 지역과 직장 지역을 등록합니다.",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "활동지역 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = ResponseDTO::class),
+                    ),
+                ],
+            ),
+        ],
+    )
+    @PostMapping("/activity_area")
+    fun postActivityAreas(
+        @RequestBody requestVO: ActivityAreaRegisterRequestVO,
+    ): ResponseDTO<*> {
+        val requestDTO = authConverter.activityAreaRegisterRequestVOToDTO(requestVO)
+        registrationService.postActivityArea(requestDTO)
+        return ResponseDTO.ok("회원가입에 성공했습니다.")
     }
 }

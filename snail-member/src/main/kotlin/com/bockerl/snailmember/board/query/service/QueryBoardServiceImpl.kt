@@ -19,14 +19,12 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
 
-// 설명. :바로 다음에 인터페이스 타입이 오는 것 ??
 @Service
 class QueryBoardServiceImpl(
     private val boardMapper: BoardMapper,
     private val queryMemberService: QueryMemberService,
     private val queryFileService: QueryFileService,
     private val redisTemplate: RedisTemplate<String, Any>,
-//    private val boardConverter: QueryBoardConverter,
 ) : QueryBoardService {
     @Transactional
     override fun readBoardByBoardId(boardId: String): QueryBoardResponseVO {

@@ -21,9 +21,16 @@ class VoToDtoConverter {
         messageType = requestVo.messageType,
     )
 
-    fun commandChatRoomCreateRequestVoTODto(requestVo: CommandChatRoomCreateRequestVo) =
-        CommandChatRoomCreateRequestDto(
-            chatRoomName = requestVo.chatRoomName,
-            chatRoomType = requestVo.chatRoomType,
-        )
+    fun commandChatRoomCreateRequestVoTODto(
+        requestVo: CommandChatRoomCreateRequestVo,
+        memberId: String,
+        memberNickname: String,
+        memberPhoto: String,
+    ) = CommandChatRoomCreateRequestDto(
+        chatRoomName = requestVo.chatRoomName,
+        chatRoomType = requestVo.chatRoomType,
+        memberId = memberId,
+        memberNickname = memberNickname,
+        memberPhoto = memberPhoto,
+    )
 }

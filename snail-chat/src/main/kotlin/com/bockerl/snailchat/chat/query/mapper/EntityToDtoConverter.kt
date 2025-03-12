@@ -10,7 +10,7 @@ class EntityToDtoConverter {
     fun chatMessageToQueryChatMessageResponseDto(entity: ChatMessage) =
         QueryChatMessageResponseDto(
             messageId = entity.chatMessageId.toHexString(),
-            chatRoomId = entity.chatRoomId,
+            chatRoomId = entity.chatRoomId.toHexString(),
             memberId = entity.memberId,
             memberNickname = entity.memberNickname,
             memberPhoto = entity.memberPhoto,

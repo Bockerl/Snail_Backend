@@ -5,6 +5,7 @@ import com.bockerl.snailchat.chat.command.application.service.CommandChatMessage
 import com.bockerl.snailchat.chat.command.domain.aggregate.entity.ChatMessage
 import com.bockerl.snailchat.chat.command.domain.aggregate.enums.CommandChatMessageType
 import com.bockerl.snailchat.chat.command.domain.repository.CommandChatMessageRepository
+import org.bson.types.ObjectId
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
 
@@ -21,7 +22,7 @@ class CommandChatMessageServiceImpl(
         // 전송할 메시지 옮기기
         val chatMessage =
             ChatMessage(
-                chatRoomId = chatRoomId,
+                chatRoomId = ObjectId(chatRoomId),
                 memberId = updateMessageDto.memberId,
                 memberNickname = updateMessageDto.memberNickname,
                 memberPhoto = updateMessageDto.memberPhoto,
@@ -45,7 +46,7 @@ class CommandChatMessageServiceImpl(
     ) {
         val chatMessage =
             ChatMessage(
-                chatRoomId = chatRoomId,
+                chatRoomId = ObjectId(chatRoomId),
                 memberId = memberId,
                 memberNickname = memberNickname,
                 memberPhoto = memberPhoto,

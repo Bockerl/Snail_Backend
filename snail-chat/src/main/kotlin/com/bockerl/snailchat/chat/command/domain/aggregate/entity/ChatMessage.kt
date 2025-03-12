@@ -14,7 +14,7 @@ import java.time.LocalDateTime
 data class ChatMessage(
     @Id
     val chatMessageId: ObjectId = ObjectId.get(),
-    val chatRoomId: String,
+    val chatRoomId: ObjectId = ObjectId.get(),
     val memberId: String,
     val memberNickname: String,
     val memberPhoto: String,

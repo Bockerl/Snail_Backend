@@ -25,7 +25,7 @@ class CommandChatRoomController(
     private val voToDtoConverter: VoToDtoConverter,
 ) {
     @Operation(
-        summary = "채팅방 생성",
+        summary = "채팅방 생성(개인/그룹)",
         description = "사용자가 다른 사용자에게 DM 버튼을 누르면 채팅방이 생성된다.",
     )
     @ApiResponses(
@@ -42,11 +42,20 @@ class CommandChatRoomController(
             ),
         ],
     )
-    @PostMapping("/create")
+    @PostMapping("/create/{memberId}/{memberNickname}/{memberPhoto}")
     fun createChatRoom(
         @RequestBody commandChatRoomCreateRequestVo: CommandChatRoomCreateRequestVo,
+        @PathVariable memberId: String, // 향후 Principal을 통해 memberId, memberNickname, memberPhoto
+        @PathVariable memberNickname: String,
+        @PathVariable memberPhoto: String,
     ): ResponseDto<*> {
-        val commandChatRoomCreateRequestDto = voToDtoConverter.commandChatRoomCreateRequestVoTODto(commandChatRoomCreateRequestVo)
+        val commandChatRoomCreateRequestDto =
+            voToDtoConverter.commandChatRoomCreateRequestVoTODto(
+                commandChatRoomCreateRequestVo,
+                memberId,
+                memberNickname,
+                memberPhoto,
+            )
 
         commandChatRoomService.createChatRoom(commandChatRoomCreateRequestDto)
 
@@ -71,13 +80,14 @@ class CommandChatRoomController(
             ),
         ],
     )
-    @DeleteMapping("/delete/{chatRoomId}/{memberId}/{memberNickname}") // 향후 msa 설계 완료 후 수정할 계획
+    @DeleteMapping("/delete/{chatRoomId}/{memberId}/{memberNickname}/{memberPhoto}") // 향후 msa 설계 완료 후 수정할 계획
     fun deleteChatRoom(
         @PathVariable chatRoomId: String,
-        @PathVariable memberId: String, // 향후 Principal을 통해 memberId, memberNickname, memberPhoto를 가져올 예정
+        @PathVariable memberId: String, // 향후 Principal을 통해 memberId, memberNickname
         @PathVariable memberNickname: String,
+        @PathVariable memberPhoto: String,
     ): ResponseDto<*> {
-        val commandChatRoomDeleteRequestDto = CommandChatRoomDeleteRequestDto(chatRoomId, memberId, memberNickname)
+        val commandChatRoomDeleteRequestDto = CommandChatRoomDeleteRequestDto(chatRoomId, memberId, memberNickname, memberPhoto)
 
         commandChatRoomService.deleteChatRoom(commandChatRoomDeleteRequestDto)
 

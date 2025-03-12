@@ -4,4 +4,5 @@ data class CommandChatRoomDeleteRequestDto(
     val chatRoomId: String,
     val memberId: String,
     val memberNickname: String,
+    val memberPhoto: String,
 )

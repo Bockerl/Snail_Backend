@@ -12,7 +12,7 @@ import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
 import com.bockerl.snailmember.file.command.application.service.CommandFileService
 import com.bockerl.snailmember.file.command.domain.aggregate.enums.FileTargetType
 import jakarta.transaction.Transactional
-import org.springframework.data.redis.cache.RedisCacheManager
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 
@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile
 class CommandBoardCommentServiceImpl(
     private val commandBoardCommentRepository: CommandBoardCommentRepository,
     private val commandFileService: CommandFileService,
-    private val cacheManager: RedisCacheManager,
+    private val redisTemplate: RedisTemplate<String, Any>,
 ) : CommandBoardCommentService {
     @Transactional
     override fun createBoardComment(commandBoardCommentCreateDTO: CommandBoardCommentCreateDTO) {
@@ -33,8 +33,8 @@ class CommandBoardCommentServiceImpl(
 
         commandBoardCommentRepository.save(boardComment)
         // 설명. 데이터 변경시 해당하는 해당 게시글 댓글들 캐시 초기화
-        cacheManager.getCache("boardComments:comment/${commandBoardCommentCreateDTO.boardId}")?.clear()
-        cacheManager.getCache("boardComments:member/${commandBoardCommentCreateDTO.memberId}")?.clear()
+        redisTemplate.delete("boardComments:comment/${commandBoardCommentCreateDTO.boardId}")
+        redisTemplate.delete("boardComments:member/${commandBoardCommentCreateDTO.memberId}")
     }
 
     @Transactional
@@ -61,12 +61,11 @@ class CommandBoardCommentServiceImpl(
 
         commandFileDTO?.let { commandFileService.createSingleFile(file, commandFileDTO) }
 
-        cacheManager.getCache("boardComments:comment/${commandBoardCommentCreateByGifDTO.boardId}")?.clear()
-        cacheManager.getCache("boardComments:member/${commandBoardCommentCreateByGifDTO.memberId}")?.clear()
+        redisTemplate.delete("boardComments:comment/${commandBoardCommentCreateByGifDTO.boardId}")
+        redisTemplate.delete("boardComments:member/${commandBoardCommentCreateByGifDTO.memberId}")
     }
 
     @Transactional
-//    @CacheEvict(value = ["/boardComment/{boardComment.boardId}"], allEntries = true)
     override fun deleteBoardComment(commandBoardCommentDeleteDTO: CommandBoardCommentDeleteDTO) {
         val boardCommentId = extractDigits(commandBoardCommentDeleteDTO.boardCommentId)
         val boardComment =
@@ -90,8 +89,8 @@ class CommandBoardCommentServiceImpl(
             commandFileService.deleteFile(commandFileDTO)
         }
 
-        cacheManager.getCache("boardComments:comment/${commandBoardCommentDeleteDTO.boardId}")?.clear()
-        cacheManager.getCache("boardComments:member/${commandBoardCommentDeleteDTO.memberId}")?.clear()
+        redisTemplate.delete("boardComments:comment/${commandBoardCommentDeleteDTO.boardId}")
+        redisTemplate.delete("boardComments:member/${commandBoardCommentDeleteDTO.memberId}")
     }
 
     fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()

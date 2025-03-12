@@ -111,8 +111,6 @@ class QueryBoardRecommentServiceImpl(
         return boardRecommentDTOList
     }
 
-    // 설명. 내 댓글 목록 추가 예정
-
     fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
 
     fun dtoToResponseVO(dto: QueryBoardRecommentDTO): QueryBoardRecommentResponseVO {

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
@@ -36,11 +37,14 @@ class RedisConfig(
     @Value("\${DB_PASSWORD}") private val redisPassword: String,
     private val objectMapper: ObjectMapper,
 ) {
+    private val logger = KotlinLogging.logger {}
+
     @Bean
     fun redisConnectionFactory(): RedisConnectionFactory {
         val sentinelConfig =
             RedisSentinelConfiguration().apply {
                 master(redisMaster)
+                logger.info { "redisMaster: " + redisMaster }
                 // 각 노드를 host와 port로 분리해서 설정
                 val (host1, port1) = parseHostPort(redisPort1)
                 sentinel(host1, port1)

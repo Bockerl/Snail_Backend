@@ -12,5 +12,6 @@ interface CommandChatMessageService {
         chatRoomId: String,
         memberId: String,
         memberNickname: String,
+        memberPhoto: String,
     )
 }

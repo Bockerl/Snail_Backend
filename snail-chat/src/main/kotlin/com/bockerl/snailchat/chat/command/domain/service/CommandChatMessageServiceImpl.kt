@@ -23,6 +23,8 @@ class CommandChatMessageServiceImpl(
             ChatMessage(
                 chatRoomId = chatRoomId,
                 memberId = updateMessageDto.memberId,
+                memberNickname = updateMessageDto.memberNickname,
+                memberPhoto = updateMessageDto.memberPhoto,
                 message = updateMessageDto.message,
                 messageType = updateMessageDto.messageType,
             )
@@ -39,11 +41,14 @@ class CommandChatMessageServiceImpl(
         chatRoomId: String,
         memberId: String,
         memberNickname: String,
+        memberPhoto: String,
     ) {
         val chatMessage =
             ChatMessage(
                 chatRoomId = chatRoomId,
                 memberId = memberId,
+                memberNickname = memberNickname,
+                memberPhoto = memberPhoto,
                 message = "$memberNickname 님이 퇴장하셨습니다.",
                 messageType = CommandChatMessageType.LEAVE,
             )

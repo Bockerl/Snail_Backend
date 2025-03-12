@@ -25,7 +25,8 @@ import kotlin.test.Test
 // 어플리케이션 컨텍스트를 로드하여 실제 내장 서버를 실행 (Websocket 연결 테스트는 실제 서버 실행 필요)
 // 무작위 포트를 배정하여, 실제 실행된 서버의 포트와 충돌 방지
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-class StompWebSocketConfigTest : TestSupport() {
+class
+StompWebSocketConfigTest : TestSupport() {
     // Server_port 번호 할당
     @LocalServerPort
     private var port: Int = 0

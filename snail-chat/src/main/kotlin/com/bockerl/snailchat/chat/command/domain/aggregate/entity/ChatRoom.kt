@@ -1,13 +1,14 @@
 package com.bockerl.snailchat.chat.command.domain.aggregate.entity
 
 import com.bockerl.snailchat.chat.command.domain.aggregate.enums.CommandChatRoomType
+import org.bson.types.ObjectId
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
 import java.time.LocalDateTime
 
 data class ChatRoom(
     @Id
-    val chatRoomId: String? = null,
+    val chatRoomId: ObjectId = ObjectId.get(),
     val chatRoomName: String?,
     val chatRoomType: CommandChatRoomType,
     val chatRoomStatus: Boolean,

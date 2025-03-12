@@ -74,7 +74,7 @@ class CommandChatRoomController(
     @DeleteMapping("/delete/{chatRoomId}/{memberId}/{memberNickname}") // 향후 msa 설계 완료 후 수정할 계획
     fun deleteChatRoom(
         @PathVariable chatRoomId: String,
-        @PathVariable memberId: String, // 향후 Principal을 통해 memberId를 가져올 예정
+        @PathVariable memberId: String, // 향후 Principal을 통해 memberId, memberNickname, memberPhoto를 가져올 예정
         @PathVariable memberNickname: String,
     ): ResponseDto<*> {
         val commandChatRoomDeleteRequestDto = CommandChatRoomDeleteRequestDto(chatRoomId, memberId, memberNickname)

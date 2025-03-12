@@ -1,5 +1,6 @@
 package com.bockerl.snailmember.member.command.application.service
 
+import com.bockerl.snailmember.member.command.application.dto.request.ActivityAreaRegisterRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.EmailRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.EmailVerifyRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.PasswordRequestDTO
@@ -17,7 +18,9 @@ interface RegistrationService {
 
     fun verifyPhoneCode(requestDTO: PhoneVerifyRequestDTO): String
 
-    fun createPhoneRefreshCode(redisId: String)
+    fun createPhoneRefreshCode(requestDTO: PhoneRequestDTO): String
 
     fun postPassword(requestDTO: PasswordRequestDTO): String
+
+    fun postActivityArea(requestDTO: ActivityAreaRegisterRequestDTO)
 }

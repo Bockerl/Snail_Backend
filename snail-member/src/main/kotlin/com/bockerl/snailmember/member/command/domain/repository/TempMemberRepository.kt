@@ -44,5 +44,8 @@ class TempMemberRepository(
         return tempMember
     }
 
-    fun delete(key: String) = redisTemplate.delete(key)
+    fun delete(redisId: String) {
+        val key = TempMember.createRedisKey(redisId)
+        redisTemplate.delete(key)
+    }
 }

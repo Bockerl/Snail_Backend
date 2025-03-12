@@ -1,6 +1,6 @@
 package com.bockerl.snailmember.area.query.config
 
-import com.bockerl.snailmember.area.command.domain.aggregate.entity.EmdAreas
+import com.bockerl.snailmember.area.command.domain.aggregate.entity.EmdArea
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.ibatis.type.BaseTypeHandler
@@ -12,14 +12,14 @@ import java.sql.Types
 
 class JsonTypeHandler(
     private val objectMapper: ObjectMapper,
-) : BaseTypeHandler<List<EmdAreas.ReeArea>>() {
+) : BaseTypeHandler<List<EmdArea.ReeArea>>() {
     private val logger = KotlinLogging.logger {}
 
     // DB에 데이터를 저장할 때 호출됨
     override fun setNonNullParameter(
         ps: PreparedStatement,
         i: Int,
-        parameter: List<EmdAreas.ReeArea>,
+        parameter: List<EmdArea.ReeArea>,
         jdbcType: JdbcType?,
     ) {
         ps.setObject(i, objectMapper.writeValueAsString(parameter), Types.OTHER)
@@ -29,7 +29,7 @@ class JsonTypeHandler(
     override fun getNullableResult(
         rs: ResultSet,
         columnName: String,
-    ): List<EmdAreas.ReeArea>? =
+    ): List<EmdArea.ReeArea>? =
         rs.getString(columnName)?.let {
             convertToList(it)
         }
@@ -38,7 +38,7 @@ class JsonTypeHandler(
     override fun getNullableResult(
         rs: ResultSet,
         columnIndex: Int,
-    ): List<EmdAreas.ReeArea>? =
+    ): List<EmdArea.ReeArea>? =
         rs.getString(columnIndex)?.let {
             convertToList(it)
         }
@@ -47,9 +47,9 @@ class JsonTypeHandler(
     override fun getNullableResult(
         cs: CallableStatement,
         columnIndex: Int,
-    ): List<EmdAreas.ReeArea>? = cs.getString(columnIndex)?.let { convertToList(it) }
+    ): List<EmdArea.ReeArea>? = cs.getString(columnIndex)?.let { convertToList(it) }
 
-    private fun convertToList(jsonString: String): List<EmdAreas.ReeArea> {
+    private fun convertToList(jsonString: String): List<EmdArea.ReeArea> {
         if (jsonString.isBlank()) {
             return emptyList()
         }
@@ -59,7 +59,7 @@ class JsonTypeHandler(
                 jsonString,
                 objectMapper.typeFactory.constructCollectionType(
                     List::class.java,
-                    EmdAreas.ReeArea::class.java,
+                    EmdArea.ReeArea::class.java,
                 ),
             )
         } catch (e: Exception) {

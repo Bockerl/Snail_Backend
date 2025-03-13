@@ -30,7 +30,7 @@ class KafkaConsumerConfig(
     private val logger = KotlinLogging.logger {}
 
     @Bean
-    fun kafkaBoardLikeConsumerFactory(): ConsumerFactory<String, Any> {
+    fun kafkaConsumerFactory(): ConsumerFactory<String, Any> {
         val props =
             mapOf<String, Any>(
                 ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServers,
@@ -60,7 +60,7 @@ class KafkaConsumerConfig(
     @Bean
     fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, Any> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, Any>()
-        factory.consumerFactory = kafkaBoardLikeConsumerFactory()
+        factory.consumerFactory = kafkaConsumerFactory()
         // 설명. consumer thread 수 default 3 or 5
         factory.setConcurrency(1)
         // 설명. 수동 커밋 설정

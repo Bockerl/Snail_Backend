@@ -15,4 +15,5 @@ data class CommandFileDTO(
     val fileTargetId: String,
     @field:Schema(description = "회원 pk", example = "MEM-00000001", type = "String")
     val memberId: String,
+    val idempotencyKey: String,
 )

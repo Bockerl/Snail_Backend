@@ -1,6 +1,7 @@
 package com.bockerl.snailmember.boardlike.command.domain.service
 
 import com.bockerl.snailmember.boardlike.command.application.dto.CommandBoardLikeDTO
+import com.bockerl.snailmember.boardlike.command.application.dto.CommandBoardLikeEventDTO
 import com.bockerl.snailmember.boardlike.command.application.service.CommandBoardLikeService
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.entity.BoardLike
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.enums.BoardLikeActionType
@@ -18,6 +19,7 @@ import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.redis.connection.ReturnType
 import org.springframework.data.redis.core.RedisCallback
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.script.DefaultRedisScript
 import org.springframework.stereotype.Service
 import java.time.Duration
 
@@ -34,6 +36,11 @@ class CommandBoardLikeServiceImpl(
     override fun createBoardLike(commandBoardLikeDTO: CommandBoardLikeDTO) {
         // 설명. redis에서 board pk 기준 인덱스 설정 및 member pk 기준 인덱스 설정 할 것
         // 설명. 집합으로 각 인덱스 관리. cold data 분리를 위해 expire 설정(1일) -> 호출될 때 마다 갱신됨
+
+        // 따닥 방지
+        if (redisTemplate.hasKey(commandBoardLikeDTO.idempotencyKey)) {
+            throw CommonException(ErrorCode.ALREADY_REQUESTED)
+        }
 
         val boardSetKey = "board-like:${commandBoardLikeDTO.boardId}"
         val boardCountKey = "board-like:count:${commandBoardLikeDTO.boardId}"
@@ -104,13 +111,30 @@ class CommandBoardLikeServiceImpl(
                 aggregateId = commandBoardLikeDTO.boardId,
                 eventType = EventType.LIKE,
                 payload = jsonPayload,
+                idempotencyKey = commandBoardLikeDTO.idempotencyKey,
             )
 
         outboxService.createOutbox(outbox)
+
+        val idempotencyScript =
+            """
+            local res = redis.call("set", KEYS[1], ARGV[1], "EX", ARGV[2])
+            return res
+            """.trimIndent()
+
+        val idempotencyRedisScript = DefaultRedisScript<String>(idempotencyScript, String::class.java)
+        val ttlInSeconds = "3600" // 1시간 TTL
+
+        val result = redisTemplate.execute(idempotencyRedisScript, listOf(commandBoardLikeDTO.idempotencyKey), "PROCESSED", ttlInSeconds)
+
+        // result가 "OK"이면 SET 명령이 성공적으로 실행된 것입니다.
+        if (result != "OK") {
+            throw CommonException(ErrorCode.REDIS_ERROR)
+        }
     }
 
     @Transactional
-    override fun createBoardLikeEventList(boardLikeList: List<CommandBoardLikeDTO>) {
+    override fun createBoardLikeEventList(boardLikeList: List<CommandBoardLikeEventDTO>) {
         try {
             // 설명. entity형으로 변환은 필요하다.
             val boardLikeListEntities =
@@ -145,6 +169,11 @@ class CommandBoardLikeServiceImpl(
 
     @Transactional
     override fun deleteBoardLike(commandBoardLikeDTO: CommandBoardLikeDTO) {
+        // 따닥 방지
+        if (redisTemplate.hasKey(commandBoardLikeDTO.idempotencyKey)) {
+            throw CommonException(ErrorCode.ALREADY_REQUESTED)
+        }
+
         val boardSetKey = "board-like:${commandBoardLikeDTO.boardId}"
         val boardCountKey = "board-like:count:${commandBoardLikeDTO.boardId}"
         val memberSetKey = "board-like:${commandBoardLikeDTO.memberId}" // 역인덱스: 멤버별 좋아요 board 목록
@@ -212,16 +241,33 @@ class CommandBoardLikeServiceImpl(
                 aggregateId = commandBoardLikeDTO.boardId,
                 eventType = EventType.LIKE,
                 payload = jsonPayload,
+                idempotencyKey = commandBoardLikeDTO.idempotencyKey,
             )
 
         outboxService.createOutbox(outbox)
+
+        val idempotencyScript =
+            """
+            local res = redis.call("set", KEYS[1], ARGV[1], "EX", ARGV[2])
+            return res
+            """.trimIndent()
+
+        val idempotencyRedisScript = DefaultRedisScript<String>(idempotencyScript, String::class.java)
+        val ttlInSeconds = "3600" // 1시간 TTL
+
+        val result = redisTemplate.execute(idempotencyRedisScript, listOf(commandBoardLikeDTO.idempotencyKey), "PROCESSED", ttlInSeconds)
+
+        // result가 "OK"이면 SET 명령이 성공적으로 실행된 것입니다.
+        if (result != "OK") {
+            throw CommonException(ErrorCode.REDIS_ERROR)
+        }
     }
 
     @Transactional
-    override fun deleteBoardLikeEvent(commandBoardLikeDTO: CommandBoardLikeDTO) {
+    override fun deleteBoardLikeEvent(commandBoardLikeEventDTO: CommandBoardLikeEventDTO) {
         boardLikeRepository.deleteByMemberIdAndBoardId(
-            extractDigits(commandBoardLikeDTO.memberId),
-            extractDigits(commandBoardLikeDTO.boardId),
+            extractDigits(commandBoardLikeEventDTO.memberId),
+            extractDigits(commandBoardLikeEventDTO.boardId),
         )
     }
 

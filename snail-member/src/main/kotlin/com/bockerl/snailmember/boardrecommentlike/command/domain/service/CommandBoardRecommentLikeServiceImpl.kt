@@ -105,6 +105,7 @@ class CommandBoardRecommentLikeServiceImpl(
                 aggregateId = commandBoardRecommentLikeDTO.boardRecommentId,
                 eventType = EventType.LIKE,
                 payload = jsonPayload,
+                idempotencyKey = commandBoardRecommentLikeDTO.idempotencyKey,
             )
 
         outboxService.createOutbox(outbox)
@@ -218,6 +219,7 @@ class CommandBoardRecommentLikeServiceImpl(
                 aggregateId = commandBoardRecommentLikeDTO.boardId,
                 eventType = EventType.LIKE,
                 payload = jsonPayload,
+                idempotencyKey = commandBoardRecommentLikeDTO.idempotencyKey,
             )
 
         outboxService.createOutbox(outbox)

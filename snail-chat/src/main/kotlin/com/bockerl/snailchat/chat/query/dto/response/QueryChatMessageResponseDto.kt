@@ -1,6 +1,6 @@
 package com.bockerl.snailchat.chat.query.dto.response
 
-import com.bockerl.snailchat.chat.command.domain.aggregate.enums.CommandChatMessageType
+import com.bockerl.snailchat.chat.command.domain.aggregate.enums.ChatMessageType
 import java.time.LocalDateTime
 
 data class QueryChatMessageResponseDto(
@@ -10,6 +10,6 @@ data class QueryChatMessageResponseDto(
     val memberNickname: String,
     val memberPhoto: String,
     val message: String?,
-    val messageType: CommandChatMessageType,
+    val messageType: ChatMessageType,
     val createdAt: LocalDateTime,
 )

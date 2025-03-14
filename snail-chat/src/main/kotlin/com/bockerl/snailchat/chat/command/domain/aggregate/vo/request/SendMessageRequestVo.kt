@@ -1,6 +1,6 @@
 package com.bockerl.snailchat.chat.command.domain.aggregate.vo.request
 
-import com.bockerl.snailchat.chat.command.domain.aggregate.enums.CommandChatMessageType
+import com.bockerl.snailchat.chat.command.domain.aggregate.enums.ChatMessageType
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.v3.oas.annotations.media.Schema
 
@@ -22,5 +22,5 @@ data class SendMessageRequestVo(
     val message: String?, // 처음 입장할 때는 message를 담지 않기 때문에 nullable하게 설정
     @field:Schema(description = "메시지 유형", example = "ENTER", allowableValues = ["ENTER", "CHAT", "LEAVE"])
     @JsonProperty("messageType")
-    val messageType: CommandChatMessageType,
+    val messageType: ChatMessageType,
 )

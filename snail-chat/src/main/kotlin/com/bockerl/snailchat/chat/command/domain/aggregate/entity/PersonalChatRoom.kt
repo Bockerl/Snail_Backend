@@ -1,5 +1,6 @@
 package com.bockerl.snailchat.chat.command.domain.aggregate.entity
 
+import com.bockerl.snailchat.chat.command.domain.aggregate.enums.ChatRoomType
 import com.bockerl.snailchat.chat.command.domain.aggregate.vo.MemberInfo
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.CreatedDate
@@ -12,6 +13,7 @@ data class PersonalChatRoom(
     @Id
     val chatRoomId: ObjectId = ObjectId.get(),
     val chatRoomName: Map<String, String>, // { "userA": "Bob", "userB": "Alice" } - 각자 볼 때 채팅방 이름 다르도록
+    val chatRoomType: ChatRoomType,
     val chatRoomStatus: Boolean,
     val participants: List<MemberInfo>,
     @CreatedDate

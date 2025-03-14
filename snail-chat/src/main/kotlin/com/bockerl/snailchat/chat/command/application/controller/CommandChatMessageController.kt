@@ -5,7 +5,7 @@ package com.bockerl.snailchat.chat.command.application.controller
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDto
 import com.bockerl.snailchat.chat.command.application.mapper.VoToDtoConverter
 import com.bockerl.snailchat.chat.command.application.service.CommandChatMessageService
-import com.bockerl.snailchat.chat.command.domain.aggregate.enums.CommandChatMessageType
+import com.bockerl.snailchat.chat.command.domain.aggregate.enums.ChatMessageType
 import com.bockerl.snailchat.chat.command.domain.aggregate.vo.request.SendMessageRequestVo
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -58,7 +58,7 @@ class CommandChatMessageController(
         // messageType이 Enter일 경우에는 처음 등장이므로, Websocket의 세션에 정보 저장 (simpleMessageHeaderAccessor)
         val updateMessageDto =
             when (commandChatMessageRequestDto.messageType) {
-                CommandChatMessageType.ENTER -> {
+                ChatMessageType.ENTER -> {
                     simpleMessageHeaderAccessor.sessionAttributes?.apply {
                         // 향후 Token 완성 후 수정필요
                         put("memberId", commandChatMessageRequestDto.memberId)

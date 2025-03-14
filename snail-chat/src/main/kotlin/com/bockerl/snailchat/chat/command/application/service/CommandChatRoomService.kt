@@ -4,9 +4,15 @@ import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoo
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomDeleteRequestDto
 
 interface CommandChatRoomService {
-    fun createChatRoom(commandChatRoomCreateRequestDto: CommandChatRoomCreateRequestDto) {
+    fun createPersonalChatRoom(commandChatRoomCreateRequestDto: CommandChatRoomCreateRequestDto) {
     }
 
-    fun deleteChatRoom(commandChatRoomDeleteRequestDto: CommandChatRoomDeleteRequestDto) {
+    fun createGroupChatRoom(commandChatRoomCreateRequestDto: CommandChatRoomCreateRequestDto) {
+    }
+
+    fun deletePersonalChatRoom(commandChatRoomDeleteRequestDto: CommandChatRoomDeleteRequestDto) {
+    }
+
+    fun deleteGroupChatRoom(commandChatRoomDeleteRequestDto: CommandChatRoomDeleteRequestDto) {
     }
 }

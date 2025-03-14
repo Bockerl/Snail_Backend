@@ -3,7 +3,7 @@
 
 package com.bockerl.snailchat.chat.command.domain.aggregate.entity
 
-import com.bockerl.snailchat.chat.command.domain.aggregate.enums.CommandChatMessageType
+import com.bockerl.snailchat.chat.command.domain.aggregate.enums.ChatMessageType
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
@@ -19,7 +19,7 @@ data class ChatMessage(
     val memberNickname: String,
     val memberPhoto: String,
     val message: String?,
-    val messageType: CommandChatMessageType,
+    val messageType: ChatMessageType,
 ) {
     @CreatedDate
     lateinit var createdAt: LocalDateTime // mongoDB가 값을 넣을떄 초기화하면서 넣어줌

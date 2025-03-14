@@ -3,7 +3,7 @@ package com.bockerl.snailchat.chat.command.domain.service
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDto
 import com.bockerl.snailchat.chat.command.application.service.CommandChatMessageService
 import com.bockerl.snailchat.chat.command.domain.aggregate.entity.ChatMessage
-import com.bockerl.snailchat.chat.command.domain.aggregate.enums.CommandChatMessageType
+import com.bockerl.snailchat.chat.command.domain.aggregate.enums.ChatMessageType
 import com.bockerl.snailchat.chat.command.domain.repository.CommandChatMessageRepository
 import org.bson.types.ObjectId
 import org.springframework.messaging.simp.SimpMessagingTemplate
@@ -51,7 +51,7 @@ class CommandChatMessageServiceImpl(
                 memberNickname = memberNickname,
                 memberPhoto = memberPhoto,
                 message = "$memberNickname 님이 퇴장하셨습니다.",
-                messageType = CommandChatMessageType.LEAVE,
+                messageType = ChatMessageType.LEAVE,
             )
 
         chatMessageRepository.save(chatMessage)

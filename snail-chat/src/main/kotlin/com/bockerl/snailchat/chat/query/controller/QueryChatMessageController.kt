@@ -50,4 +50,32 @@ class QueryChatMessageController(
 
         return ResponseDto.ok(chatMessageList)
     }
+
+    @Operation(
+        summary = "채팅방 입장시 여부 출력 (최초, 재입장)",
+        description = "사용자가 채팅방 입장시 최초 or 재입장 여부 출력 ",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "채팅방 입장 여부 출력 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = CommandChatMessageRequestDto::class),
+                    ),
+                ],
+            ),
+        ],
+    )
+    @GetMapping("/{chatRoomId}/{memberId}")
+    fun isFirstJoin(
+        @PathVariable chatRoomId: String,
+        @PathVariable memberId: String,
+    ): ResponseDto<*> {
+        val isFirstJoinStatus = queryChatMessageService.getIsFirstJoin(chatRoomId, memberId)
+
+        return ResponseDto.ok(isFirstJoinStatus)
+    }
 }

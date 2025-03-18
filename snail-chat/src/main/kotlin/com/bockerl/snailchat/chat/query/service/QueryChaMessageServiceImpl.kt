@@ -2,10 +2,11 @@ package com.bockerl.snailchat.chat.query.service
 
 import com.bockerl.snailchat.chat.command.domain.aggregate.entity.ChatMessage
 import com.bockerl.snailchat.chat.command.domain.aggregate.enums.ChatMessageType
+import com.bockerl.snailchat.chat.query.dto.LatestChatMessageDto
 import com.bockerl.snailchat.chat.query.dto.request.QueryChatMessageRequestDto
 import com.bockerl.snailchat.chat.query.dto.response.QueryChatMessageResponseDto
 import com.bockerl.snailchat.chat.query.mapper.EntityToDtoConverter
-import com.bockerl.snailchat.chat.query.repository.QueryChatMessageRepository
+import com.bockerl.snailchat.chat.query.repository.queryChatMessage.QueryChatMessageRepository
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 
@@ -55,5 +56,12 @@ class QueryChaMessageServiceImpl(
 
         // LEAVE는 있는데 ENTER는 없거나(에러), LEAVE가 ENTER보다 더 최근이면, 최초 입장으로 처리 (나갔다가 다시 들어옴)
         return lastEnterMessage == null || lastLeaveMessage.createdAt.isAfter(lastEnterMessage.createdAt)
+    }
+
+    override fun getLatestChatMessageByChatRoomId(chatRoomId: ObjectId): LatestChatMessageDto? {
+        val latestChatMessage =
+            queryChatMessageRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoomId)
+
+        return latestChatMessage?.let { entityToDtoConverter.latestChatMessageToLatestChatMessageDto(it) }
     }
 }

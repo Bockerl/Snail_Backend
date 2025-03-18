@@ -1,6 +1,7 @@
 package com.bockerl.snailchat.chat.query.mapper
 
 import com.bockerl.snailchat.chat.command.domain.aggregate.entity.ChatMessage
+import com.bockerl.snailchat.chat.query.dto.LatestChatMessageDto
 import com.bockerl.snailchat.chat.query.dto.response.QueryChatMessageResponseDto
 import org.springframework.stereotype.Component
 
@@ -16,6 +17,13 @@ class EntityToDtoConverter {
             memberPhoto = entity.memberPhoto,
             message = entity.message ?: "",
             messageType = entity.messageType,
+            createdAt = entity.createdAt,
+        )
+
+    // 채팅방 최신 메시지 Entity -> Dto
+    fun latestChatMessageToLatestChatMessageDto(entity: ChatMessage) =
+        LatestChatMessageDto(
+            message = entity.message ?: "",
             createdAt = entity.createdAt,
         )
 }

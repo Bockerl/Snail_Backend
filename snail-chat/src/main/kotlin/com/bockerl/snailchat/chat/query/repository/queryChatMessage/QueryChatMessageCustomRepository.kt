@@ -1,4 +1,4 @@
-package com.bockerl.snailchat.chat.query.repository
+package com.bockerl.snailchat.chat.query.repository.queryChatMessage
 
 import com.bockerl.snailchat.chat.command.domain.aggregate.entity.ChatMessage
 import org.bson.types.ObjectId

@@ -4,6 +4,7 @@ import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoo
 import com.bockerl.snailchat.chat.command.application.mapper.VoToDtoConverter
 import com.bockerl.snailchat.chat.command.application.service.CommandChatRoomService
 import com.bockerl.snailchat.chat.command.domain.aggregate.vo.request.CommandChatRoomDeleteRequestVo
+import com.bockerl.snailchat.chat.command.domain.aggregate.vo.request.CommandChatRoomJoinRequestVo
 import com.bockerl.snailchat.common.ResponseDto
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -147,6 +148,39 @@ class CommandChatRoomController(
             voToDtoConverter.commandChatRoomDeleteRequestVoTODto(commandChatRoomDeleteRequestVo, memberId, memberNickname, memberPhoto)
 
         commandChatRoomService.deleteGroupChatRoom(commandChatRoomDeleteRequestDto)
+
+        return ResponseDto.ok(null)
+    }
+
+    @Operation(
+        summary = "그룹 채팅방 참가",
+        description = "모임 및 모임 참여시 그룹 채팅방 참가",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "그룹 채팅방 참가 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = CommandChatRoomCreateRequestDto::class),
+                    ),
+                ],
+            ),
+        ],
+    )
+    @PostMapping("/join/{memberId}/{memberNickname}/{memberPhoto}")
+    fun joinGroupChatRoom(
+        @RequestBody commandChatRoomJoinRequestVo: CommandChatRoomJoinRequestVo,
+        @PathVariable memberId: String, // 향후 Principal을 통해 memberId, memberNickname
+        @PathVariable memberNickname: String,
+        @PathVariable memberPhoto: String,
+    ): ResponseDto<*> {
+        val commandChatRoomJoinRequestDto =
+            voToDtoConverter.commandChatRoomJoinRequestVoToDto(commandChatRoomJoinRequestVo, memberId, memberNickname, memberPhoto)
+
+        commandChatRoomService.joinGroupChatRoom(commandChatRoomJoinRequestDto)
 
         return ResponseDto.ok(null)
     }

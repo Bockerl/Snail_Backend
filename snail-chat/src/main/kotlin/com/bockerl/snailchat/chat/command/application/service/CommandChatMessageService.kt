@@ -1,6 +1,7 @@
 package com.bockerl.snailchat.chat.command.application.service
 
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDto
+import org.bson.types.ObjectId
 
 interface CommandChatMessageService {
     fun sendMessage(
@@ -9,7 +10,14 @@ interface CommandChatMessageService {
     )
 
     fun saveLeaveMessage(
-        chatRoomId: String,
+        chatRoomId: ObjectId,
+        memberId: String,
+        memberNickname: String,
+        memberPhoto: String,
+    )
+
+    fun saveEnterMessage(
+        chatRoomId: ObjectId,
         memberId: String,
         memberNickname: String,
         memberPhoto: String,

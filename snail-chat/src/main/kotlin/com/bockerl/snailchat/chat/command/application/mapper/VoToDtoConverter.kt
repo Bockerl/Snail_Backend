@@ -2,7 +2,9 @@ package com.bockerl.snailchat.chat.command.application.mapper
 
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDto
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomDeleteRequestDto
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomJoinRequestDto
 import com.bockerl.snailchat.chat.command.domain.aggregate.vo.request.CommandChatRoomDeleteRequestVo
+import com.bockerl.snailchat.chat.command.domain.aggregate.vo.request.CommandChatRoomJoinRequestVo
 import com.bockerl.snailchat.chat.command.domain.aggregate.vo.request.SendMessageRequestVo
 import org.springframework.stereotype.Component
 
@@ -27,6 +29,18 @@ class VoToDtoConverter {
         memberNickname: String,
         memberPhoto: String,
     ) = CommandChatRoomDeleteRequestDto(
+        chatRoomId = requestVo.chatRoomId,
+        memberId = memberId,
+        memberNickname = memberNickname,
+        memberPhoto = memberPhoto,
+    )
+
+    fun commandChatRoomJoinRequestVoToDto(
+        requestVo: CommandChatRoomJoinRequestVo,
+        memberId: String,
+        memberNickname: String,
+        memberPhoto: String,
+    ) = CommandChatRoomJoinRequestDto(
         chatRoomId = requestVo.chatRoomId,
         memberId = memberId,
         memberNickname = memberNickname,

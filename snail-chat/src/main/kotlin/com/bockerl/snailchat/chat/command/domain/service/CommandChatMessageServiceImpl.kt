@@ -38,14 +38,14 @@ class CommandChatMessageServiceImpl(
     }
 
     override fun saveLeaveMessage(
-        chatRoomId: String,
+        chatRoomId: ObjectId,
         memberId: String,
         memberNickname: String,
         memberPhoto: String,
     ) {
         val chatMessage =
             ChatMessage(
-                chatRoomId = ObjectId(chatRoomId),
+                chatRoomId = chatRoomId,
                 memberId = memberId,
                 memberNickname = memberNickname,
                 memberPhoto = memberPhoto,
@@ -54,5 +54,24 @@ class CommandChatMessageServiceImpl(
             )
 
         chatMessageRepository.save(chatMessage)
+    }
+
+    override fun saveEnterMessage(
+        chatRoomId: ObjectId,
+        memberId: String,
+        memberNickname: String,
+        memberPhoto: String,
+    ) {
+        val enterMessage =
+            ChatMessage(
+                chatRoomId = chatRoomId,
+                memberId = memberId,
+                memberNickname = memberNickname,
+                memberPhoto = memberPhoto,
+                message = "${memberNickname}님이 입장하셨습니다.",
+                messageType = ChatMessageType.ENTER,
+            )
+
+        chatMessageRepository.save(enterMessage)
     }
 }

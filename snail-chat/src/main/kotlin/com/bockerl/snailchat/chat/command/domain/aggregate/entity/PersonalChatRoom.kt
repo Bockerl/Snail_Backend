@@ -14,7 +14,8 @@ import java.time.Instant
 data class PersonalChatRoom(
     @Id
     val chatRoomId: ObjectId = ObjectId.get(),
-    val chatRoomName: Map<String, String>, // { "userA": "Bob", "userB": "Alice" } - 각자 볼 때 채팅방 이름 다르도록
+    val chatRoomName: Map<String, String>, // { "userA": "John", "userB": "Alice" } - 각자 볼 때 채팅방 이름 다르도록
+    val chatRoomPhoto: Map<String, String>, // { "userA": "John.jpg", "userB": "Alice.jpg" } - 각자 볼 때 채팅방 사진 다르도록
     val chatRoomType: ChatRoomType,
     val chatRoomStatus: Boolean,
     val participants: List<MemberInfo>,

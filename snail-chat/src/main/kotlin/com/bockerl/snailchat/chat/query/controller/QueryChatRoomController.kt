@@ -3,6 +3,7 @@
 package com.bockerl.snailchat.chat.query.controller
 
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomCreateRequestDto
+import com.bockerl.snailchat.chat.query.dto.request.QueryGroupChatRoomRequestDto
 import com.bockerl.snailchat.chat.query.dto.request.QueryPersonalChatRoomRequestDto
 import com.bockerl.snailchat.chat.query.service.QueryChatRoomService
 import com.bockerl.snailchat.common.ResponseDto
@@ -36,7 +37,7 @@ class QueryChatRoomController(
             ),
         ],
     )
-    @GetMapping("/{memberId}")
+    @GetMapping("/personal/{memberId}")
     fun getPersonalChatRoomListByMemberId(
         @PathVariable memberId: String,
         @RequestParam(required = false) lastId: String? = null,
@@ -47,5 +48,36 @@ class QueryChatRoomController(
         val personalChatRoomList = queryChatRoomService.getPersonalChatRoomList(queryPersonalChatRoomRequestDto)
 
         return ResponseDto.ok(personalChatRoomList)
+    }
+
+    @Operation(
+        summary = "채팅방 전체 조회(그룹)",
+        description = "사용자가 본인이 참여하고 있는 그룹 채팅방을 전부 조회",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "그룹 채팅방 조회 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = CommandChatRoomCreateRequestDto::class),
+                    ),
+                ],
+            ),
+        ],
+    )
+    @GetMapping("/group/{memberId}")
+    fun getGroupChatRoomListByMemberId(
+        @PathVariable memberId: String,
+        @RequestParam(required = false) lastId: String? = null,
+        @RequestParam(defaultValue = "10") pageSize: Int,
+    ): ResponseDto<*> {
+        val queryGroupChatRoomRequestDto = QueryGroupChatRoomRequestDto(memberId, lastId, pageSize)
+
+        val groupChatRoomList = queryChatRoomService.getGroupChatRoomList(queryGroupChatRoomRequestDto)
+
+        return ResponseDto.ok(groupChatRoomList)
     }
 }

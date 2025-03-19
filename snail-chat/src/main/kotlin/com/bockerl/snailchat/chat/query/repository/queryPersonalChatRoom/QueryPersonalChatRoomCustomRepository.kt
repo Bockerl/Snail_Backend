@@ -5,12 +5,12 @@ import org.bson.types.ObjectId
 
 interface QueryPersonalChatRoomCustomRepository {
     fun findLatestPersonalChatRoomsByMemberId(
-        memberId: ObjectId,
+        memberId: String,
         pageSize: Int,
     ): List<PersonalChatRoom>
 
     fun findPreviousPersonalChatRoomsByMemberId(
-        memberId: ObjectId,
+        memberId: String,
         lastId: ObjectId,
         pageSize: Int,
     ): List<PersonalChatRoom>

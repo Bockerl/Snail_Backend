@@ -63,6 +63,7 @@ dependencies {
 //    implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+    implementation("io.github.microutils:kotlin-logging:3.0.5")
 
     // FeignClient
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")

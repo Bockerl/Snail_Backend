@@ -55,7 +55,7 @@ class QueryChaMessageServiceImpl(
         }
 
         // LEAVE는 있는데 ENTER는 없거나(에러), LEAVE가 ENTER보다 더 최근이면, 최초 입장으로 처리 (나갔다가 다시 들어옴)
-        return lastEnterMessage == null || lastLeaveMessage.createdAt.isAfter(lastEnterMessage.createdAt)
+        return lastEnterMessage == null || (lastLeaveMessage.createdAt?.isAfter(lastEnterMessage.createdAt) ?: false)
     }
 
     override fun getLatestChatMessageByChatRoomId(chatRoomId: ObjectId): LatestChatMessageDto? {

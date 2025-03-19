@@ -31,8 +31,7 @@ class CommandChatMessageServiceImpl(
             )
 
         // 전송할 메시지 DB에 저장
-        val saveMessage = chatMessageRepository.save(chatMessage)
-        println(saveMessage)
+        chatMessageRepository.save(chatMessage)
 
         // 해당 경로를 구독하고 있는 Client들에게 Message 전송
         simpleMessagingTemplate.convertAndSend("/topic/message/$chatRoomId", updateMessageDto)

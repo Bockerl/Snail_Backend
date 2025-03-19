@@ -5,7 +5,7 @@ import com.bockerl.snailchat.chat.query.dto.response.QueryPersonalChatRoomRespon
 import com.bockerl.snailchat.chat.query.repository.queryPersonalChatRoom.QueryPersonalChatRoomRepository
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Service
 class QueryChatRoomServiceImpl(
@@ -18,13 +18,13 @@ class QueryChatRoomServiceImpl(
         val personalChatRoomByMemberId =
             if (queryPersonalChatRoomRequestDto.lastId == null) {
                 queryPersonalChatRoomRepository.findLatestPersonalChatRoomsByMemberId(
-                    ObjectId(queryPersonalChatRoomRequestDto.memberId),
+                    queryPersonalChatRoomRequestDto.memberId,
                     queryPersonalChatRoomRequestDto.pageSize,
                 )
             } else {
                 // 다음 페이지 메시지 조회 ( lastId != null )
                 queryPersonalChatRoomRepository.findPreviousPersonalChatRoomsByMemberId(
-                    ObjectId(queryPersonalChatRoomRequestDto.memberId),
+                    queryPersonalChatRoomRequestDto.memberId,
                     ObjectId(queryPersonalChatRoomRequestDto.lastId),
                     queryPersonalChatRoomRequestDto.pageSize,
                 )
@@ -36,14 +36,14 @@ class QueryChatRoomServiceImpl(
                 val latestChatMessage = queryChatMessageService.getLatestChatMessageByChatRoomId(personalChatRoom.chatRoomId)
 
                 QueryPersonalChatRoomResponseDto(
-                    chatRoomId = personalChatRoom.chatRoomId,
+                    chatRoomId = personalChatRoom.chatRoomId.toString(),
                     chatRoomName =
                         personalChatRoom.chatRoomName
-                            .filterKeys { it != queryPersonalChatRoomRequestDto.memberId } // 현재 memberId를 제외한 값
+                            .filterKeys { it == queryPersonalChatRoomRequestDto.memberId } // 현재 memberId를 제외한 값
                             .values
                             .firstOrNull() ?: "알 수 없음",
                     latestMessage = latestChatMessage?.message ?: "채팅 메시지가 없습니다.",
-                    latestMessageTime = latestChatMessage?.createdAt ?: personalChatRoom.createdAt ?: LocalDateTime.now(),
+                    latestMessageTime = latestChatMessage?.createdAt ?: personalChatRoom.createdAt ?: Instant.now(),
 //                    unreadCount =
 //                        getUnreadMessageCount(
 //                            personalChatRoom.chatRoomId,

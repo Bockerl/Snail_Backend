@@ -20,9 +20,9 @@ class StompWebSocketConfig : WebSocketMessageBrokerConfigurer {
 
     // 내부 메시지 브로커 설정
     override fun configureMessageBroker(registry: MessageBrokerRegistry) {
-        // 메시지 구독(수신) Prefix
+        // 발행 ( 클라이언트 -> 서버 )
         registry.setApplicationDestinationPrefixes("/app")
-        // 메시지 발행(발신) Prefix
+        // 구독 ( 서버 -> 클라이언트)
         registry.enableSimpleBroker("/topic")
     }
 

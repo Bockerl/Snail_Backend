@@ -11,13 +11,13 @@ class QueryPersonalChatRoomCustomRepositoryImpl(
     private val mongoQueryUtil: MongoQueryUtil,
 ) : QueryPersonalChatRoomCustomRepository {
     override fun findLatestPersonalChatRoomsByMemberId(
-        memberId: ObjectId,
+        memberId: String,
         pageSize: Int,
     ): List<PersonalChatRoom> {
         val personalChatRoom =
             mongoQueryUtil.findWithPaging(
                 PersonalChatRoom::class.java,
-                Criteria.where("memberId").`is`(memberId),
+                Criteria.where("participants.memberId").`is`(memberId),
                 "_id",
                 pageSize,
             )
@@ -26,7 +26,7 @@ class QueryPersonalChatRoomCustomRepositoryImpl(
     }
 
     override fun findPreviousPersonalChatRoomsByMemberId(
-        memberId: ObjectId,
+        memberId: String,
         lastId: ObjectId,
         pageSize: Int,
     ): List<PersonalChatRoom> {
@@ -34,7 +34,7 @@ class QueryPersonalChatRoomCustomRepositoryImpl(
             mongoQueryUtil.findWithPaging(
                 PersonalChatRoom::class.java,
                 Criteria
-                    .where("memberId")
+                    .where("participants.memberId")
                     .`is`(memberId)
                     .and("_id")
                     .lt(lastId), // lastId보다 작은 수만 조회

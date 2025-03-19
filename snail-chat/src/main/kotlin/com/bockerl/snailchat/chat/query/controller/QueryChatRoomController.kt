@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.bockerl.snailchat.chat.query.controller
 
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomCreateRequestDto
@@ -35,7 +37,7 @@ class QueryChatRoomController(
         ],
     )
     @GetMapping("/{memberId}")
-    fun getChatRoomListByMemberId(
+    fun getPersonalChatRoomListByMemberId(
         @PathVariable memberId: String,
         @RequestParam(required = false) lastId: String? = null,
         @RequestParam(defaultValue = "10") pageSize: Int,

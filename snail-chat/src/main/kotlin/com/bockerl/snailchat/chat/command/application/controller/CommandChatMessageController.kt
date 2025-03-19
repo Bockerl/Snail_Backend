@@ -29,7 +29,7 @@ class CommandChatMessageController(
         description =
             """
             Websocket을 통한 Stomp 프로토콜을 이용하여 채팅 메시지를 전송합니다.
-            Client는 /app/{chatRoomId} 경로로 메시지를 전송합니다.
+            Client는 /topic/{chatRoomId} 경로로 메시지를 전송합니다.
             """,
     )
     @ApiResponses(

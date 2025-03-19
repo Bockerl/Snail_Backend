@@ -1,8 +1,8 @@
 package com.bockerl.snailchat.chat.query.dto
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 data class LatestChatMessageDto(
     val message: String,
-    val createdAt: LocalDateTime,
+    val createdAt: Instant?,
 )

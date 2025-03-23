@@ -1,17 +1,17 @@
 package com.bockerl.snailchat.chat.command.application.service
 
-import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomCreateRequestDto
-import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomDeleteRequestDto
-import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomJoinRequestDto
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomCreateRequestDTO
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomDeleteRequestDTO
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomJoinRequestDTO
 
 interface CommandChatRoomService {
-    fun createPersonalChatRoom(commandChatRoomCreateRequestDto: CommandChatRoomCreateRequestDto)
+    fun createPersonalChatRoom(commandChatRoomCreateRequestDto: CommandChatRoomCreateRequestDTO)
 
-    fun createGroupChatRoom(commandChatRoomCreateRequestDto: CommandChatRoomCreateRequestDto)
+    fun createGroupChatRoom(commandChatRoomCreateRequestDto: CommandChatRoomCreateRequestDTO)
 
-    fun deletePersonalChatRoom(commandChatRoomDeleteRequestDto: CommandChatRoomDeleteRequestDto)
+    fun deletePersonalChatRoom(commandChatRoomDeleteRequestDto: CommandChatRoomDeleteRequestDTO)
 
-    fun deleteGroupChatRoom(commandChatRoomDeleteRequestDto: CommandChatRoomDeleteRequestDto)
+    fun deleteGroupChatRoom(commandChatRoomDeleteRequestDto: CommandChatRoomDeleteRequestDTO)
 
-    fun joinGroupChatRoom(commandChatRoomJoinRequestDto: CommandChatRoomJoinRequestDto)
+    fun joinGroupChatRoom(commandChatRoomJoinRequestDto: CommandChatRoomJoinRequestDTO)
 }

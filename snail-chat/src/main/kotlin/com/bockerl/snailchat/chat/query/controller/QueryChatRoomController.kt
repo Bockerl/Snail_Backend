@@ -2,9 +2,9 @@
 
 package com.bockerl.snailchat.chat.query.controller
 
-import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomCreateRequestDto
-import com.bockerl.snailchat.chat.query.dto.request.QueryGroupChatRoomRequestDto
-import com.bockerl.snailchat.chat.query.dto.request.QueryPersonalChatRoomRequestDto
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomCreateRequestDTO
+import com.bockerl.snailchat.chat.query.dto.request.QueryGroupChatRoomRequestDTO
+import com.bockerl.snailchat.chat.query.dto.request.QueryPersonalChatRoomRequestDTO
 import com.bockerl.snailchat.chat.query.service.QueryChatRoomService
 import com.bockerl.snailchat.common.ResponseDto
 import io.swagger.v3.oas.annotations.Operation
@@ -31,7 +31,7 @@ class QueryChatRoomController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = CommandChatRoomCreateRequestDto::class),
+                        schema = Schema(implementation = CommandChatRoomCreateRequestDTO::class),
                     ),
                 ],
             ),
@@ -43,7 +43,7 @@ class QueryChatRoomController(
         @RequestParam(required = false) lastId: String? = null,
         @RequestParam(defaultValue = "10") pageSize: Int,
     ): ResponseDto<*> {
-        val queryPersonalChatRoomRequestDto = QueryPersonalChatRoomRequestDto(memberId, lastId, pageSize)
+        val queryPersonalChatRoomRequestDto = QueryPersonalChatRoomRequestDTO(memberId, lastId, pageSize)
 
         val personalChatRoomList = queryChatRoomService.getPersonalChatRoomList(queryPersonalChatRoomRequestDto)
 
@@ -62,7 +62,7 @@ class QueryChatRoomController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = CommandChatRoomCreateRequestDto::class),
+                        schema = Schema(implementation = CommandChatRoomCreateRequestDTO::class),
                     ),
                 ],
             ),
@@ -74,7 +74,7 @@ class QueryChatRoomController(
         @RequestParam(required = false) lastId: String? = null,
         @RequestParam(defaultValue = "10") pageSize: Int,
     ): ResponseDto<*> {
-        val queryGroupChatRoomRequestDto = QueryGroupChatRoomRequestDto(memberId, lastId, pageSize)
+        val queryGroupChatRoomRequestDto = QueryGroupChatRoomRequestDTO(memberId, lastId, pageSize)
 
         val groupChatRoomList = queryChatRoomService.getGroupChatRoomList(queryGroupChatRoomRequestDto)
 

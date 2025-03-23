@@ -1,6 +1,6 @@
 package com.bockerl.snailchat.chat.command.application.controller
 
-import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomCreateRequestDto
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomCreateRequestDTO
 import com.bockerl.snailchat.chat.command.application.mapper.VoToDtoConverter
 import com.bockerl.snailchat.chat.command.application.service.CommandChatRoomService
 import com.bockerl.snailchat.chat.command.domain.aggregate.vo.request.CommandChatRoomDeleteRequestVo
@@ -36,7 +36,7 @@ class CommandChatRoomController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = CommandChatRoomCreateRequestDto::class),
+                        schema = Schema(implementation = CommandChatRoomCreateRequestDTO::class),
                     ),
                 ],
             ),
@@ -48,7 +48,7 @@ class CommandChatRoomController(
         @PathVariable memberNickname: String,
         @PathVariable memberPhoto: String,
     ): ResponseDto<*> {
-        val commandChatRoomCreateRequestDto = CommandChatRoomCreateRequestDto(memberId, memberNickname, memberPhoto)
+        val commandChatRoomCreateRequestDto = CommandChatRoomCreateRequestDTO(memberId, memberNickname, memberPhoto)
 
         commandChatRoomService.createPersonalChatRoom(commandChatRoomCreateRequestDto)
 
@@ -67,7 +67,7 @@ class CommandChatRoomController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = CommandChatRoomCreateRequestDto::class),
+                        schema = Schema(implementation = CommandChatRoomCreateRequestDTO::class),
                     ),
                 ],
             ),
@@ -79,7 +79,7 @@ class CommandChatRoomController(
         @PathVariable memberNickname: String,
         @PathVariable memberPhoto: String,
     ): ResponseDto<*> {
-        val commandChatRoomCreateRequestDto = CommandChatRoomCreateRequestDto(memberId, memberNickname, memberPhoto)
+        val commandChatRoomCreateRequestDto = CommandChatRoomCreateRequestDTO(memberId, memberNickname, memberPhoto)
 
         commandChatRoomService.createGroupChatRoom(commandChatRoomCreateRequestDto)
 
@@ -98,7 +98,7 @@ class CommandChatRoomController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = CommandChatRoomCreateRequestDto::class),
+                        schema = Schema(implementation = CommandChatRoomCreateRequestDTO::class),
                     ),
                 ],
             ),
@@ -131,7 +131,7 @@ class CommandChatRoomController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = CommandChatRoomCreateRequestDto::class),
+                        schema = Schema(implementation = CommandChatRoomCreateRequestDTO::class),
                     ),
                 ],
             ),
@@ -164,7 +164,7 @@ class CommandChatRoomController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = CommandChatRoomCreateRequestDto::class),
+                        schema = Schema(implementation = CommandChatRoomCreateRequestDTO::class),
                     ),
                 ],
             ),

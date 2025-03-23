@@ -1,8 +1,8 @@
 package com.bockerl.snailchat.chat.command.application.mapper
 
-import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDto
-import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomDeleteRequestDto
-import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomJoinRequestDto
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDTO
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomDeleteRequestDTO
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomJoinRequestDTO
 import com.bockerl.snailchat.chat.command.domain.aggregate.vo.request.CommandChatRoomDeleteRequestVo
 import com.bockerl.snailchat.chat.command.domain.aggregate.vo.request.CommandChatRoomJoinRequestVo
 import com.bockerl.snailchat.chat.command.domain.aggregate.vo.request.SendMessageRequestVo
@@ -14,7 +14,7 @@ class VoToDtoConverter {
     fun sendMessageRequestVoToDto(
         requestVo: SendMessageRequestVo,
         chatRoomId: String,
-    ) = CommandChatMessageRequestDto(
+    ) = CommandChatMessageRequestDTO(
         chatRoomId = chatRoomId, // DestinationVariable 받아온 chatRoomId 넣어줌
         memberId = requestVo.memberId,
         memberNickname = requestVo.memberNickname,
@@ -28,7 +28,7 @@ class VoToDtoConverter {
         memberId: String,
         memberNickname: String,
         memberPhoto: String,
-    ) = CommandChatRoomDeleteRequestDto(
+    ) = CommandChatRoomDeleteRequestDTO(
         chatRoomId = requestVo.chatRoomId,
         memberId = memberId,
         memberNickname = memberNickname,
@@ -40,7 +40,7 @@ class VoToDtoConverter {
         memberId: String,
         memberNickname: String,
         memberPhoto: String,
-    ) = CommandChatRoomJoinRequestDto(
+    ) = CommandChatRoomJoinRequestDTO(
         chatRoomId = requestVo.chatRoomId,
         memberId = memberId,
         memberNickname = memberNickname,

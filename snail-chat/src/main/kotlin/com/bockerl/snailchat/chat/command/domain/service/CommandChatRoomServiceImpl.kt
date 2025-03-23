@@ -1,8 +1,8 @@
 package com.bockerl.snailchat.chat.command.domain.service
 
-import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomCreateRequestDto
-import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomDeleteRequestDto
-import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomJoinRequestDto
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomCreateRequestDTO
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomDeleteRequestDTO
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomJoinRequestDTO
 import com.bockerl.snailchat.chat.command.application.service.CommandChatMessageService
 import com.bockerl.snailchat.chat.command.application.service.CommandChatRoomService
 import com.bockerl.snailchat.chat.command.domain.aggregate.entity.GroupChatRoom
@@ -16,6 +16,7 @@ import com.bockerl.snailchat.common.exception.ErrorCode
 import org.bson.types.ObjectId
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CommandChatRoomServiceImpl(
@@ -25,14 +26,15 @@ class CommandChatRoomServiceImpl(
     private val simpleMessagingTemplate: SimpMessagingTemplate,
 //    private val memberFeignClient: MemberFeignClient,
 ) : CommandChatRoomService {
-    override fun createPersonalChatRoom(commandChatRoomCreateRequestDto: CommandChatRoomCreateRequestDto) {
+    @Transactional
+    override fun createPersonalChatRoom(commandChatRoomCreateRequestDTO: CommandChatRoomCreateRequestDTO) {
         // FeignClient 적용 전 임시데이터
         val participants =
             listOf(
                 MemberInfo(
-                    memberId = commandChatRoomCreateRequestDto.memberId,
-                    memberNickname = commandChatRoomCreateRequestDto.memberNickname,
-                    memberPhoto = commandChatRoomCreateRequestDto.memberPhoto,
+                    memberId = commandChatRoomCreateRequestDTO.memberId,
+                    memberNickname = commandChatRoomCreateRequestDTO.memberNickname,
+                    memberPhoto = commandChatRoomCreateRequestDTO.memberPhoto,
                 ),
                 // 향후 FeignClient로 DM을 받는 사람의 정보를 받아와야함
                 MemberInfo(
@@ -63,7 +65,8 @@ class CommandChatRoomServiceImpl(
         commandPersonalChatRoomRepository.save(personalChatRoom)
     }
 
-    override fun createGroupChatRoom(commandChatRoomCreateRequestDto: CommandChatRoomCreateRequestDto) {
+    @Transactional
+    override fun createGroupChatRoom(commandChatRoomCreateRequestDTO: CommandChatRoomCreateRequestDTO) {
         // FeignClient 적용 전 임시데이터
         val meetingName = "Gangnam Climbing"
         val meetingPhoto = "Climbing.jpg"
@@ -72,9 +75,9 @@ class CommandChatRoomServiceImpl(
         val participants =
             listOf(
                 MemberInfo(
-                    memberId = commandChatRoomCreateRequestDto.memberId,
-                    memberNickname = commandChatRoomCreateRequestDto.memberNickname,
-                    memberPhoto = commandChatRoomCreateRequestDto.memberPhoto,
+                    memberId = commandChatRoomCreateRequestDTO.memberId,
+                    memberNickname = commandChatRoomCreateRequestDTO.memberNickname,
+                    memberPhoto = commandChatRoomCreateRequestDTO.memberPhoto,
                 ),
             )
 
@@ -92,15 +95,16 @@ class CommandChatRoomServiceImpl(
         commandGroupChatRoomRepository.save(groupChatRoom)
     }
 
-    override fun deletePersonalChatRoom(commandChatRoomDeleteRequestDto: CommandChatRoomDeleteRequestDto) {
+    @Transactional
+    override fun deletePersonalChatRoom(commandChatRoomDeleteRequestDTO: CommandChatRoomDeleteRequestDTO) {
         val chatRoom =
             commandPersonalChatRoomRepository
-                .findById(ObjectId(commandChatRoomDeleteRequestDto.chatRoomId))
+                .findById(ObjectId(commandChatRoomDeleteRequestDTO.chatRoomId))
                 .orElseThrow { (CommonException(ErrorCode.NOT_FOUND_CHAT_ROOM)) }
 
         // 참가자 리스트에서 나가는 사용자 제거
         val updatedParticipants =
-            chatRoom.participants.filter { it.memberId != commandChatRoomDeleteRequestDto.memberId }
+            chatRoom.participants.filter { it.memberId != commandChatRoomDeleteRequestDTO.memberId }
 
         // 참가자 리스트 존재하지 않으면, 채팅방 상태 변경 후 메소드 종료
         if (updatedParticipants.isEmpty()) {
@@ -112,9 +116,9 @@ class CommandChatRoomServiceImpl(
         // 참가자가 남아있는 경우만 퇴장 채팅 저장
         commandChatMessageService.saveLeaveMessage(
             chatRoom.chatRoomId,
-            commandChatRoomDeleteRequestDto.memberId,
-            commandChatRoomDeleteRequestDto.memberNickname,
-            commandChatRoomDeleteRequestDto.memberPhoto,
+            commandChatRoomDeleteRequestDTO.memberId,
+            commandChatRoomDeleteRequestDTO.memberNickname,
+            commandChatRoomDeleteRequestDTO.memberPhoto,
         )
 
         val updatedChatRoom = chatRoom.copy(participants = updatedParticipants)
@@ -122,20 +126,21 @@ class CommandChatRoomServiceImpl(
 
         // 채팅방 참여자들에게 수정된 채팅방 정보(채팅방 참여자 수등) 제공
         simpleMessagingTemplate.convertAndSend(
-            "topic/chatRoom/$commandChatRoomDeleteRequestDto.chatRoomId",
+            "topic/chatRoom/$commandChatRoomDeleteRequestDTO.chatRoomId",
             updatedChatRoom,
         )
     }
 
-    override fun deleteGroupChatRoom(commandChatRoomDeleteRequestDto: CommandChatRoomDeleteRequestDto) {
+    @Transactional
+    override fun deleteGroupChatRoom(commandChatRoomDeleteRequestDTO: CommandChatRoomDeleteRequestDTO) {
         val chatRoom =
             commandGroupChatRoomRepository
-                .findById(ObjectId(commandChatRoomDeleteRequestDto.chatRoomId))
+                .findById(ObjectId(commandChatRoomDeleteRequestDTO.chatRoomId))
                 .orElseThrow { (CommonException(ErrorCode.NOT_FOUND_CHAT_ROOM)) }
 
         // 참가자 리스트에서 나가는 사용자 제거
         val updatedParticipants =
-            chatRoom.participants.filter { it.memberId != commandChatRoomDeleteRequestDto.memberId }
+            chatRoom.participants.filter { it.memberId != commandChatRoomDeleteRequestDTO.memberId }
 
         // 참가자 리스트 존재하지 않으면, 채팅방 상태 변경 후 메소드 종료
         if (updatedParticipants.isEmpty()) {
@@ -147,9 +152,9 @@ class CommandChatRoomServiceImpl(
         // 참가자가 남아있는 경우만 퇴장 채팅 저장
         commandChatMessageService.saveLeaveMessage(
             chatRoom.chatRoomId,
-            commandChatRoomDeleteRequestDto.memberId,
-            commandChatRoomDeleteRequestDto.memberNickname,
-            commandChatRoomDeleteRequestDto.memberPhoto,
+            commandChatRoomDeleteRequestDTO.memberId,
+            commandChatRoomDeleteRequestDTO.memberNickname,
+            commandChatRoomDeleteRequestDTO.memberPhoto,
         )
 
         val updatedChatRoom = chatRoom.copy(participants = updatedParticipants)
@@ -157,26 +162,27 @@ class CommandChatRoomServiceImpl(
 
         // 채팅방 참여자들에게 수정된 채팅방 정보(채팅방 참여자 수등) 제공
         simpleMessagingTemplate.convertAndSend(
-            "topic/chatRoom/$commandChatRoomDeleteRequestDto.chatRoomId",
+            "topic/chatRoom/$commandChatRoomDeleteRequestDTO.chatRoomId",
             updatedChatRoom,
         )
     }
 
-    override fun joinGroupChatRoom(commandChatRoomJoinRequestDto: CommandChatRoomJoinRequestDto) {
+    @Transactional
+    override fun joinGroupChatRoom(commandChatRoomJoinRequestDTO: CommandChatRoomJoinRequestDTO) {
         val chatRoom =
             commandGroupChatRoomRepository
-                .findById(ObjectId(commandChatRoomJoinRequestDto.chatRoomId))
+                .findById(ObjectId(commandChatRoomJoinRequestDTO.chatRoomId))
                 .orElseThrow { (CommonException(ErrorCode.NOT_FOUND_CHAT_ROOM)) }
 
-        if (chatRoom.participants.any { it.memberId == commandChatRoomJoinRequestDto.memberId }) {
+        if (chatRoom.participants.any { it.memberId == commandChatRoomJoinRequestDTO.memberId }) {
             return
         }
 
         val newMemberinfo =
             MemberInfo(
-                commandChatRoomJoinRequestDto.memberId,
-                commandChatRoomJoinRequestDto.memberNickname,
-                commandChatRoomJoinRequestDto.memberPhoto,
+                commandChatRoomJoinRequestDTO.memberId,
+                commandChatRoomJoinRequestDTO.memberNickname,
+                commandChatRoomJoinRequestDTO.memberPhoto,
             )
 
         val updatedChatRoom =
@@ -192,9 +198,9 @@ class CommandChatRoomServiceImpl(
         val enterMessage =
             commandChatMessageService.saveEnterMessage(
                 chatRoom.chatRoomId,
-                commandChatRoomJoinRequestDto.memberId,
-                commandChatRoomJoinRequestDto.memberNickname,
-                commandChatRoomJoinRequestDto.memberPhoto,
+                commandChatRoomJoinRequestDTO.memberId,
+                commandChatRoomJoinRequestDTO.memberNickname,
+                commandChatRoomJoinRequestDTO.memberPhoto,
             )
 
         // 채팅방 구독자들에게 입장 메시지 전송
@@ -204,6 +210,9 @@ class CommandChatRoomServiceImpl(
         simpleMessagingTemplate.convertAndSend("/topic/room/${chatRoom.chatRoomId}/update", updatedChatRoom)
 
         // 새로운 참여자들도 채팅방 정보 업데이트 - 확인후 구독
-        simpleMessagingTemplate.convertAndSend("/topic/member/${commandChatRoomJoinRequestDto.memberId}/update", updatedChatRoom.chatRoomId)
+        simpleMessagingTemplate.convertAndSend(
+            "/topic/member/${commandChatRoomJoinRequestDTO.memberId}/update",
+            updatedChatRoom.chatRoomId.toString(),
+        )
     }
 }

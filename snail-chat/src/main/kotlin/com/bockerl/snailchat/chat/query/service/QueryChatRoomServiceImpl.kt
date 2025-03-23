@@ -1,9 +1,9 @@
 package com.bockerl.snailchat.chat.query.service
 
-import com.bockerl.snailchat.chat.query.dto.request.QueryGroupChatRoomRequestDto
-import com.bockerl.snailchat.chat.query.dto.request.QueryPersonalChatRoomRequestDto
-import com.bockerl.snailchat.chat.query.dto.response.QueryGroupChatRoomResponseDto
-import com.bockerl.snailchat.chat.query.dto.response.QueryPersonalChatRoomResponseDto
+import com.bockerl.snailchat.chat.query.dto.request.QueryGroupChatRoomRequestDTO
+import com.bockerl.snailchat.chat.query.dto.request.QueryPersonalChatRoomRequestDTO
+import com.bockerl.snailchat.chat.query.dto.response.QueryGroupChatRoomResponseDTO
+import com.bockerl.snailchat.chat.query.dto.response.QueryPersonalChatRoomResponseDTO
 import com.bockerl.snailchat.chat.query.repository.queryGroupChatRoom.QueryGroupChatRoomRepository
 import com.bockerl.snailchat.chat.query.repository.queryPersonalChatRoom.QueryPersonalChatRoomRepository
 import org.bson.types.ObjectId
@@ -17,8 +17,8 @@ class QueryChatRoomServiceImpl(
     private val queryChatMessageService: QueryChatMessageService,
 ) : QueryChatRoomService {
     override fun getPersonalChatRoomList(
-        queryPersonalChatRoomRequestDto: QueryPersonalChatRoomRequestDto,
-    ): List<QueryPersonalChatRoomResponseDto> {
+        queryPersonalChatRoomRequestDto: QueryPersonalChatRoomRequestDTO,
+    ): List<QueryPersonalChatRoomResponseDTO> {
         val personalChatRoomByMemberId =
             if (queryPersonalChatRoomRequestDto.lastId == null) {
                 queryPersonalChatRoomRepository.findLatestPersonalChatRoomsByMemberId(
@@ -39,7 +39,7 @@ class QueryChatRoomServiceImpl(
             personalChatRoomByMemberId.map { personalChatRoom ->
                 val latestChatMessage = queryChatMessageService.getLatestChatMessageByChatRoomId(personalChatRoom.chatRoomId)
 
-                QueryPersonalChatRoomResponseDto(
+                QueryPersonalChatRoomResponseDTO(
                     chatRoomId = personalChatRoom.chatRoomId.toString(),
                     chatRoomName =
                         personalChatRoom.chatRoomName
@@ -65,7 +65,7 @@ class QueryChatRoomServiceImpl(
         return queryPersonalChatRoomDTOList
     }
 
-    override fun getGroupChatRoomList(queryGroupChatRoomRequestDto: QueryGroupChatRoomRequestDto): List<QueryGroupChatRoomResponseDto> {
+    override fun getGroupChatRoomList(queryGroupChatRoomRequestDto: QueryGroupChatRoomRequestDTO): List<QueryGroupChatRoomResponseDTO> {
         val groupChatRoomByMemberId =
             if (queryGroupChatRoomRequestDto.lastId == null) {
                 queryGroupChatRoomRepository.findLatestGroupChatRoomsByMemberId(
@@ -86,7 +86,7 @@ class QueryChatRoomServiceImpl(
             groupChatRoomByMemberId.map { groupChatRoom ->
                 val latestChatMessage = queryChatMessageService.getLatestChatMessageByChatRoomId(groupChatRoom.chatRoomId)
 
-                QueryGroupChatRoomResponseDto(
+                QueryGroupChatRoomResponseDTO(
                     chatRoomId = groupChatRoom.chatRoomId.toString(),
                     chatRoomName = groupChatRoom.chatRoomName,
                     chatRoomPhoto = groupChatRoom.chatRoomPhoto,

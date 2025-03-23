@@ -2,9 +2,9 @@ package com.bockerl.snailchat.chat.query.service
 
 import com.bockerl.snailchat.chat.command.domain.aggregate.entity.ChatMessage
 import com.bockerl.snailchat.chat.command.domain.aggregate.enums.ChatMessageType
-import com.bockerl.snailchat.chat.query.dto.LatestChatMessageDto
-import com.bockerl.snailchat.chat.query.dto.request.QueryChatMessageRequestDto
-import com.bockerl.snailchat.chat.query.dto.response.QueryChatMessageResponseDto
+import com.bockerl.snailchat.chat.query.dto.LatestChatMessageDTO
+import com.bockerl.snailchat.chat.query.dto.request.QueryChatMessageRequestDTO
+import com.bockerl.snailchat.chat.query.dto.response.QueryChatMessageResponseDTO
 import com.bockerl.snailchat.chat.query.mapper.EntityToDtoConverter
 import com.bockerl.snailchat.chat.query.repository.queryChatMessage.QueryChatMessageRepository
 import org.bson.types.ObjectId
@@ -15,7 +15,7 @@ class QueryChaMessageServiceImpl(
     private val queryChatMessageRepository: QueryChatMessageRepository,
     private val entityToDtoConverter: EntityToDtoConverter,
 ) : QueryChatMessageService {
-    override fun getChatMessageByChatRoomId(queryChatMessageRequestDto: QueryChatMessageRequestDto): List<QueryChatMessageResponseDto> {
+    override fun getChatMessageByChatRoomId(queryChatMessageRequestDto: QueryChatMessageRequestDTO): List<QueryChatMessageResponseDTO> {
         val chatMessagesByChatRoomId: List<ChatMessage> =
             // 첫 페이지 메시지 조회 ( lastId = null )
             if (queryChatMessageRequestDto.lastId == null) {
@@ -58,7 +58,7 @@ class QueryChaMessageServiceImpl(
         return lastEnterMessage == null || (lastLeaveMessage.createdAt?.isAfter(lastEnterMessage.createdAt) ?: false)
     }
 
-    override fun getLatestChatMessageByChatRoomId(chatRoomId: ObjectId): LatestChatMessageDto? {
+    override fun getLatestChatMessageByChatRoomId(chatRoomId: ObjectId): LatestChatMessageDTO? {
         val latestChatMessage =
             queryChatMessageRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoomId)
 

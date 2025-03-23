@@ -1,12 +1,17 @@
 package com.bockerl.snailchat.chat.command.application.service
 
-import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDto
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDTO
 import org.bson.types.ObjectId
 
 interface CommandChatMessageService {
     fun sendMessage(
-        chatRoomId: String,
-        updateMessageDto: CommandChatMessageRequestDto,
+//        chatRoomId: String,
+        updateMessageDto: CommandChatMessageRequestDTO,
+    )
+
+    fun sendMessageByKafka(
+//        chatRoomId: String,
+        updateMessageDto: CommandChatMessageRequestDTO,
     )
 
     fun saveLeaveMessage(

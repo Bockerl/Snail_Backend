@@ -1,6 +1,6 @@
 package com.bockerl.snailchat.chat.command.domain.service
 
-import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDto
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDTO
 import com.bockerl.snailchat.chat.command.application.service.CommandChatMessageService
 import com.bockerl.snailchat.chat.command.domain.aggregate.entity.ChatMessage
 import com.bockerl.snailchat.chat.command.domain.aggregate.enums.ChatMessageType
@@ -8,6 +8,7 @@ import com.bockerl.snailchat.chat.command.domain.repository.CommandChatMessageRe
 import org.bson.types.ObjectId
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CommandChatMessageServiceImpl(
@@ -15,28 +16,52 @@ class CommandChatMessageServiceImpl(
     private val chatMessageRepository: CommandChatMessageRepository,
 ) : CommandChatMessageService {
     // STOMP를 통한 메시지 전송
-    override fun sendMessage(
-        chatRoomId: String,
-        updateMessageDto: CommandChatMessageRequestDto,
-    ) {
+    @Transactional
+    override fun sendMessage(updateMessageDTO: CommandChatMessageRequestDTO) {
         // 전송할 메시지 옮기기
         val chatMessage =
             ChatMessage(
-                chatRoomId = ObjectId(chatRoomId),
-                memberId = updateMessageDto.memberId,
-                memberNickname = updateMessageDto.memberNickname,
-                memberPhoto = updateMessageDto.memberPhoto,
-                message = updateMessageDto.message,
-                messageType = updateMessageDto.messageType,
+                chatRoomId = ObjectId(updateMessageDTO.chatRoomId),
+                memberId = updateMessageDTO.memberId,
+                memberNickname = updateMessageDTO.memberNickname,
+                memberPhoto = updateMessageDTO.memberPhoto,
+                message = updateMessageDTO.message,
+                messageType = updateMessageDTO.messageType,
             )
 
         // 전송할 메시지 DB에 저장
         chatMessageRepository.save(chatMessage)
 
         // 해당 경로를 구독하고 있는 Client들에게 Message 전송
-        simpleMessagingTemplate.convertAndSend("/topic/message/$chatRoomId", updateMessageDto)
+        simpleMessagingTemplate.convertAndSend("/topic/message/${chatMessage.chatRoomId}", chatMessage)
     }
 
+    // Kakfa를 통한 메시지 전송
+    @Transactional
+    override fun sendMessageByKafka(updateMessageDTO: CommandChatMessageRequestDTO) {
+        // 전송할 메시지 옮기기
+        val chatMessage =
+            ChatMessage(
+                chatRoomId = ObjectId(updateMessageDTO.chatRoomId),
+                memberId = updateMessageDTO.memberId,
+                memberNickname = updateMessageDTO.memberNickname,
+                memberPhoto = updateMessageDTO.memberPhoto,
+                message = updateMessageDTO.message,
+                messageType = updateMessageDTO.messageType,
+            )
+
+        // 전송할 메시지 DB에 저장
+        chatMessageRepository.save(chatMessage)
+
+        // 해당 경로를 구독하고 있는 Client들에게 Message 전송
+        simpleMessagingTemplate.convertAndSend("/topic/message/${chatMessage.chatRoomId}", chatMessage)
+
+        // Kafka에 event 발행
+//        sendMessageEvent =
+//            CommandSendMessageEvent()
+    }
+
+    @Transactional
     override fun saveLeaveMessage(
         chatRoomId: ObjectId,
         memberId: String,
@@ -56,6 +81,7 @@ class CommandChatMessageServiceImpl(
         chatMessageRepository.save(chatMessage)
     }
 
+    @Transactional
     override fun saveEnterMessage(
         chatRoomId: ObjectId,
         memberId: String,

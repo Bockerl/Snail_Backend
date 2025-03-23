@@ -2,8 +2,8 @@
 
 package com.bockerl.snailchat.chat.query.controller
 
-import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDto
-import com.bockerl.snailchat.chat.query.dto.request.QueryChatMessageRequestDto
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDTO
+import com.bockerl.snailchat.chat.query.dto.request.QueryChatMessageRequestDTO
 import com.bockerl.snailchat.chat.query.service.QueryChatMessageService
 import com.bockerl.snailchat.common.ResponseDto
 import io.swagger.v3.oas.annotations.Operation
@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -35,7 +34,7 @@ class QueryChatMessageController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = CommandChatMessageRequestDto::class),
+                        schema = Schema(implementation = CommandChatMessageRequestDTO::class),
                     ),
                 ],
             ),
@@ -47,7 +46,7 @@ class QueryChatMessageController(
         @RequestParam(required = false) lastId: String? = null,
         @RequestParam(defaultValue = "10") pageSize: Int,
     ): ResponseDto<*> {
-        val queryChatMessageRequestDto = QueryChatMessageRequestDto(chatRoomId, lastId, pageSize)
+        val queryChatMessageRequestDto = QueryChatMessageRequestDTO(chatRoomId, lastId, pageSize)
 
         val chatMessageList = queryChatMessageService.getChatMessageByChatRoomId(queryChatMessageRequestDto)
 
@@ -66,7 +65,7 @@ class QueryChatMessageController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = CommandChatMessageRequestDto::class),
+                        schema = Schema(implementation = CommandChatMessageRequestDTO::class),
                     ),
                 ],
             ),

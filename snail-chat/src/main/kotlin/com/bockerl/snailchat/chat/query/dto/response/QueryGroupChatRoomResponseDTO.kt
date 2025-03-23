@@ -2,7 +2,7 @@ package com.bockerl.snailchat.chat.query.dto.response
 
 import java.time.Instant
 
-data class QueryPersonalChatRoomResponseDto(
+data class QueryGroupChatRoomResponseDTO(
     val chatRoomId: String,
     val chatRoomName: String,
     val chatRoomPhoto: String,

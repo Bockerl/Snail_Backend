@@ -1,4 +1,4 @@
-package com.bockerl.snailchat.config
+package com.bockerl.snailchat.infrastructure.config
 
 import org.springframework.context.annotation.Configuration
 import org.springframework.messaging.simp.config.MessageBrokerRegistry
@@ -15,7 +15,7 @@ class StompWebSocketConfig : WebSocketMessageBrokerConfigurer {
         registry
             .addEndpoint("/chat")
             .setAllowedOrigins("*")
-//            .withSockJS()
+            .withSockJS()
     }
 
     // 내부 메시지 브로커 설정

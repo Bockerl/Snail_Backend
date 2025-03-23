@@ -1,4 +1,4 @@
-package com.bockerl.snailchat.config
+package com.bockerl.snailchat.infrastructure.config
 
 import io.swagger.v3.oas.annotations.extensions.Extension
 import io.swagger.v3.oas.annotations.media.Content

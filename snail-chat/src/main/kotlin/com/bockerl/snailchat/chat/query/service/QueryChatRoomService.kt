@@ -1,12 +1,12 @@
 package com.bockerl.snailchat.chat.query.service
 
-import com.bockerl.snailchat.chat.query.dto.request.QueryGroupChatRoomRequestDto
-import com.bockerl.snailchat.chat.query.dto.request.QueryPersonalChatRoomRequestDto
-import com.bockerl.snailchat.chat.query.dto.response.QueryGroupChatRoomResponseDto
-import com.bockerl.snailchat.chat.query.dto.response.QueryPersonalChatRoomResponseDto
+import com.bockerl.snailchat.chat.query.dto.request.QueryGroupChatRoomRequestDTO
+import com.bockerl.snailchat.chat.query.dto.request.QueryPersonalChatRoomRequestDTO
+import com.bockerl.snailchat.chat.query.dto.response.QueryGroupChatRoomResponseDTO
+import com.bockerl.snailchat.chat.query.dto.response.QueryPersonalChatRoomResponseDTO
 
 interface QueryChatRoomService {
-    fun getPersonalChatRoomList(queryPersonalChatRoomRequestDto: QueryPersonalChatRoomRequestDto): List<QueryPersonalChatRoomResponseDto>
+    fun getPersonalChatRoomList(queryPersonalChatRoomRequestDto: QueryPersonalChatRoomRequestDTO): List<QueryPersonalChatRoomResponseDTO>
 
-    fun getGroupChatRoomList(queryGroupChatRoomRequestDto: QueryGroupChatRoomRequestDto): List<QueryGroupChatRoomResponseDto>
+    fun getGroupChatRoomList(queryGroupChatRoomRequestDto: QueryGroupChatRoomRequestDTO): List<QueryGroupChatRoomResponseDTO>
 }

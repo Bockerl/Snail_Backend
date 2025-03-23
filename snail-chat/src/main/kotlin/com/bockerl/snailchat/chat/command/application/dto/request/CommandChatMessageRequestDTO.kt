@@ -2,7 +2,7 @@ package com.bockerl.snailchat.chat.command.application.dto.request
 
 import com.bockerl.snailchat.chat.command.domain.aggregate.enums.ChatMessageType
 
-data class CommandChatMessageRequestDto(
+data class CommandChatMessageRequestDTO(
     val chatRoomId: String,
     val memberId: String,
     val memberNickname: String,

@@ -5,13 +5,13 @@ import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoo
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomJoinRequestDTO
 
 interface CommandChatRoomService {
-    fun createPersonalChatRoom(commandChatRoomCreateRequestDto: CommandChatRoomCreateRequestDTO)
+    fun createPersonalChatRoom(commandChatRoomCreateRequestDTO: CommandChatRoomCreateRequestDTO)
 
-    fun createGroupChatRoom(commandChatRoomCreateRequestDto: CommandChatRoomCreateRequestDTO)
+    fun createGroupChatRoom(commandChatRoomCreateRequestDTO: CommandChatRoomCreateRequestDTO)
 
-    fun deletePersonalChatRoom(commandChatRoomDeleteRequestDto: CommandChatRoomDeleteRequestDTO)
+    fun deletePersonalChatRoom(commandChatRoomDeleteRequestDTO: CommandChatRoomDeleteRequestDTO)
 
-    fun deleteGroupChatRoom(commandChatRoomDeleteRequestDto: CommandChatRoomDeleteRequestDTO)
+    fun deleteGroupChatRoom(commandChatRoomDeleteRequestDTO: CommandChatRoomDeleteRequestDTO)
 
-    fun joinGroupChatRoom(commandChatRoomJoinRequestDto: CommandChatRoomJoinRequestDTO)
+    fun joinGroupChatRoom(commandChatRoomJoinRequestDTO: CommandChatRoomJoinRequestDTO)
 }

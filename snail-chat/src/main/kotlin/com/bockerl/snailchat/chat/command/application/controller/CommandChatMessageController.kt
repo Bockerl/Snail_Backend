@@ -24,6 +24,7 @@ class CommandChatMessageController(
     private val commandChatMessageService: CommandChatMessageService,
     private val voToDtoConverter: VoToDtoConverter,
 ) {
+    //    @MessageMapping("{chatRoomId}")
     @Operation(
         summary = "메시지 송신 (Stomp) ",
         description =
@@ -46,7 +47,6 @@ class CommandChatMessageController(
             ),
         ],
     )
-    @MessageMapping("{chatRoomId}")
     fun sendMessage(
         @DestinationVariable chatRoomId: String,
         sendMessageRequestVo: SendMessageRequestVo,
@@ -73,7 +73,6 @@ class CommandChatMessageController(
             }
 
         // 메시지 전송
-//        commandChatMessageService.sendMessage(chatRoomId, updateMessageDto)
         commandChatMessageService.sendMessage(updateMessageDto)
     }
 
@@ -99,33 +98,33 @@ class CommandChatMessageController(
             ),
         ],
     )
-    @MessageMapping("/kafka/{chatRoomId}")
+    @MessageMapping("{chatRoomId}")
     fun sendMessageByKafka(
         @DestinationVariable chatRoomId: String,
         sendMessageRequestVo: SendMessageRequestVo,
         simpleMessageHeaderAccessor: SimpMessageHeaderAccessor,
     ) {
         // Vo -> Dto + 토큰에서 memberId/Nickname/Photo를 받아올 수 있도록 수정해야 함
-        val commandChatMessageRequestDto = voToDtoConverter.sendMessageRequestVoToDto(sendMessageRequestVo, chatRoomId)
+        val commandChatMessageRequestDTO = voToDtoConverter.sendMessageRequestVoToDto(sendMessageRequestVo, chatRoomId)
 
         // messageType이 Enter일 경우에는 처음 등장이므로, Websocket의 세션에 정보 저장 (simpleMessageHeaderAccessor)
-        val updateMessageDto =
-            when (commandChatMessageRequestDto.messageType) {
+        val updateMessageDTO =
+            when (commandChatMessageRequestDTO.messageType) {
                 ChatMessageType.ENTER -> {
                     simpleMessageHeaderAccessor.sessionAttributes?.apply {
                         // 향후 Token 완성 후 수정필요
-                        put("memberId", commandChatMessageRequestDto.memberId)
-                        put("memberNickname", commandChatMessageRequestDto.memberNickname)
-                        put("memberPhoto", commandChatMessageRequestDto.memberPhoto)
-                        put("chatRoomId", commandChatMessageRequestDto.chatRoomId)
+                        put("memberId", commandChatMessageRequestDTO.memberId)
+                        put("memberNickname", commandChatMessageRequestDTO.memberNickname)
+                        put("memberPhoto", commandChatMessageRequestDTO.memberPhoto)
+                        put("chatRoomId", commandChatMessageRequestDTO.chatRoomId)
                     }
 
-                    commandChatMessageRequestDto.copy(message = "${commandChatMessageRequestDto.memberNickname}님이 입장하셨습니다.")
+                    commandChatMessageRequestDTO.copy(message = "${commandChatMessageRequestDTO.memberNickname}님이 입장하셨습니다.")
                 }
-                else -> commandChatMessageRequestDto
+                else -> commandChatMessageRequestDTO
             }
 
         // 메시지 전송
-        commandChatMessageService.sendMessageByKafka(updateMessageDto)
+        commandChatMessageService.sendMessageByKafka(updateMessageDTO)
     }
 }

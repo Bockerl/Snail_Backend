@@ -39,6 +39,7 @@ class CommandBoardCommentLikeController(
     )
     @PostMapping("")
     fun postBoardCommentLike(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestBody commandBoardCommentLikeRequestVO: CommandBoardCommentLikeRequestVO,
     ): ResponseDTO<*> {
         val commandBoardCommentLikeDTO =
@@ -46,6 +47,7 @@ class CommandBoardCommentLikeController(
                 boardCommentId = commandBoardCommentLikeRequestVO.boardCommentId,
                 boardId = commandBoardCommentLikeRequestVO.boardId,
                 memberId = commandBoardCommentLikeRequestVO.memberId,
+                idempotencyKey = idempotencyKey,
             )
         commandBoardCommentLikeService.createBoardCommentLike(commandBoardCommentLikeDTO)
 
@@ -69,6 +71,7 @@ class CommandBoardCommentLikeController(
     )
     @DeleteMapping("")
     fun deleteBoardCommentLike(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestBody commandBoardCommentLikeRequestVO: CommandBoardCommentLikeRequestVO,
     ): ResponseDTO<*> {
         val commandBoardCommentLikeDTO =
@@ -76,6 +79,7 @@ class CommandBoardCommentLikeController(
                 boardCommentId = commandBoardCommentLikeRequestVO.boardCommentId,
                 boardId = commandBoardCommentLikeRequestVO.boardId,
                 memberId = commandBoardCommentLikeRequestVO.memberId,
+                idempotencyKey = idempotencyKey,
             )
 
         commandBoardCommentLikeService.deleteBoardCommentLike(commandBoardCommentLikeDTO)

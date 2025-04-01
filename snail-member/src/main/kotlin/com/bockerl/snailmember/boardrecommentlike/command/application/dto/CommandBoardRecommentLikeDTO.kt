@@ -5,5 +5,6 @@ class CommandBoardRecommentLikeDTO(
     val boardId: String,
     val memberId: String,
     val boardRecommentId: String,
+    val eventId: String? = null,
     val idempotencyKey: String,
 )

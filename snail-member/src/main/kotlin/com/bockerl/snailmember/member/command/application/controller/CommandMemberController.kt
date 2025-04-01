@@ -21,12 +21,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.http.MediaType
 import org.springframework.security.core.Authentication
-import org.springframework.web.bind.annotation.PatchMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestPart
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
@@ -107,6 +102,7 @@ class CommandMemberController(
     )
     @PatchMapping("/profile", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun patchProfile(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestPart("profileRequestVO") requestVO: ProfileRequestVO,
         @RequestPart("file", required = false) file: MultipartFile?,
         @CurrentMemberId memberId: String,
@@ -114,7 +110,7 @@ class CommandMemberController(
         logger.info { "프로필 변경 요청 controller에 도착" }
         logger.info { "controller에 도착한 memberId: $memberId" }
         val requestDTO = memberConverter.profileRequestVOToDTO(requestVO, file)
-        commandMemberService.patchProfile(memberId, requestDTO, file)
+        commandMemberService.patchProfile(memberId, requestDTO, file, idempotencyKey)
         return ResponseDTO.ok("프로필 변경 성공")
     }
 }

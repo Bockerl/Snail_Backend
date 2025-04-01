@@ -67,6 +67,7 @@ class CommandBoardController(
     )
     @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun postBoard(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestPart("commandBoardRequestVO") commandBoardCreateRequestVO: CommandBoardCreateRequestVO,
         @RequestPart("files", required = false) files: List<MultipartFile>?,
     ): ResponseDTO<*> {
@@ -78,6 +79,7 @@ class CommandBoardController(
                 boardLocation = commandBoardCreateRequestVO.boardLocation,
                 boardAccessLevel = commandBoardCreateRequestVO.boardAccessLevel,
                 memberId = commandBoardCreateRequestVO.memberId,
+                idempotencyKey = idempotencyKey,
             )
 
         commandBoardService.createBoard(commandBoardCreateDTO, files ?: emptyList())
@@ -118,6 +120,7 @@ class CommandBoardController(
     )
     @PatchMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun patchBoard(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestPart("commandBoardUpdateRequestVO") commandBoardUpdateRequestVO: CommandBoardUpdateRequestVO,
         @RequestPart("files", required = false) files: List<MultipartFile>?,
     ): ResponseDTO<*> {
@@ -131,6 +134,7 @@ class CommandBoardController(
                 boardAccessLevel = commandBoardUpdateRequestVO.boardAccessLevel,
                 memberId = commandBoardUpdateRequestVO.memberId,
                 deleteFilesIds = commandBoardUpdateRequestVO.deleteFilesIds,
+                idempotencyKey = idempotencyKey,
             )
 
         commandBoardService.updateBoard(commandBoardUpdateDTO, files ?: emptyList())
@@ -159,12 +163,14 @@ class CommandBoardController(
     )
     @DeleteMapping("")
     fun deleteBoard(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestBody commandBoardDeleteRequestVO: CommandBoardDeleteRequestVO,
     ): ResponseDTO<*> {
         val commandBoardDeleteDTO =
             CommandBoardDeleteDTO(
                 boardId = commandBoardDeleteRequestVO.boardId,
                 memberId = commandBoardDeleteRequestVO.memberId,
+                idempotencyKey = idempotencyKey,
             )
 
         commandBoardService.deleteBoard(commandBoardDeleteDTO)

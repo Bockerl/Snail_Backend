@@ -56,6 +56,7 @@ class CommandBoardCommentServiceImpl(
                     fileTargetType = FileTargetType.BOARD_COMMENT,
                     fileTargetId = formattedBoardCommentId(it),
                     memberId = commandBoardCommentCreateByGifDTO.memberId,
+                    idempotencyKey = commandBoardCommentCreateByGifDTO.idempotencyKey,
                 )
             }
 
@@ -85,6 +86,7 @@ class CommandBoardCommentServiceImpl(
                     fileTargetType = FileTargetType.BOARD_COMMENT,
                     fileTargetId = formattedBoardCommentId(boardCommentId),
                     memberId = commandBoardCommentDeleteDTO.memberId,
+                    idempotencyKey = commandBoardCommentDeleteDTO.idempotencyKey,
                 )
             commandFileService.deleteFile(commandFileDTO)
         }

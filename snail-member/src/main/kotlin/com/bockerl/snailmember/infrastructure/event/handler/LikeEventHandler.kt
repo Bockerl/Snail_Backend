@@ -30,12 +30,22 @@ class LikeEventHandler(
     private val logger = KotlinLogging.logger {}
 
     @Transactional
-    fun handle(event: BaseLikeEvent) {
+    fun handle(
+        event: BaseLikeEvent,
+        eventId: String,
+        idempotencyKey: String,
+    ) {
         when (event) {
             is BoardLikeEvent -> {
                 when (event.boardLikeActionType) {
                     BoardLikeActionType.CREATE -> {
-                        val like = CommandBoardLikeEventDTO(memberId = event.memberId, boardId = event.boardId)
+                        val like =
+                            CommandBoardLikeEventDTO(
+                                memberId = event.memberId,
+                                boardId = event.boardId,
+                                eventId = eventId,
+                                idempotencyKey = idempotencyKey,
+                            )
                         boardLikeBuffer.add(like)
                         if (boardLikeBuffer.size >= bufferSize) {
                             commandBoardLikeService.createBoardLikeEventList(boardLikeBuffer)
@@ -48,6 +58,8 @@ class LikeEventHandler(
                             CommandBoardLikeEventDTO(
                                 memberId = event.memberId,
                                 boardId = event.boardId,
+                                eventId = eventId,
+                                idempotencyKey = eventId,
                             ),
                         )
                     }
@@ -62,6 +74,8 @@ class LikeEventHandler(
                                 memberId = event.memberId,
                                 boardId = event.boardId,
                                 boardCommentId = event.boardCommentId,
+                                eventId = eventId,
+                                idempotencyKey = idempotencyKey,
                             )
                         boardCommentLikeBuffer.add(like)
                         if (boardCommentLikeBuffer.size >= bufferSize) {
@@ -76,6 +90,8 @@ class LikeEventHandler(
                                 memberId = event.memberId,
                                 boardCommentId = event.boardCommentId,
                                 boardId = event.boardId,
+                                eventId = eventId,
+                                idempotencyKey = idempotencyKey,
                             ),
                         )
                     }
@@ -91,6 +107,8 @@ class LikeEventHandler(
                                 boardId = event.boardId,
                                 boardCommentId = event.boardCommentId,
                                 boardRecommentId = event.boardRecommentId,
+                                eventId = eventId,
+                                idempotencyKey = idempotencyKey,
                             )
                         boardRecommentLikeBuffer.add(like)
                         if (boardRecommentLikeBuffer.size >= bufferSize) {
@@ -106,6 +124,8 @@ class LikeEventHandler(
                                 boardId = event.boardId,
                                 boardCommentId = event.boardCommentId,
                                 boardRecommentId = event.boardRecommentId,
+                                eventId = eventId,
+                                idempotencyKey = idempotencyKey,
                             ),
                         )
                     }

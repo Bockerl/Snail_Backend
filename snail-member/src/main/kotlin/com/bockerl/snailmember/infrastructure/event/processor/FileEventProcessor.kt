@@ -28,7 +28,11 @@ class FileEventProcessor(
         maxAttempts = 3,
         backoff = Backoff(delay = 1000, multiplier = 2.0, random = true),
     )
-    fun processCreate(event: BaseFileCreatedEvent) {
+    fun processCreate(
+        event: BaseFileCreatedEvent,
+        eventId: String,
+        idempotencyKey: String,
+    ) {
         logger.info { "이벤트 처리 시작: $event" }
 //        likeEventHandler.handle(event)
         fileEventHandler.handleCreate(event)
@@ -44,7 +48,11 @@ class FileEventProcessor(
         maxAttempts = 3,
         backoff = Backoff(delay = 1000, multiplier = 2.0, random = true),
     )
-    fun processDelete(event: FileDeletedEvent) {
+    fun processDelete(
+        event: FileDeletedEvent,
+        eventId: String,
+        idempotencyKey: String,
+    ) {
         logger.info { "이벤트 처리 시작: $event" }
 //        likeEventHandler.handle(event)
         fileEventHandler.handleDelete(event)

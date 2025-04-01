@@ -29,6 +29,8 @@ class LikeEventConsumerImpl(
     fun consume(
         @Payload event: BaseLikeEvent,
         @Header(KafkaHeaders.RECEIVED_PARTITION) partition: Int,
+        @Header("eventId") eventId: String,
+        @Header("idempotencyKey") idempotencyKey: String,
         // 설명. 오프셋 커밋용
         acknowledgment: Acknowledgment,
     ) {
@@ -36,7 +38,7 @@ class LikeEventConsumerImpl(
         // 설명. 멱등성 보장을 위한 try-catch문
         try {
             // 직접 LikeEventHandler를 호출하는 대신, 재시도 정책이 적용된 프로세서를 호출합니다.
-            likeEventProcessor.process(event)
+            likeEventProcessor.process(event, eventId, idempotencyKey)
             // 설명. 오프셋 수동 커밋
             acknowledgment.acknowledge()
         } catch (e: Exception) {

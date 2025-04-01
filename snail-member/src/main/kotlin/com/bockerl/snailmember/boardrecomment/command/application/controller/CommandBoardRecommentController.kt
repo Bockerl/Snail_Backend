@@ -88,6 +88,7 @@ class CommandBoardRecommentController(
     )
     @PostMapping("gif", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun postBoardCommentByGif(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestPart("commandBoardRecommentCreateByGifRequestVO") commandBoardRecommentCreateByGifRequestVO:
             CommandBoardRecommentCreateByGifRequestVO,
         @RequestPart("file", required = true) file: MultipartFile,
@@ -97,6 +98,7 @@ class CommandBoardRecommentController(
                 memberId = commandBoardRecommentCreateByGifRequestVO.memberId,
                 boardId = commandBoardRecommentCreateByGifRequestVO.boardId,
                 boardCommentId = commandBoardRecommentCreateByGifRequestVO.boardCommentId,
+                idempotencyKey = idempotencyKey,
             )
 
         commandBoardRecommentService.createBoardRecommentByGif(commandBoardRecommentCreateByGifDTO, file)
@@ -122,6 +124,7 @@ class CommandBoardRecommentController(
     )
     @DeleteMapping("")
     fun deleteBoardComment(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestBody commandBoardRecommentDeleteRequestVO: CommandBoardRecommentDeleteRequestVO,
     ): ResponseDTO<*> {
         val commandBoardRecommentDeleteDTO =
@@ -130,6 +133,7 @@ class CommandBoardRecommentController(
                 memberId = commandBoardRecommentDeleteRequestVO.memberId,
                 boardId = commandBoardRecommentDeleteRequestVO.boardId,
                 boardRecommentId = commandBoardRecommentDeleteRequestVO.boardRecommentId,
+                idempotencyKey = idempotencyKey,
             )
         commandBoardRecommentService.deleteBoardRecomment(commandBoardRecommentDeleteDTO)
 

@@ -12,4 +12,5 @@ data class CommandBoardUpdateDTO(
     val boardAccessLevel: String,
     val memberId: String,
     val deleteFilesIds: List<Long>,
+    val idempotencyKey: String,
 )

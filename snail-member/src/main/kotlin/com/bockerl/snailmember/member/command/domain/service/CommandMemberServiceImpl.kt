@@ -130,6 +130,7 @@ class CommandMemberServiceImpl(
         memberId: String,
         requestDTO: ProfileRequestDTO,
         file: MultipartFile?,
+        idempotencyKey: String,
     ): Unit =
         TransactionalConfig.run {
             logger.info { "프로필 수정 서비스 도착" }
@@ -158,6 +159,7 @@ class CommandMemberServiceImpl(
                         fileTargetType = FileTargetType.MEMBER,
                         fileTargetId = memberId,
                         memberId = memberId,
+                        idempotencyKey = idempotencyKey,
                     )
                 // 기존 프사가 없다면 생성, 있다면 삭제 후 수정 호출
                 if (member.memberPhoto.isBlank()) {

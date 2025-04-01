@@ -9,11 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/board-recomment-like")
@@ -37,6 +33,7 @@ class CommandBoardRecommentLikeController(
     )
     @PostMapping("")
     fun postBoardCommentLike(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestBody commandBoardRecommentLikeRequestVO: CommandBoardRecommentLikeRequestVO,
     ): ResponseDTO<*> {
         val commandBoardRecommentLikeDTO =
@@ -45,6 +42,7 @@ class CommandBoardRecommentLikeController(
                 boardId = commandBoardRecommentLikeRequestVO.boardId,
                 memberId = commandBoardRecommentLikeRequestVO.memberId,
                 boardRecommentId = commandBoardRecommentLikeRequestVO.boardRecommentId,
+                idempotencyKey = idempotencyKey,
             )
         commandBoardRecommentLikeService.createBoardRecommentLike(commandBoardRecommentLikeDTO)
 
@@ -68,6 +66,7 @@ class CommandBoardRecommentLikeController(
     )
     @DeleteMapping("")
     fun deleteBoardRecommentLike(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestBody commandBoardRecommentLikeRequestVO: CommandBoardRecommentLikeRequestVO,
     ): ResponseDTO<*> {
         val commandBoardRecommentLikeDTO =
@@ -76,6 +75,7 @@ class CommandBoardRecommentLikeController(
                 boardId = commandBoardRecommentLikeRequestVO.boardId,
                 memberId = commandBoardRecommentLikeRequestVO.memberId,
                 boardRecommentId = commandBoardRecommentLikeRequestVO.boardRecommentId,
+                idempotencyKey = idempotencyKey,
             )
 
         commandBoardRecommentLikeService.deleteBoardRecommentLike(commandBoardRecommentLikeDTO)

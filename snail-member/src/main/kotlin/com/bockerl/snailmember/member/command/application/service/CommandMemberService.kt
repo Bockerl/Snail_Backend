@@ -20,5 +20,6 @@ interface CommandMemberService {
         memberId: String,
         requestDTO: ProfileRequestDTO,
         file: MultipartFile?,
+        idempotencyKey: String,
     )
 }

@@ -2,23 +2,14 @@ server:
     port: ${SERVER_PORT}
 
 spring:
-#    datasource:
-#        url: jdbc:postgresql://${DATABASE_HOST}:${POSTGRESQL_DATABASE_PORT}/${POSTGRESQL_DATABASE_NAME}
-#        username: ${DB_USERNAME}
-#        password: ${DB_PASSWORD}
-#        driver-class-name: org.postgresql.Driver
-#    jpa:
-#        show-sql: true
-#        database: postgresql
-#        database-platform: org.hibernate.dialect.PostgreSQLDialect
-#        hibernate:
-#            ddl-auto: update
 #    sql:
 #        init:
 #            mode: always
 #    properties:
 #        hibernate:
 #            format_sql: true
+    profiles:
+        active: dev
     cloud:
         azure:
             storage:
@@ -31,6 +22,9 @@ spring:
             max-request-size: 10MB
     kafka:
         bootstrap-servers: ${KAFKA_PORT}
+        topic:
+            personal-chat: ${KAFKA_TOPIC_NAME_PERSONAL}
+            group-chat: ${KAFKA_TOPIC_NAME_GROUP}
         consumer:
             group-id: ${KAFKA_GROUP_ID}
     data:
@@ -42,11 +36,8 @@ spring:
 #                    - ${REDIS_PORT2}
 #                    - ${REDIS_PORT3}
         mongodb:
-            host: ${DATABASE_HOST}
-            port: ${MONGO_DATABASE_PORT}
             database: ${MONGO_DATABASE_NAME}
-            auto-index-creation: true
-
+            uri: mongodb://${DATABASE_HOST}:${MONGO_DATABASE_PORT}/${MONGO_DATABASE_NAME}
 springdoc:
     api-docs:
         enabled: true
@@ -54,12 +45,10 @@ springdoc:
         enabled: true
         path: /swagger-ui.html
 
-#spring.data.jpa.repositories.enabled: true
-
 logging:
     level:
-        #        org.springframework.kafka: DEBUG
-        #        org.apache.kafka: DEBUG
+#        org.springframework.kafka: DEBUG
+#        org.apache.kafka: DEBUG
         com:
             bockerl:
                 snailmember: DEBUG

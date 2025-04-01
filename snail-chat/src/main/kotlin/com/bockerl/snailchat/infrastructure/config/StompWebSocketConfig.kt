@@ -15,7 +15,7 @@ class StompWebSocketConfig : WebSocketMessageBrokerConfigurer {
         registry
             .addEndpoint("/chat")
             .setAllowedOrigins("*")
-            .withSockJS()
+//            .withSockJS()
     }
 
     // 내부 메시지 브로커 설정

@@ -59,7 +59,6 @@ dependencies {
 //    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("com.azure.spring:spring-cloud-azure-starter-storage")
 //    implementation("org.springframework.boot:spring-boot-starter-jdbc")
-//    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 //    implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
@@ -95,8 +94,8 @@ dependencies {
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
 
     // redis 직렬화 설정
-//    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-//    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
     // hibernate(Json 저장을 위한)
 //    implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
@@ -109,7 +108,8 @@ dependencies {
 
     // kafka 설정
     implementation("org.springframework.kafka:spring-kafka")
-    implementation("org.apache.kafka:kafka-clients:2.5.0")
+//    implementation("org.apache.kafka:kafka-clients:2.5.0")
+    implementation("org.apache.kafka:kafka-clients:3.6.1")
     testImplementation("org.springframework.kafka:spring-kafka-test")
 
     // netty 설정

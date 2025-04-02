@@ -1,5 +1,6 @@
 package com.bockerl.snailchat.chat.command.application.mapper
 
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageKeyRequestDTO
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDTO
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomDeleteRequestDTO
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomJoinRequestDTO
@@ -45,5 +46,19 @@ class VoToDtoConverter {
         memberId = memberId,
         memberNickname = memberNickname,
         memberPhoto = memberPhoto,
+    )
+
+    fun sendMessageRequestVoAndKeyToDto(
+        requestVo: SendMessageRequestVo,
+        chatRoomId: String,
+        idempotencyKey: String,
+    ) = CommandChatMessageKeyRequestDTO(
+        chatRoomId = chatRoomId, // DestinationVariable 받아온 chatRoomId 넣어줌
+        memberId = requestVo.memberId,
+        memberNickname = requestVo.memberNickname,
+        memberPhoto = requestVo.memberPhoto,
+        message = requestVo.message,
+        messageType = requestVo.messageType,
+        idempotencyKey = idempotencyKey,
     )
 }

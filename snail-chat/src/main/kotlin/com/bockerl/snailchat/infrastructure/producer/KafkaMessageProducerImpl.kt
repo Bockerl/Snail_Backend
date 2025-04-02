@@ -1,6 +1,6 @@
 package com.bockerl.snailchat.infrastructure.producer
 
-import com.bockerl.snailchat.chat.command.application.dto.ChatMessageDTO
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDTO
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.SendResult
@@ -22,7 +22,7 @@ class KafkaMessageProducerImpl(
     override fun sendMessageByKafka(
         topic: String,
         key: String,
-        chatMessageDTO: ChatMessageDTO,
+        chatMessageDTO: CommandChatMessageRequestDTO,
     ) {
         logger.info { "Kafka로 메시지 전송: 토픽=$topic, key=$key, message=$chatMessageDTO" }
 

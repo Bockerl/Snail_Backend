@@ -1,6 +1,6 @@
 package com.bockerl.snailchat.infrastructure.event.consumer
 
-import com.bockerl.snailchat.chat.command.application.dto.ChatMessageDTO
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDTO
 import com.bockerl.snailchat.chat.command.application.service.CommandChatMessageService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.kafka.annotation.KafkaListener
@@ -17,7 +17,7 @@ class KafkaMessageConsumerImpl(
         groupId = "\${spring.kafka.consumer.group-id}",
         containerFactory = "kafkaListenerContainerFactory",
     )
-    override fun consumeChatMessage(chatMessageDTO: ChatMessageDTO) {
+    override fun consumeChatMessage(chatMessageDTO: CommandChatMessageRequestDTO) {
         commandChatMessageService.sendToStomp(chatMessageDTO)
         logger.info { "Kafka에서 메시지 수신: $chatMessageDTO" }
     }

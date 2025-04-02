@@ -1,6 +1,6 @@
 package com.bockerl.snailchat.chat.command.application.service
 
-import com.bockerl.snailchat.chat.command.application.dto.ChatMessageDTO
+import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageKeyRequestDTO
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDTO
 import org.bson.types.ObjectId
 
@@ -15,7 +15,7 @@ interface CommandChatMessageService {
         updateMessageDTO: CommandChatMessageRequestDTO,
     )
 
-    fun sendToStomp(chatMessageDTO: ChatMessageDTO)
+    fun sendToStomp(chatMessageDTO: CommandChatMessageRequestDTO)
 
     fun saveLeaveMessage(
         chatRoomId: ObjectId,
@@ -30,4 +30,6 @@ interface CommandChatMessageService {
         memberNickname: String,
         memberPhoto: String,
     )
+
+    fun sendMessageByKafkaOutbox(updateMessageDTO: CommandChatMessageKeyRequestDTO)
 }

@@ -17,6 +17,7 @@ import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CommandChatMessageServiceImpl(
@@ -85,7 +86,7 @@ class CommandChatMessageServiceImpl(
 
 // Websocket + Stomp + Kafka  ----------------------------------------------------------------------------------------
 
-//    @Transactional
+    @Transactional
     override fun sendMessageByKafkaOutbox(updateMessageDTO: CommandChatMessageKeyRequestDTO) {
         // 전송할 메시지 옮기기
         val chatMessage =

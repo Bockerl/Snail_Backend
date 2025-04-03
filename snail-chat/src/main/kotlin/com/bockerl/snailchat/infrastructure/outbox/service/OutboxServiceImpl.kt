@@ -28,4 +28,18 @@ class OutboxServiceImpl(
 
     //    @Transactional
     override fun existsByIdempotencyKey(idempotencyKey: String): Boolean = outboxRepository.existsByidempotencyKey(idempotencyKey)
+
+    override fun findByStatus(status: List<OutboxStatus>): List<Outbox> = outboxRepository.findByStatus(OutboxStatus.PENDING)
+
+    override fun changeStatus(event: Outbox) {
+        val outbox = outboxRepository.findById(event.outboxId)
+
+        if (outbox.isPresent) {
+            val updateOutbox = outbox.get()
+            updateOutbox.status = event.status
+            outboxRepository.save(updateOutbox)
+        } else {
+            println("해당 event의 Outbox가 존재하지 않습니다.")
+        }
+    }
 }

@@ -20,9 +20,10 @@ data class Outbox(
     val outboxId: ObjectId = ObjectId.get(),
     val eventId: String = UUID.randomUUID().toString(),
     val aggregateId: String, // 연관된 도메인 객체의 식별자 (예: ChatMessage의 id를 String으로 변환)
-    val eventType: EventType,
-    val payload: String, // 이벤트 데이터를 JSON 등으로 직렬화한 문자열
-    val status: OutboxStatus,
+    var eventType: EventType,
+    var payload: String, // 이벤트 데이터를 JSON 등으로 직렬화한 문자열
+    var status: OutboxStatus,
+    var retryCount: Int = 0,
     @Indexed(unique = true)
     val idempotencyKey: String, // 중복 전파 방지를 위한 고유 키
     @CreatedDate

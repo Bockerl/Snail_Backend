@@ -16,6 +16,7 @@ import com.bockerl.snailchat.common.exception.ErrorCode
 import org.bson.types.ObjectId
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CommandChatRoomServiceImpl(
@@ -25,7 +26,7 @@ class CommandChatRoomServiceImpl(
     private val simpleMessagingTemplate: SimpMessagingTemplate,
 //    private val memberFeignClient: MemberFeignClient,
 ) : CommandChatRoomService {
-//    @Transactional
+    @Transactional
     override fun createPersonalChatRoom(commandChatRoomCreateRequestDTO: CommandChatRoomCreateRequestDTO) {
         // FeignClient 적용 전 임시데이터
         val participants =

@@ -2,6 +2,8 @@ package com.bockerl.snailchat.infrastructure.config
 
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
+import com.mongodb.ReadPreference
+import com.mongodb.WriteConcern
 import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoClients
 import org.springframework.beans.factory.annotation.Value
@@ -35,6 +37,8 @@ class MongoConfig(
             MongoClientSettings
                 .builder()
                 .applyConnectionString(connectionStringObj)
+                .writeConcern(WriteConcern.ACKNOWLEDGED) // WriteConcern 기본 설정 옵션
+                .readPreference(ReadPreference.secondaryPreferred()) //  ReadPreference Replica시 많이 설정하는 옵션
                 .build()
         return MongoClients.create(mongoClientSettings)
     }

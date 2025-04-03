@@ -13,9 +13,6 @@ enum class OutboxStatus {
     @Schema(description = "이벤트 전송 성공 (Kafka 등)")
     SUCCESS,
 
-    @Schema(description = "이벤트 전송 실패 (예외 발생)")
-    FAILURE,
-
     @Schema(description = "재시도 중 (FAILURE 상태에서 옮겨옴)")
     RETRYING,
 

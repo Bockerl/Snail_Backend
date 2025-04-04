@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.bockerl.snailmember.boardrecommentlike.command.application.controller
 
 import com.bockerl.snailmember.boardrecommentlike.command.application.dto.CommandBoardRecommentLikeDTO

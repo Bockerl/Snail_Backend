@@ -6,5 +6,5 @@ class OutboxDTO(
     val aggregateId: String,
     val eventType: EventType,
     val payload: String,
-    val idempotencyKey: String,
+    val idempotencyKey: String? = null,
 )

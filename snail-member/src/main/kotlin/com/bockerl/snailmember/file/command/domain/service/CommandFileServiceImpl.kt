@@ -69,11 +69,13 @@ class CommandFileServiceImpl(
 
         val jsonPayload = objectMapper.writeValueAsString(event)
 
+        logger.info { "idempotencykey: " + commandFileDTO.idempotencyKey }
+
         // 설명. 파일에서는 aggregateId에 fileName을 넣겠습니다.
         val outbox =
             OutboxDTO(
                 aggregateId = fileName,
-                eventType = EventType.FILE,
+                eventType = EventType.FILE_CREATED,
                 payload = jsonPayload,
                 idempotencyKey = commandFileDTO.idempotencyKey,
             )
@@ -160,9 +162,9 @@ class CommandFileServiceImpl(
             val outbox =
                 OutboxDTO(
                     aggregateId = fileName,
-                    eventType = EventType.FILE,
+                    eventType = EventType.FILE_CREATED,
                     payload = jsonPayload,
-                    idempotencyKey = commandFileDTO.idempotencyKey,
+//                    idempotencyKey = commandFileDTO.idempotencyKey,
                 )
             outboxEvents.add(outbox)
         }
@@ -242,9 +244,9 @@ class CommandFileServiceImpl(
             val outbox =
                 OutboxDTO(
                     aggregateId = fileName,
-                    eventType = EventType.FILE,
+                    eventType = EventType.FILE_CREATED,
                     payload = jsonPayload,
-                    idempotencyKey = commandFileWithGatheringDTO.idempotencyKey,
+//                    idempotencyKey = commandFileWithGatheringDTO.idempotencyKey,
                 )
             outboxEvents.add(outbox)
         }
@@ -295,9 +297,9 @@ class CommandFileServiceImpl(
         val deleteOutBox =
             OutboxDTO(
                 aggregateId = existingFile[0].fileName,
-                eventType = EventType.FILE,
+                eventType = EventType.FILE_DELETED,
                 payload = deleteJsonPayload,
-                idempotencyKey = commandFileDTO.idempotencyKey,
+//                idempotencyKey = commandFileDTO.idempotencyKey,
             )
 
         outboxService.createOutbox(deleteOutBox)
@@ -336,9 +338,9 @@ class CommandFileServiceImpl(
         val createOutbox =
             OutboxDTO(
                 aggregateId = fileName,
-                eventType = EventType.FILE,
+                eventType = EventType.FILE_CREATED,
                 payload = createJsonPayload,
-                idempotencyKey = commandFileDTO.idempotencyKey,
+//                idempotencyKey = commandFileDTO.idempotencyKey,
             )
 
         outboxService.createOutbox(createOutbox)
@@ -400,7 +402,7 @@ class CommandFileServiceImpl(
                 val deleteOutbox =
                     OutboxDTO(
                         aggregateId = file.fileName, // fileName을 aggregateId로 사용
-                        eventType = EventType.FILE,
+                        eventType = EventType.FILE_DELETED,
                         payload = deleteJsonPayload,
                         idempotencyKey = commandFileDTO.idempotencyKey,
                     )
@@ -466,7 +468,7 @@ class CommandFileServiceImpl(
             val createOutbox =
                 OutboxDTO(
                     aggregateId = fileName, // fileName을 aggregateId로 사용
-                    eventType = EventType.FILE,
+                    eventType = EventType.FILE_CREATED,
                     payload = createJsonPayload,
                     idempotencyKey = commandFileDTO.idempotencyKey,
                 )
@@ -534,7 +536,7 @@ class CommandFileServiceImpl(
                 val deleteOutbox =
                     OutboxDTO(
                         aggregateId = file.fileName, // fileName을 aggregateId로 사용
-                        eventType = EventType.FILE,
+                        eventType = EventType.FILE_DELETED,
                         payload = deleteJsonPayload,
                         idempotencyKey = commandFileWithGatheringDTO.idempotencyKey,
                     )
@@ -601,7 +603,7 @@ class CommandFileServiceImpl(
             val createOutbox =
                 OutboxDTO(
                     aggregateId = fileName, // fileName을 aggregateId로 사용
-                    eventType = EventType.FILE,
+                    eventType = EventType.FILE_CREATED,
                     payload = createJsonPayload,
                     idempotencyKey = commandFileWithGatheringDTO.idempotencyKey,
                 )
@@ -656,9 +658,9 @@ class CommandFileServiceImpl(
                 val deleteOutbox =
                     OutboxDTO(
                         aggregateId = file.fileName, // fileName을 aggregateId로 사용
-                        eventType = EventType.FILE,
+                        eventType = EventType.FILE_DELETED,
                         payload = deleteJsonPayload,
-                        idempotencyKey = commandFileDTO.idempotencyKey,
+//                        idempotencyKey = commandFileDTO.idempotencyKey,
                     )
                 outboxEvents.add(deleteOutbox)
             }

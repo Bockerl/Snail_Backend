@@ -31,7 +31,7 @@ class FileEventProcessor(
     fun processCreate(
         event: BaseFileCreatedEvent,
         eventId: String,
-        idempotencyKey: String,
+        idempotencyKey: String?,
     ) {
         logger.info { "이벤트 처리 시작: $event" }
 //        likeEventHandler.handle(event)
@@ -51,7 +51,7 @@ class FileEventProcessor(
     fun processDelete(
         event: FileDeletedEvent,
         eventId: String,
-        idempotencyKey: String,
+        idempotencyKey: String?,
     ) {
         logger.info { "이벤트 처리 시작: $event" }
 //        likeEventHandler.handle(event)

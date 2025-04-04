@@ -5,5 +5,6 @@ enum class EventType(
     val topic: String,
 ) {
     LIKE("board-like-events"),
-    FILE("file-events"),
+    FILE_CREATED("file-events"),
+    FILE_DELETED("file-events"),
 }

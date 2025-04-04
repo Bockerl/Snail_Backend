@@ -18,6 +18,7 @@ import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer
 import org.springframework.kafka.listener.DefaultErrorHandler
 import org.springframework.kafka.support.converter.StringJsonMessageConverter
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.kafka.support.serializer.JsonSerializer
 import org.springframework.util.backoff.FixedBackOff
@@ -41,6 +42,8 @@ class KafkaConsumerConfig(
                 ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to false,
                 ConsumerConfig.MAX_POLL_RECORDS_CONFIG to 500,
                 ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG to 30000,
+//                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to ErrorHandlingDeserializer::class.java,
+//                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to ErrorHandlingDeserializer::class.java,
             )
 
         val objectMapper = ObjectMapper().registerKotlinModule()
@@ -54,11 +57,34 @@ class KafkaConsumerConfig(
 //                // 설명. 각각의 service를 추가해야 하지 않을까 싶습니다
 //                addTrustedPackages("*")
 //            }
-        return DefaultKafkaConsumerFactory(props, StringDeserializer(), deserializer)
+
+        // ErrorHandlingDeserializer가 각각 StringDeserializer와 JsonDeserializer를 감쌉니다.
+        val keyDeserializer = ErrorHandlingDeserializer(StringDeserializer())
+        val valueDeserializer = ErrorHandlingDeserializer(deserializer)
+
+//        return DefaultKafkaConsumerFactory(props, StringDeserializer(), deserializer)
+        return DefaultKafkaConsumerFactory(props, keyDeserializer, valueDeserializer)
     }
 
     @Bean
     fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, Any> {
+        val factory = ConcurrentKafkaListenerContainerFactory<String, Any>()
+        factory.consumerFactory = kafkaConsumerFactory()
+        // 설명. consumer thread 수 default 3 or 5
+        factory.setConcurrency(1)
+        // 설명. 수동 커밋 설정
+        factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
+
+        // 설명. 에러 핸들러 설정
+        factory.setCommonErrorHandler(errorHandler())
+
+        factory.setRecordMessageConverter(StringJsonMessageConverter())
+
+        return factory
+    }
+
+    @Bean
+    fun kafkaListenerFileContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, Any> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, Any>()
         factory.consumerFactory = kafkaConsumerFactory()
         // 설명. consumer thread 수 default 3 or 5

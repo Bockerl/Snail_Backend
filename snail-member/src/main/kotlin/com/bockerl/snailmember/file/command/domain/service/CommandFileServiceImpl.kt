@@ -75,6 +75,7 @@ class CommandFileServiceImpl(
                 aggregateId = fileName,
                 eventType = EventType.FILE,
                 payload = jsonPayload,
+                idempotencyKey = commandFileDTO.idempotencyKey,
             )
 
         outboxService.createOutbox(outbox)
@@ -162,6 +163,7 @@ class CommandFileServiceImpl(
                     aggregateId = fileName,
                     eventType = EventType.FILE,
                     payload = jsonPayload,
+                    idempotencyKey = commandFileDTO.idempotencyKey,
                 )
             outboxEvents.add(outbox)
         }
@@ -243,6 +245,7 @@ class CommandFileServiceImpl(
                     aggregateId = fileName,
                     eventType = EventType.FILE,
                     payload = jsonPayload,
+                    idempotencyKey = commandFileWithGatheringDTO.idempotencyKey,
                 )
             outboxEvents.add(outbox)
         }
@@ -296,6 +299,7 @@ class CommandFileServiceImpl(
                 aggregateId = existingFile[0].fileName,
                 eventType = EventType.FILE,
                 payload = deleteJsonPayload,
+                idempotencyKey = commandFileDTO.idempotencyKey,
             )
 
         outboxService.createOutbox(deleteOutBox)
@@ -337,6 +341,7 @@ class CommandFileServiceImpl(
                 aggregateId = fileName,
                 eventType = EventType.FILE,
                 payload = createJsonPayload,
+                idempotencyKey = commandFileDTO.idempotencyKey,
             )
 
         outboxService.createOutbox(createOutbox)
@@ -401,6 +406,7 @@ class CommandFileServiceImpl(
                         aggregateId = file.fileName, // fileName을 aggregateId로 사용
                         eventType = EventType.FILE,
                         payload = deleteJsonPayload,
+                        idempotencyKey = commandFileDTO.idempotencyKey,
                     )
                 outboxEvents.add(deleteOutbox)
             }
@@ -466,6 +472,7 @@ class CommandFileServiceImpl(
                     aggregateId = fileName, // fileName을 aggregateId로 사용
                     eventType = EventType.FILE,
                     payload = createJsonPayload,
+                    idempotencyKey = commandFileDTO.idempotencyKey,
                 )
             outboxEvents.add(createOutbox)
         }
@@ -533,6 +540,7 @@ class CommandFileServiceImpl(
                         aggregateId = file.fileName, // fileName을 aggregateId로 사용
                         eventType = EventType.FILE,
                         payload = deleteJsonPayload,
+                        idempotencyKey = commandFileWithGatheringDTO.idempotencyKey,
                     )
                 outboxEvents.add(deleteOutbox)
             }
@@ -599,6 +607,7 @@ class CommandFileServiceImpl(
                     aggregateId = fileName, // fileName을 aggregateId로 사용
                     eventType = EventType.FILE,
                     payload = createJsonPayload,
+                    idempotencyKey = commandFileWithGatheringDTO.idempotencyKey,
                 )
             outboxEvents.add(createOutbox)
         }
@@ -653,6 +662,7 @@ class CommandFileServiceImpl(
                         aggregateId = file.fileName, // fileName을 aggregateId로 사용
                         eventType = EventType.FILE,
                         payload = deleteJsonPayload,
+                        idempotencyKey = commandFileDTO.idempotencyKey,
                     )
                 outboxEvents.add(deleteOutbox)
             }

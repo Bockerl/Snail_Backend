@@ -15,4 +15,5 @@ data class CommandBoardCreateDTO(
     val boardLocation: String,
     val boardAccessLevel: String,
     val memberId: String,
+    val idempotencyKey: String,
 )

@@ -12,4 +12,5 @@ class CommandFileWithGatheringDTO(
     val memberId: String,
     @field:Schema(description = "모임 번호", example = "GAT-00000001", type = "String")
     val gatheringId: String,
+    val idempotencyKey: String,
 )

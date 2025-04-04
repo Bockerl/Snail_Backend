@@ -54,6 +54,7 @@ class CommandBoardServiceImpl(
                         fileTargetType = FileTargetType.BOARD,
                         fileTargetId = formattedBoardId(it),
                         memberId = commandBoardCreateDTO.memberId,
+                        idempotencyKey = commandBoardCreateDTO.idempotencyKey,
                     )
                 }
 
@@ -92,6 +93,7 @@ class CommandBoardServiceImpl(
                         fileTargetType = FileTargetType.BOARD,
                         fileTargetId = formattedBoardId(it),
                         memberId = commandBoardUpdateDTO.memberId,
+                        idempotencyKey = commandBoardUpdateDTO.idempotencyKey,
                     )
                 }
 
@@ -117,6 +119,7 @@ class CommandBoardServiceImpl(
                 fileTargetType = FileTargetType.BOARD,
                 fileTargetId = formattedBoardId(boardId),
                 memberId = commandBoardDeleteDTO.memberId,
+                idempotencyKey = commandBoardDeleteDTO.idempotencyKey,
             )
 
         commandFileService.deleteFile(commandFileDTO)

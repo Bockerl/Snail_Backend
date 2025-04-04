@@ -107,6 +107,7 @@ class CommandMemberController(
     )
     @PatchMapping("/profile", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun patchProfile(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestPart("profileRequestVO") requestVO: ProfileRequestVO,
         @RequestPart("file", required = false) file: MultipartFile?,
         @Parameter(hidden = true) @CurrentMemberId memberId: String,
@@ -114,7 +115,7 @@ class CommandMemberController(
         logger.info { "프로필 변경 요청 controller에 도착" }
         logger.info { "controller에 도착한 memberId: $memberId" }
         val requestDTO = memberConverter.profileRequestVOToDTO(requestVO, file)
-        commandMemberService.patchProfile(memberId, requestDTO, file)
+        commandMemberService.patchProfile(memberId, requestDTO, file, idempotencyKey)
         return ResponseDTO.ok("프로필 변경 성공")
     }
 }

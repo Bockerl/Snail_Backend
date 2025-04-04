@@ -1,9 +1,7 @@
 package com.bockerl.snailmember.boardcommentlike.command.application.dto
 
-class CommandBoardCommentLikeDTO(
+data class CommandBoardCommentLikeEventDTO(
     val boardCommentId: String,
     val boardId: String,
     val memberId: String,
-    val eventId: String? = null,
-    val idempotencyKey: String,
 )

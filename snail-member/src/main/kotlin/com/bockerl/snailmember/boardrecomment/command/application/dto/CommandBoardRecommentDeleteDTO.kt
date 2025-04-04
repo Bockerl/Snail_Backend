@@ -5,4 +5,5 @@ class CommandBoardRecommentDeleteDTO(
     val memberId: String,
     val boardId: String,
     val boardRecommentId: String,
+    val idempotencyKey: String,
 )

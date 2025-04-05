@@ -20,7 +20,6 @@ import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer
 import org.springframework.kafka.listener.DefaultErrorHandler
 import org.springframework.kafka.support.ExponentialBackOffWithMaxRetries
-import org.springframework.kafka.support.converter.StringJsonMessageConverter
 import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.kafka.support.serializer.JsonSerializer
 
@@ -63,7 +62,7 @@ class KafkaConsumerConfig(
         factory.setConcurrency(1) // consumer thread 수 default 3 or 5
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL // 수동 커밋 설정
         factory.setCommonErrorHandler(errorHandler())
-        factory.setRecordMessageConverter(StringJsonMessageConverter())
+//        factory.setRecordMessageConverter(StringJsonMessageConverter())
 
         return factory
     }
@@ -82,7 +81,7 @@ class KafkaConsumerConfig(
                 logger.error(
                     exception,
                 ) { "DLT로 메시지 전송: 토픽 =${record.topic()}, 파티션=${record.partition()}, 오프셋=${record.offset()}, 예외=${exception.message}" }
-                TopicPartition("${record.topic()}.DLT", record.partition())
+                TopicPartition("chat.outbox.consumer.dlq", record.partition())
             }
 
         return DefaultErrorHandler(recoverer, fixedBackOff)

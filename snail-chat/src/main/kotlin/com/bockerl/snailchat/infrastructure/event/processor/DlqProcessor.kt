@@ -11,7 +11,7 @@ class DlqProcessor(
     private val logger = KotlinLogging.logger {}
 
     fun sendToDlq(event: Any) {
-        val dlqTopic = "chat.outbox.dlq"
+        val dlqTopic = "chat.outbox.producer.dlq"
 
         try {
             kafkaTemplate.send(dlqTopic, event).get() // get()을 통해 전송 실패 경우만 반환

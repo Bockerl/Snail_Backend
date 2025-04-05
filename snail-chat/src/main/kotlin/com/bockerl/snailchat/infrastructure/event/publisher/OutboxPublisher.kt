@@ -26,14 +26,16 @@ class OutboxPublisher(
                 // 중복 방지를 위해 진행 상태 나타내줌
                 event.status = OutboxStatus.PROCESSING
                 outboxService.changeStatus(event)
+                logger.info { "publisher 처리중: $event" }
 
                 outboxEventProcessor.process(event)
+                logger.info { "publisher 처리 완료: $event" }
 
                 // 성공상태 반영
                 event.status = OutboxStatus.SUCCESS
                 outboxService.changeStatus(event)
             } catch (e: Exception) {
-                logger.error(e) { "Outbox 이벤트 처리 중 예외 발생 " }
+                logger.error(e) { "Outbox 이벤트 처리 중 예외 발생: $event " }
 
                 // 실패시 재시도를 위해서 카운트 증가
                 event.retryCount += 1

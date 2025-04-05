@@ -16,8 +16,9 @@ import org.springframework.web.bind.annotation.RestController
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.messaging.handler.annotation.DestinationVariable
+import org.springframework.messaging.handler.annotation.Header
+import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor
-import org.springframework.web.bind.annotation.RequestHeader
 
 @RestController
 @RequestMapping("/api/chatMessage")
@@ -77,7 +78,6 @@ class CommandChatMessageController(
         commandChatMessageService.sendMessage(updateMessageDto)
     }
 
-    //    @MessageMapping("{chatRoomId}")
     @Operation(
         summary = "메시지 송신 (Kafka) ",
         description =
@@ -155,10 +155,11 @@ class CommandChatMessageController(
     @MessageMapping("{chatRoomId}")
     fun sendMessageByKafkaOutbox(
         @DestinationVariable chatRoomId: String,
-        @RequestHeader("idempotencyKey") idempotencyKey: String,
-        sendMessageRequestVo: SendMessageRequestVo,
+        @Header("idempotencyKey") idempotencyKey: String,
+        @Payload sendMessageRequestVo: SendMessageRequestVo,
         simpleMessageHeaderAccessor: SimpMessageHeaderAccessor,
     ) {
+        println("idempotencyKey:$idempotencyKey")
         // Vo -> Dto + 토큰에서 memberId/Nickname/Photo를 받아올 수 있도록 수정해야 함
         val commandChatMessageKeyRequestDTO =
             voToDtoConverter.sendMessageRequestVoAndKeyToDto(

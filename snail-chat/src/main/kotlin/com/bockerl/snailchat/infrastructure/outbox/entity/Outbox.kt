@@ -24,6 +24,7 @@ data class Outbox(
     var payload: String, // 이벤트 데이터를 JSON 등으로 직렬화한 문자열
     var status: OutboxStatus,
     var retryCount: Int = 0,
+    var dlqRetryCount: Int = 0,
     @Indexed(unique = true)
     val idempotencyKey: String, // 중복 전파 방지를 위한 고유 키
     @CreatedDate

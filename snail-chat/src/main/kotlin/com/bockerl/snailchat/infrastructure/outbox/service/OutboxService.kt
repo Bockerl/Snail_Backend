@@ -12,4 +12,6 @@ interface OutboxService {
     fun findByStatus(status: List<OutboxStatus>): List<Outbox>
 
     fun changeStatus(event: Outbox)
+
+    fun changeStatusAndRetryCount(event: Outbox)
 }

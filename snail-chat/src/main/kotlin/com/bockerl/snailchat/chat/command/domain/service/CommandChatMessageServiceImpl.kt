@@ -112,8 +112,8 @@ class CommandChatMessageServiceImpl(
         // 도메인 이벤트 생성 (구독자에게 전달할 필요한 모든 정보 포함)
         val sendMessageEvent =
             CommandSendMessageEvent(
-                chatMessageId = savedChatMessage.id,
-                chatRoomId = savedChatMessage.chatRoomId,
+                chatMessageId = savedChatMessage.id.toHexString(),
+                chatRoomId = savedChatMessage.chatRoomId.toHexString(),
                 memberId = savedChatMessage.memberId,
                 memberNickname = savedChatMessage.memberNickname,
                 memberPhoto = savedChatMessage.memberPhoto,
@@ -128,7 +128,7 @@ class CommandChatMessageServiceImpl(
         val outboxDTO =
             OutboxDTO(
                 aggregateId = savedChatMessage.id.toHexString(), // objectId -> String
-                eventType = EventType.MESSAGE_SENT, // 예시: 메시지 전송 이벤트 타입
+                eventType = EventType.PERSONAL_MESSAGE_SENT, // 예시: 메시지 전송 이벤트 타입
                 payload = jsonPayload,
                 idempotencyKey = updateMessageDTO.idempotencyKey, // 클라이언트에서 제공한 고유 키
             )

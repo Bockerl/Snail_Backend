@@ -1,11 +1,10 @@
 package com.bockerl.snailchat.chat.command.domain.aggregate.event
 
 import com.bockerl.snailchat.chat.command.domain.aggregate.enums.ChatMessageType
-import org.bson.types.ObjectId
 
 data class CommandSendMessageEvent(
-    val chatMessageId: ObjectId = ObjectId.get(),
-    val chatRoomId: ObjectId = ObjectId.get(),
+    val chatMessageId: String,
+    val chatRoomId: String,
     val memberId: String,
     val memberNickname: String,
     val memberPhoto: String,

@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository
 interface OutboxRepository : MongoRepository<Outbox, ObjectId> {
     fun existsByidempotencyKey(idempotencyKey: String): Boolean
 
-    fun findByStatus(status: OutboxStatus): List<Outbox>
+    fun findByStatusIn(status: List<OutboxStatus>): List<Outbox>
 }

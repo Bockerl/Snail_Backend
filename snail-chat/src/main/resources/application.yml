@@ -50,6 +50,7 @@ springdoc:
 logging:
     level:
         org.mongodb.driver: warn
+        org.springframework.boot.devtools.restart: DEBUG
         com:
             bockerl:
                 snailmember: DEBUG

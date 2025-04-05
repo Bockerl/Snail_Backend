@@ -4,15 +4,12 @@ import com.bockerl.snailchat.infrastructure.outbox.dto.OutboxDTO
 import com.bockerl.snailchat.infrastructure.outbox.entity.Outbox
 import com.bockerl.snailchat.infrastructure.outbox.enums.OutboxStatus
 import com.bockerl.snailchat.infrastructure.outbox.repository.OutboxRepository
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 
 @Service
 class OutboxServiceImpl(
     private val outboxRepository: OutboxRepository,
 ) : OutboxService {
-    private val logger = KotlinLogging.logger { }
-
     override fun createOutbox(outboxDTO: OutboxDTO) {
         val outbox =
             Outbox(
@@ -25,10 +22,9 @@ class OutboxServiceImpl(
         outboxRepository.save(outbox)
     }
 
-    //    @Transactional
     override fun existsByIdempotencyKey(idempotencyKey: String): Boolean = outboxRepository.existsByidempotencyKey(idempotencyKey)
 
-    override fun findByStatus(status: List<OutboxStatus>): List<Outbox> = outboxRepository.findByStatus(OutboxStatus.PENDING)
+    override fun findByStatus(status: List<OutboxStatus>): List<Outbox> = outboxRepository.findByStatusIn(status)
 
     override fun changeStatus(event: Outbox) {
         val outbox = outboxRepository.findById(event.outboxId)
@@ -36,6 +32,20 @@ class OutboxServiceImpl(
         if (outbox.isPresent) {
             val updateOutbox = outbox.get()
             updateOutbox.status = event.status
+            outboxRepository.save(updateOutbox)
+        } else {
+            println("해당 event의 Outbox가 존재하지 않습니다.")
+        }
+    }
+
+    override fun changeStatusAndRetryCount(event: Outbox) {
+        val outbox = outboxRepository.findById(event.outboxId)
+
+        if (outbox.isPresent) {
+            val updateOutbox = outbox.get()
+            // 상태 초기화 (RETRYING) 하고 다시 처리 시도
+            updateOutbox.status = OutboxStatus.RETRYING
+            updateOutbox.retryCount = 0
             outboxRepository.save(updateOutbox)
         } else {
             println("해당 event의 Outbox가 존재하지 않습니다.")

@@ -13,7 +13,6 @@ class OutboxServiceImpl(
 ) : OutboxService {
     private val logger = KotlinLogging.logger { }
 
-    //    @Transactional
     override fun createOutbox(outboxDTO: OutboxDTO) {
         val outbox =
             Outbox(

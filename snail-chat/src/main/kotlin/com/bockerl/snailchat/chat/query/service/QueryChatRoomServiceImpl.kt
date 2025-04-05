@@ -8,6 +8,7 @@ import com.bockerl.snailchat.chat.query.repository.queryGroupChatRoom.QueryGroup
 import com.bockerl.snailchat.chat.query.repository.queryPersonalChatRoom.QueryPersonalChatRoomRepository
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 @Service
@@ -16,6 +17,7 @@ class QueryChatRoomServiceImpl(
     private val queryGroupChatRoomRepository: QueryGroupChatRoomRepository,
     private val queryChatMessageService: QueryChatMessageService,
 ) : QueryChatRoomService {
+    @Transactional(readOnly = true)
     override fun getPersonalChatRoomList(
         queryPersonalChatRoomRequestDto: QueryPersonalChatRoomRequestDTO,
     ): List<QueryPersonalChatRoomResponseDTO> {
@@ -65,6 +67,7 @@ class QueryChatRoomServiceImpl(
         return queryPersonalChatRoomDTOList
     }
 
+    @Transactional(readOnly = true)
     override fun getGroupChatRoomList(queryGroupChatRoomRequestDto: QueryGroupChatRoomRequestDTO): List<QueryGroupChatRoomResponseDTO> {
         val groupChatRoomByMemberId =
             if (queryGroupChatRoomRequestDto.lastId == null) {

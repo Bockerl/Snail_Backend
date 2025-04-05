@@ -9,12 +9,14 @@ import com.bockerl.snailchat.chat.query.mapper.EntityToDtoConverter
 import com.bockerl.snailchat.chat.query.repository.queryChatMessage.QueryChatMessageRepository
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class QueryChaMessageServiceImpl(
     private val queryChatMessageRepository: QueryChatMessageRepository,
     private val entityToDtoConverter: EntityToDtoConverter,
 ) : QueryChatMessageService {
+    @Transactional
     override fun getChatMessageByChatRoomId(queryChatMessageRequestDto: QueryChatMessageRequestDTO): List<QueryChatMessageResponseDTO> {
         val chatMessagesByChatRoomId: List<ChatMessage> =
             // 첫 페이지 메시지 조회 ( lastId = null )
@@ -35,6 +37,7 @@ class QueryChaMessageServiceImpl(
         return chatMessagesByChatRoomId.map { entityToDtoConverter.chatMessageToQueryChatMessageResponseDto(it) }
     }
 
+    @Transactional
     override fun getIsFirstJoin(
         chatRoomId: String,
         memberId: String,
@@ -58,6 +61,7 @@ class QueryChaMessageServiceImpl(
         return lastEnterMessage == null || (lastLeaveMessage.createdAt?.isAfter(lastEnterMessage.createdAt) ?: false)
     }
 
+    @Transactional
     override fun getLatestChatMessageByChatRoomId(chatRoomId: ObjectId): LatestChatMessageDTO? {
         val latestChatMessage =
             queryChatMessageRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoomId)

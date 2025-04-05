@@ -65,7 +65,7 @@ class CommandChatRoomServiceImpl(
         commandPersonalChatRoomRepository.save(personalChatRoom)
     }
 
-//    @Transactional
+    @Transactional
     override fun createGroupChatRoom(commandChatRoomCreateRequestDTO: CommandChatRoomCreateRequestDTO) {
         // FeignClient 적용 전 임시데이터
         val meetingName = "Gangnam Climbing"
@@ -95,7 +95,7 @@ class CommandChatRoomServiceImpl(
         commandGroupChatRoomRepository.save(groupChatRoom)
     }
 
-//    @Transactional
+    @Transactional
     override fun deletePersonalChatRoom(commandChatRoomDeleteRequestDTO: CommandChatRoomDeleteRequestDTO) {
         val chatRoom =
             commandPersonalChatRoomRepository
@@ -131,7 +131,7 @@ class CommandChatRoomServiceImpl(
         )
     }
 
-//    @Transactional
+    @Transactional
     override fun deleteGroupChatRoom(commandChatRoomDeleteRequestDTO: CommandChatRoomDeleteRequestDTO) {
         val chatRoom =
             commandGroupChatRoomRepository
@@ -167,7 +167,7 @@ class CommandChatRoomServiceImpl(
         )
     }
 
-//    @Transactional
+    @Transactional
     override fun joinGroupChatRoom(commandChatRoomJoinRequestDTO: CommandChatRoomJoinRequestDTO) {
         val chatRoom =
             commandGroupChatRoomRepository

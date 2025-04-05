@@ -34,7 +34,7 @@ class CommandChatMessageServiceImpl(
     private val logger = KotlinLogging.logger { }
 
     // STOMP를 통한 메시지 전송
-//    @Transactional
+    @Transactional
     override fun sendMessage(updateMessageDTO: CommandChatMessageRequestDTO) {
         // 전송할 메시지 옮기기
         val chatMessage =
@@ -57,7 +57,7 @@ class CommandChatMessageServiceImpl(
 // Websocket + Stomp ---------------------------------------------------------------------------------------------------
 
     // Stomp + Kakfa를 통한 메시지 전송
-//    @Transactional
+    @Transactional
     override fun sendMessageByKafka(updateMessageDTO: CommandChatMessageRequestDTO) {
         // 전송할 메시지 옮기기
         val chatMessage =
@@ -145,7 +145,7 @@ class CommandChatMessageServiceImpl(
 
 // Websocket + Stomp + Kafka + Outbox --------------------------------------------------------------------------------
 
-//    @Transactional
+    @Transactional
     override fun saveLeaveMessage(
         chatRoomId: ObjectId,
         memberId: String,
@@ -165,7 +165,7 @@ class CommandChatMessageServiceImpl(
         chatMessageRepository.save(chatMessage)
     }
 
-//    @Transactional
+    @Transactional
     override fun saveEnterMessage(
         chatRoomId: ObjectId,
         memberId: String,

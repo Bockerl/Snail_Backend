@@ -2,12 +2,12 @@ server:
     port: ${SERVER_PORT}
 
 spring:
-#    sql:
-#        init:
-#            mode: always
-#    properties:
-#        hibernate:
-#            format_sql: true
+    #    sql:
+    #        init:
+    #            mode: always
+    #    properties:
+    #        hibernate:
+    #            format_sql: true
     profiles:
         active: dev
     cloud:
@@ -28,16 +28,18 @@ spring:
         consumer:
             group-id: ${KAFKA_GROUP_ID}
     data:
-#        redis:
-#            sentinel:
-#                master: ${REDIS_MASTER}
-#                nodes:
-#                    - ${REDIS_PORT1}
-#                    - ${REDIS_PORT2}
-#                    - ${REDIS_PORT3}
+        #        redis:
+        #            sentinel:
+        #                master: ${REDIS_MASTER}
+        #                nodes:
+        #                    - ${REDIS_PORT1}
+        #                    - ${REDIS_PORT2}
+        #                    - ${REDIS_PORT3}
         mongodb:
+            uri: mongodb://${DB_USERNAME}:${DB_PASSWORD}@${MONGO_REPLICA_ADDRESS}/${MONGO_DATABASE_NAME}?authSource=snail&replicaSet=rs0&retryWrites=true
             database: ${MONGO_DATABASE_NAME}
-            uri: mongodb://${DATABASE_HOST}:${MONGO_DATABASE_PORT}/${MONGO_DATABASE_NAME}
+
+
 springdoc:
     api-docs:
         enabled: true
@@ -47,8 +49,8 @@ springdoc:
 
 logging:
     level:
-#        org.springframework.kafka: DEBUG
-#        org.apache.kafka: DEBUG
+        org.mongodb.driver: warn
         com:
             bockerl:
                 snailmember: DEBUG
+

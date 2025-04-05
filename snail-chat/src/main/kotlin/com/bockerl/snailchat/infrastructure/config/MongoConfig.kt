@@ -31,14 +31,15 @@ class MongoConfig(
     @Bean
     fun mongoTemplate(): MongoTemplate = MongoTemplate(mongoClient(), databaseName)
 
+    @Bean
     override fun mongoClient(): MongoClient {
         val connectionStringObj = ConnectionString(connectionUri)
         val mongoClientSettings =
             MongoClientSettings
                 .builder()
                 .applyConnectionString(connectionStringObj)
-                .writeConcern(WriteConcern.ACKNOWLEDGED) // WriteConcern 기본 설정 옵션
-                .readPreference(ReadPreference.secondaryPreferred()) //  ReadPreference Replica시 많이 설정하는 옵션
+                .writeConcern(WriteConcern.ACKNOWLEDGED) // 잘 저장되었는지 ACK을 보내줌
+                .readPreference(ReadPreference.secondaryPreferred()) // SECONDARY로 읽어옴
                 .build()
         return MongoClients.create(mongoClientSettings)
     }

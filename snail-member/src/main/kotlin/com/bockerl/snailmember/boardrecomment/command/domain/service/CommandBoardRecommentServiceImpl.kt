@@ -11,6 +11,7 @@ import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
 import com.bockerl.snailmember.file.command.application.service.CommandFileService
 import com.bockerl.snailmember.file.command.domain.aggregate.enums.FileTargetType
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
@@ -22,6 +23,8 @@ class CommandBoardRecommentServiceImpl(
     private val commandFileService: CommandFileService,
     private val redisTemplate: RedisTemplate<String, Any>,
 ) : CommandBoardRecommentService {
+    private val logger = KotlinLogging.logger {}
+
     @Transactional
     override fun createBoardRecomment(commandBoardRecommentCreateDTO: CommandBoardRecommentCreateDTO) {
         val boardRecomment =
@@ -82,10 +85,10 @@ class CommandBoardRecommentServiceImpl(
         }
 
         // 설명. 내용이 비어있을 때, 파일 지우러 감
-        boardRecomment.boardRecommentContents?.let {
+        boardRecomment.boardRecommentContents ?: run {
             val commandFileDTO =
                 CommandFileDTO(
-                    fileTargetType = FileTargetType.BOARD_COMMENT,
+                    fileTargetType = FileTargetType.BOARD_RECOMMENT,
                     fileTargetId = formattedBoardRecommentId(boardRecommentId),
                     memberId = commandBoardRecommentDeleteDTO.memberId,
                     idempotencyKey = commandBoardRecommentDeleteDTO.idempotencyKey,

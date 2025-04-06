@@ -34,7 +34,6 @@ class CommandFileServiceImpl(
     private val gatheringFileService: CommandGatheringFileService,
     private val objectMapper: ObjectMapper,
     private val outboxService: OutboxService,
-//    @Lazy private val commandMemberService: CommandMemberService,
 ) : CommandFileService {
     private val logger = KotlinLogging.logger {}
 
@@ -42,7 +41,7 @@ class CommandFileServiceImpl(
     override fun createSingleFile(
         file: MultipartFile,
         commandFileDTO: CommandFileDTO,
-    ): String {
+    ) {
         val fileName = generateUniqueFileName(file.originalFilename)
         val blobClient = blobContainerClient.getBlobClient(fileName)
 
@@ -54,9 +53,9 @@ class CommandFileServiceImpl(
             logger.error { "Blob storage 업로드 실패: 파일명 $fileName, $ex" }
             throw CommonException(ErrorCode.BLOB_STORAGE_ERROR)
         }
-        logger.info { "파일 저장 성공: $fileName" }
+
         val fileUrl = blobClient.blobUrl
-        logger.info { "저장된 파일 url: $fileUrl" }
+
         val event =
             FileCreatedEvent(
                 fileName = fileName,
@@ -69,28 +68,18 @@ class CommandFileServiceImpl(
 
         val jsonPayload = objectMapper.writeValueAsString(event)
 
+        logger.info { "idempotencykey: " + commandFileDTO.idempotencyKey }
+
         // 설명. 파일에서는 aggregateId에 fileName을 넣겠습니다.
         val outbox =
             OutboxDTO(
                 aggregateId = fileName,
-                eventType = EventType.FILE,
+                eventType = EventType.FILE_CREATED,
                 payload = jsonPayload,
                 idempotencyKey = commandFileDTO.idempotencyKey,
             )
 
         outboxService.createOutbox(outbox)
-//        val fileEntity =
-//            File(
-//                fileName = fileName,
-//                fileType = file.contentType ?: "unknown",
-//                fileUrl = fileUrl,
-//                fileTargetType = commandFileRequestVO.fileTargetType,
-//                fileTargetId = extractDigits(commandFileRequestVO.fileTargetId),
-//                memberId = extractDigits(commandFileRequestVO.memberId),
-//            )
-
-//        commandFileRepository.save(fileEntity)
-        return fileUrl
     }
 
     @Transactional
@@ -98,31 +87,12 @@ class CommandFileServiceImpl(
         files: List<MultipartFile>,
         commandFileDTO: CommandFileDTO,
     ) {
-//        val fileEntities = mutableListOf<File>()
         val outboxEvents = mutableListOf<OutboxDTO>()
 
         // 설명. 업로드 파일 수 제한 10개 초과 되지 않도록...
         if (files.size > 10) {
             throw CommonException(ErrorCode.TOO_MANY_FILES)
         }
-
-//        files.forEach { file ->
-//            val fileName = generateUniqueFileName(file.originalFilename)
-//            val blobClient = blobContainerClient.getBlobClient(fileName)
-//            blobClient.upload(file.inputStream, file.size, true)
-//            val fileUrl = blobClient.blobUrl
-//
-//            val fileEntity =
-//                File(
-//                    fileName = fileName,
-//                    fileType = file.contentType ?: "unknown",
-//                    fileUrl = fileUrl,
-//                    fileTargetType = commandFileDTO.fileTargetType,
-//                    fileTargetId = extractDigits(commandFileDTO.fileTargetId),
-//                    memberId = extractDigits(commandFileDTO.memberId),
-//                )
-//            fileEntities.add(fileEntity)
-//        }
 
         files.forEach { file ->
             val fileName = generateUniqueFileName(file.originalFilename)
@@ -134,17 +104,6 @@ class CommandFileServiceImpl(
                 throw CommonException(ErrorCode.BLOB_STORAGE_ERROR)
             }
             val fileUrl = blobClient.blobUrl
-
-//            val fileEntity =
-//                File(
-//                    fileName = fileName,
-//                    fileType = file.contentType ?: "unknown",
-//                    fileUrl = fileUrl,
-//                    fileTargetType = commandFileDTO.fileTargetType,
-//                    fileTargetId = extractDigits(commandFileDTO.fileTargetId),
-//                    memberId = extractDigits(commandFileDTO.memberId),
-//                )
-            // commandFileRepository.save(fileEntity)
 
             // 각 파일마다 개별 이벤트 생성
             val event =
@@ -161,14 +120,13 @@ class CommandFileServiceImpl(
             val outbox =
                 OutboxDTO(
                     aggregateId = fileName,
-                    eventType = EventType.FILE,
+                    eventType = EventType.FILE_CREATED,
                     payload = jsonPayload,
-                    idempotencyKey = commandFileDTO.idempotencyKey,
+//                    idempotencyKey = commandFileDTO.idempotencyKey,
                 )
             outboxEvents.add(outbox)
         }
 
-//        commandFileRepository.saveAll(fileEntities)
         outboxService.createOutboxes(outboxEvents)
     }
 
@@ -177,7 +135,6 @@ class CommandFileServiceImpl(
         files: List<MultipartFile>,
         commandFileWithGatheringDTO: CommandFileWithGatheringDTO,
     ) {
-//        val fileEntities = mutableListOf<File>()
         val outboxEvents = mutableListOf<OutboxDTO>()
 
         // 설명. targetType이 앨범 도메인 일 시 초과 체크 x
@@ -187,24 +144,6 @@ class CommandFileServiceImpl(
         if (files.size > 10) {
             throw CommonException(ErrorCode.TOO_MANY_FILES)
         }
-
-//        files.forEach { file ->
-//            val fileName = generateUniqueFileName(file.originalFilename)
-//            val blobClient = blobContainerClient.getBlobClient(fileName)
-//            blobClient.upload(file.inputStream, file.size, true)
-//            val fileUrl = blobClient.blobUrl
-//
-//            val fileEntity =
-//                File(
-//                    fileName = fileName,
-//                    fileType = file.contentType ?: "unknown",
-//                    fileUrl = fileUrl,
-//                    fileTargetType = commandFileWithGatheringDTO.fileTargetType,
-//                    fileTargetId = extractDigits(commandFileWithGatheringDTO.fileTargetId),
-//                    memberId = extractDigits(commandFileWithGatheringDTO.memberId),
-//                )
-//            fileEntities.add(fileEntity)
-//        }
 
         files.forEach { file ->
             val fileName = generateUniqueFileName(file.originalFilename)
@@ -216,16 +155,6 @@ class CommandFileServiceImpl(
                 throw CommonException(ErrorCode.BLOB_STORAGE_ERROR)
             }
             val fileUrl = blobClient.blobUrl
-
-//            val fileEntity =
-//                File(
-//                    fileName = fileName,
-//                    fileType = file.contentType ?: "unknown",
-//                    fileUrl = fileUrl,
-//                    fileTargetType = commandFileWithGatheringDTO.fileTargetType,
-//                    fileTargetId = extractDigits(commandFileWithGatheringDTO.fileTargetId),
-//                    memberId = extractDigits(commandFileWithGatheringDTO.memberId),
-//                )
 
             // 각 파일마다 개별 이벤트 생성
             val event =
@@ -243,21 +172,15 @@ class CommandFileServiceImpl(
             val outbox =
                 OutboxDTO(
                     aggregateId = fileName,
-                    eventType = EventType.FILE,
+                    eventType = EventType.FILE_CREATED,
                     payload = jsonPayload,
-                    idempotencyKey = commandFileWithGatheringDTO.idempotencyKey,
+//                    idempotencyKey = commandFileWithGatheringDTO.idempotencyKey,
                 )
             outboxEvents.add(outbox)
         }
 
         // 파일 정보 저장
-//        val savedFiles = commandFileRepository.saveAll(fileEntities)
         outboxService.createOutboxes(outboxEvents)
-
-        // fileId와 gatheringId를 이용해 GatheringFile 저장
-//        savedFiles.forEach { file ->
-//            gatheringFileService.createGatheringFile(file.fileId!!, extractDigits(commandFileWithGatheringDTO.gatheringId), file)
-//        }
     }
 
     // 설명. 삭제 후 재생성
@@ -265,7 +188,7 @@ class CommandFileServiceImpl(
     override fun updateProfileImage(
         file: MultipartFile,
         commandFileDTO: CommandFileDTO,
-    ): String {
+    ) {
         if (!file.contentType?.startsWith("image/")!!) {
             throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT)
         }
@@ -276,7 +199,6 @@ class CommandFileServiceImpl(
             )
 
         val blobClient = blobContainerClient.getBlobClient(existingFile[0].fileName)
-        logger.info { "삭제하려는 파일명: ${existingFile[0].fileName}" }
 
         try {
             blobClient.delete()
@@ -285,7 +207,6 @@ class CommandFileServiceImpl(
             throw CommonException(ErrorCode.BLOB_STORAGE_ERROR)
         }
 
-//        commandFileRepository.updateActiveAndFileUrlByFileId(existingFile[0].fileId)
         val deleteEvent =
             FileDeletedEvent(
                 fileTargetId = commandFileDTO.fileTargetId,
@@ -297,15 +218,14 @@ class CommandFileServiceImpl(
         val deleteOutBox =
             OutboxDTO(
                 aggregateId = existingFile[0].fileName,
-                eventType = EventType.FILE,
+                eventType = EventType.FILE_DELETED,
                 payload = deleteJsonPayload,
-                idempotencyKey = commandFileDTO.idempotencyKey,
+//                idempotencyKey = commandFileDTO.idempotencyKey,
             )
 
         outboxService.createOutbox(deleteOutBox)
 
         val fileName = generateUniqueFileName(file.originalFilename)
-        logger.info { "새로 저장하려는 파일명: $fileName" }
         blobContainerClient.getBlobClient(fileName)
         try {
             blobClient.upload(file.inputStream, file.size, true)
@@ -314,16 +234,6 @@ class CommandFileServiceImpl(
             throw CommonException(ErrorCode.BLOB_STORAGE_ERROR)
         }
         val fileUrl = blobClient.blobUrl
-        logger.info { "blob 저장 성공 - url: $fileUrl" }
-//        val fileEntity =
-//            File(
-//                fileName = fileName,
-//                fileType = file.contentType ?: "unknown",
-//                fileUrl = fileUrl,
-//                fileTargetType = commandFileDTO.fileTargetType,
-//                fileTargetId = extractDigits(commandFileDTO.fileTargetId),
-//                memberId = extractDigits(commandFileDTO.memberId),
-//            )
 
         val event =
             FileCreatedEvent(
@@ -339,14 +249,12 @@ class CommandFileServiceImpl(
         val createOutbox =
             OutboxDTO(
                 aggregateId = fileName,
-                eventType = EventType.FILE,
+                eventType = EventType.FILE_CREATED,
                 payload = createJsonPayload,
-                idempotencyKey = commandFileDTO.idempotencyKey,
+//                idempotencyKey = commandFileDTO.idempotencyKey,
             )
 
         outboxService.createOutbox(createOutbox)
-//        commandFileRepository.save(fileEntity)
-        return fileUrl
     }
 
     // 설명. 삭제할 파일 삭제 후 새로운 파일 추가
@@ -371,17 +279,6 @@ class CommandFileServiceImpl(
             throw CommonException(ErrorCode.TOO_MANY_FILES)
         }
 
-//        // 삭제할 파일만 삭제
-//        if (deletedFileIds.isNotEmpty()) {
-//            val filesToDelete = existingFiles.filter { it.fileId in deletedFileIds }
-//            filesToDelete.forEach { file ->
-//                val blobClient = blobContainerClient.getBlobClient(file.fileName)
-//                blobClient.delete()
-//            }
-//
-//            commandFileRepository.updateActiveAndFileUrlByDeletedFileIds(deletedFileIds)
-//        }
-
         // 1. 삭제할 파일 처리: Blob Storage에서 삭제 + 삭제 이벤트 발행
         if (deletedFileIds.isNotEmpty()) {
             val filesToDelete = existingFiles.filter { it.fileId in deletedFileIds }
@@ -404,32 +301,13 @@ class CommandFileServiceImpl(
                 val deleteOutbox =
                     OutboxDTO(
                         aggregateId = file.fileName, // fileName을 aggregateId로 사용
-                        eventType = EventType.FILE,
+                        eventType = EventType.FILE_DELETED,
                         payload = deleteJsonPayload,
                         idempotencyKey = commandFileDTO.idempotencyKey,
                     )
                 outboxEvents.add(deleteOutbox)
             }
-            // DB 상태 업데이트: 삭제된 파일의 active 플래그 등을 업데이트
-//            commandFileRepository.updateActiveAndFileUrlByDeletedFileIds(deletedFileIds)
         }
-
-        // 새 파일 추가
-//        val newFileEntities =
-//            newFiles.mapIndexed { index, file ->
-//                val fileName = generateUniqueFileName(file.originalFilename)
-//                val blobClient = blobContainerClient.getBlobClient(fileName)
-//                blobClient.upload(file.inputStream, file.size, true)
-//
-//                File(
-//                    fileName = fileName,
-//                    fileType = file.contentType ?: "unknown",
-//                    fileUrl = blobClient.blobUrl,
-//                    fileTargetType = commandFileDTO.fileTargetType,
-//                    fileTargetId = extractDigits(commandFileDTO.fileTargetId),
-//                    memberId = extractDigits(commandFileDTO.memberId),
-//                )
-//            }
 
         // 3. 새 파일 업로드 및 생성 이벤트 발행
         val newFileEntities = mutableListOf<File>()
@@ -470,15 +348,12 @@ class CommandFileServiceImpl(
             val createOutbox =
                 OutboxDTO(
                     aggregateId = fileName, // fileName을 aggregateId로 사용
-                    eventType = EventType.FILE,
+                    eventType = EventType.FILE_CREATED,
                     payload = createJsonPayload,
                     idempotencyKey = commandFileDTO.idempotencyKey,
                 )
             outboxEvents.add(createOutbox)
         }
-
-        // 새 파일 저장
-//        commandFileRepository.saveAll(newFileEntities)
 
         // 설명. outbox 테이블에 모든 이벤트 보내기
         outboxService.createOutboxes(outboxEvents)
@@ -505,17 +380,6 @@ class CommandFileServiceImpl(
             throw CommonException(ErrorCode.TOO_MANY_FILES)
         }
 
-        // 삭제할 파일만 삭제
-//        if (deletedFileIds.isNotEmpty()) {
-//            val filesToDelete = existingFiles.filter { it.fileId in deletedFileIds }
-//            filesToDelete.forEach { file ->
-//                val blobClient = blobContainerClient.getBlobClient(file.fileName)
-//                blobClient.delete()
-//            }
-//            commandFileRepository.updateActiveAndFileUrlByDeletedFileIds(deletedFileIds)
-//            // 설명. cascade 설정으로 해당 gatheringFile도 같이 삭제
-//        }
-
         // 1. 삭제할 파일 처리: Blob Storage에서 삭제 + 삭제 이벤트 발행
         if (deletedFileIds.isNotEmpty()) {
             val filesToDelete = existingFiles.filter { it.fileId in deletedFileIds }
@@ -538,32 +402,13 @@ class CommandFileServiceImpl(
                 val deleteOutbox =
                     OutboxDTO(
                         aggregateId = file.fileName, // fileName을 aggregateId로 사용
-                        eventType = EventType.FILE,
+                        eventType = EventType.FILE_DELETED,
                         payload = deleteJsonPayload,
                         idempotencyKey = commandFileWithGatheringDTO.idempotencyKey,
                     )
                 outboxEvents.add(deleteOutbox)
             }
-            // DB 상태 업데이트: 삭제된 파일의 active 플래그 등을 업데이트
-//            commandFileRepository.updateActiveAndFileUrlByDeletedFileIds(deletedFileIds)
         }
-
-        // 새 파일 추가
-//        val newFileEntities =
-//            newFiles.mapIndexed { index, file ->
-//                val fileName = generateUniqueFileName(file.originalFilename)
-//                val blobClient = blobContainerClient.getBlobClient(fileName)
-//                blobClient.upload(file.inputStream, file.size, true)
-//
-//                File(
-//                    fileName = fileName,
-//                    fileType = file.contentType ?: "unknown",
-//                    fileUrl = blobClient.blobUrl,
-//                    fileTargetType = commandFileWithGatheringDTO.fileTargetType,
-//                    fileTargetId = extractDigits(commandFileWithGatheringDTO.fileTargetId),
-//                    memberId = extractDigits(commandFileWithGatheringDTO.memberId),
-//                )
-//            }
 
         // 3. 새 파일 업로드 및 생성 이벤트 발행
         val newFileEntities = mutableListOf<File>()
@@ -605,22 +450,14 @@ class CommandFileServiceImpl(
             val createOutbox =
                 OutboxDTO(
                     aggregateId = fileName, // fileName을 aggregateId로 사용
-                    eventType = EventType.FILE,
+                    eventType = EventType.FILE_CREATED,
                     payload = createJsonPayload,
                     idempotencyKey = commandFileWithGatheringDTO.idempotencyKey,
                 )
             outboxEvents.add(createOutbox)
         }
-
-        // 새 파일 저장
-//        commandFileRepository.saveAll(newFileEntities)
-
         // 설명. outbox 테이블에 모든 이벤트 보내기
         outboxService.createOutboxes(outboxEvents)
-        // fileId와 gatheringId를 이용해 GatheringFile 저장
-//        savedFiles.forEach { file ->
-//            gatheringFileService.createGatheringFile(file.fileId!!, extractDigits(commandFileWithGatheringDTO.gatheringId), file)
-//        }
     }
 
     /* 설명.
@@ -660,9 +497,9 @@ class CommandFileServiceImpl(
                 val deleteOutbox =
                     OutboxDTO(
                         aggregateId = file.fileName, // fileName을 aggregateId로 사용
-                        eventType = EventType.FILE,
+                        eventType = EventType.FILE_DELETED,
                         payload = deleteJsonPayload,
-                        idempotencyKey = commandFileDTO.idempotencyKey,
+//                        idempotencyKey = commandFileDTO.idempotencyKey,
                     )
                 outboxEvents.add(deleteOutbox)
             }
@@ -723,6 +560,4 @@ class CommandFileServiceImpl(
     }
 
     private fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
-
-//    private fun formattedFileId(fileId: Long): String = "FIL-${fileId.toString().padStart(8, '0') ?: "00000000"}"
 }

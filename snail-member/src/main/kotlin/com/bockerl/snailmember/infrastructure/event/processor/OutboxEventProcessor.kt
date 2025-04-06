@@ -3,14 +3,14 @@ package com.bockerl.snailmember.infrastructure.event.processor
 import com.bockerl.snailmember.infrastructure.config.TransactionalConfig
 import com.bockerl.snailmember.infrastructure.outbox.entity.Outbox
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.dao.TransientDataAccessException
 import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.messaging.MessageHeaders
-import org.springframework.messaging.support.MessageBuilder
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Recover
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
+import java.nio.charset.StandardCharsets
 
 @Service
 class OutboxEventProcessor(
@@ -33,21 +33,26 @@ class OutboxEventProcessor(
         logger.info { "Outbox 이벤트 전송 시작: ${event.outboxId}" }
 
         TransactionalConfig.run {
-            val headers =
-                MessageHeaders(
-                    mapOf(
-                        "eventId" to event.eventId,
-                        "idempotencyKey" to event.idempotencyKey,
-                    ),
-                )
-
-            val message =
-                MessageBuilder
-                    .withPayload(event.payload)
-                    .copyHeaders(headers)
-                    .build()
-
-            kafkaTemplate.send(event.eventType.topic, message).get()
+//            val headers =
+//                MessageHeaders(
+//                    mapOf(
+//                        "eventId" to event.eventId,
+//                        "idempotencyKey" to event.idempotencyKey,
+//                    ),
+//                )
+//
+//            val message =
+//                MessageBuilder
+//                    .withPayload(event.payload)
+//                    .copyHeaders(headers)
+//                    .build()
+            val producerRecord =
+                ProducerRecord<String, Any>(event.eventType.topic, event.payload).apply {
+                    headers().add("eventId", event.eventId.toString().toByteArray(StandardCharsets.UTF_8))
+                    headers().add("idempotencyKey", event.idempotencyKey?.toByteArray(StandardCharsets.UTF_8))
+                }
+//            kafkaTemplate.send(event.eventType.topic, message).get()
+            kafkaTemplate.send(producerRecord).get()
         }
 
         // 동기식 전송: .get() 호출로 전송 결과를 기다림

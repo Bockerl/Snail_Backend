@@ -7,6 +7,4 @@ class CommandBoardLikeRequestVO(
     val boardId: String,
     @field:Schema(description = "회원 번호", example = "MEM-00000001", type = "String")
     val memberId: String,
-    @field:Schema(description = "멱등성 보장 키", example = "UUID", type = "String")
-    val idempotencyKey: String,
 )

@@ -1,7 +1,7 @@
 package com.bockerl.snailmember.common.event
 
-import com.bockerl.snailmember.file.command.domain.aggregate.enums.FileTargetType
 import com.bockerl.snailmember.file.command.domain.aggregate.event.FileCreatedEvent
+import com.bockerl.snailmember.file.command.domain.aggregate.event.FileDeletedEvent
 import com.bockerl.snailmember.file.command.domain.aggregate.event.GatheringFileCreatedEvent
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -15,14 +15,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     property = "eventType",
 )
 @JsonSubTypes(
-    JsonSubTypes.Type(value = FileCreatedEvent::class, name = "FILE"),
+    JsonSubTypes.Type(value = FileCreatedEvent::class, name = "FILE_CREATED"),
     JsonSubTypes.Type(value = GatheringFileCreatedEvent::class, name = "GATHERING_FILE"),
+    JsonSubTypes.Type(value = FileDeletedEvent::class, name = "FILE_DELETED"),
 )
-interface BaseFileCreatedEvent {
-    val fileName: String
-    val fileUrl: String
-    val fileType: String
-    val fileTargetType: FileTargetType
-    val fileTargetId: String
-    val memberId: String
-}
+interface BaseFileCreatedEvent

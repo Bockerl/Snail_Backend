@@ -18,14 +18,14 @@
         SELECT
         board_recomment_id,
         board_comment_id,
-        board_comment_contents,
+        board_recomment_contents,
         member_id,
         board_id,
         active,
         created_at,
         updated_at
         FROM
-        board_comment
+        board_recomment
         <where>
             <if test="lastId != null">
                 board_recomment_id &lt; #{lastId} and
@@ -41,14 +41,14 @@
         SELECT
         board_recomment_id,
         board_comment_id,
-        board_comment_contents,
+        board_recomment_contents,
         member_id,
         board_id,
         active,
         created_at,
         updated_at
         FROM
-        board_comment
+        board_recomment
         <where>
             <if test="lastId != null">
                 board_recomment_id &lt; #{lastId} and

@@ -5,4 +5,5 @@ class CommandBoardRecommentCreateDTO(
     val memberId: String,
     val boardId: String,
     val boardCommentId: String,
+    val idempotencyKey: String,
 )

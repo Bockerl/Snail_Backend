@@ -107,6 +107,14 @@ class OpenApiConfig(
 
     @Bean
     @Profile("!Prod")
+    fun boardRecommentLikeApi(): GroupedOpenApi =
+        createGroupedOpenApi(
+            groupName = "게시글 대댓글 좋아요 관련 api",
+            paths = arrayOf("/api/board-recomment-like/**"),
+        )
+
+    @Bean
+    @Profile("!Prod")
     fun gatheringApi(): GroupedOpenApi =
         createGroupedOpenApi(
             groupName = "모임 관련 api",

@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.bockerl.snailmember.boardlike.query.controller
 
 import com.bockerl.snailmember.boardlike.query.service.QueryBoardLikeService
@@ -7,10 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/board-like")
@@ -35,9 +34,11 @@ class QueryBoardLikeController(
     )
     @GetMapping("board/{boardId}")
     fun getBoardLike(
+        @RequestParam(required = false) lastId: Long? = null,
+        @RequestParam(defaultValue = "10") pageSize: Int,
         @PathVariable boardId: String,
     ): ResponseDTO<*> {
-        val queryBoardLikeResponseVO = queryBoardLikeService.readBoardLike(boardId)
+        val queryBoardLikeResponseVO = queryBoardLikeService.readBoardLike(boardId, lastId, pageSize)
 
         return ResponseDTO.ok(queryBoardLikeResponseVO)
     }
@@ -81,6 +82,8 @@ class QueryBoardLikeController(
     )
     @GetMapping("member/{memberId}")
     fun getBoardIdsByMemberId(
+        @RequestParam(required = false) lastId: Long? = null,
+        @RequestParam(defaultValue = "10") pageSize: Int,
         @PathVariable memberId: String,
-    ): ResponseDTO<*> = ResponseDTO.ok(queryBoardLikeService.readBoardIdsByMemberId(memberId))
+    ): ResponseDTO<*> = ResponseDTO.ok(queryBoardLikeService.readBoardIdsByMemberId(memberId, lastId, pageSize))
 }

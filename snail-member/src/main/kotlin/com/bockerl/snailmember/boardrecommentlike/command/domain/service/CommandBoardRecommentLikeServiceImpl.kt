@@ -18,6 +18,7 @@ import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.redis.connection.ReturnType
 import org.springframework.data.redis.core.RedisCallback
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.script.DefaultRedisScript
 import org.springframework.stereotype.Service
 import java.time.Duration
 
@@ -33,6 +34,10 @@ class CommandBoardRecommentLikeServiceImpl(
     @Transactional
     override fun createBoardRecommentLike(commandBoardRecommentLikeDTO: CommandBoardRecommentLikeDTO) {
         // 설명. 집합으로 각 인덱스 관리. cold data 분리를 위해 expire 설정(1일) -> 호출될 때 마다 갱신됨
+        // 따닥 방지
+        if (redisTemplate.hasKey(commandBoardRecommentLikeDTO.idempotencyKey)) {
+            throw CommonException(ErrorCode.ALREADY_REQUESTED)
+        }
 
         val boardRecommentSetKey = "board-recomment-like:${commandBoardRecommentLikeDTO.boardRecommentId}"
         val boardRecommentCountKey = "board-recomment-like:count:${commandBoardRecommentLikeDTO.boardRecommentId}"
@@ -109,6 +114,28 @@ class CommandBoardRecommentLikeServiceImpl(
             )
 
         outboxService.createOutbox(outbox)
+
+        val idempotencyScript =
+            """
+            local res = redis.call("set", KEYS[1], ARGV[1], "EX", ARGV[2])
+            return res
+            """.trimIndent()
+
+        val idempotencyRedisScript = DefaultRedisScript<String>(idempotencyScript, String::class.java)
+        val ttlInSeconds = "3600" // 1시간 TTL
+
+        val result =
+            redisTemplate.execute(
+                idempotencyRedisScript,
+                listOf(commandBoardRecommentLikeDTO.idempotencyKey),
+                "PROCESSED",
+                ttlInSeconds,
+            )
+
+        // result가 "OK"이면 SET 명령이 성공적으로 실행된 것입니다.
+        if (result != "OK") {
+            throw CommonException(ErrorCode.REDIS_ERROR)
+        }
     }
 
     @Transactional
@@ -149,6 +176,10 @@ class CommandBoardRecommentLikeServiceImpl(
 
     @Transactional
     override fun deleteBoardRecommentLike(commandBoardRecommentLikeDTO: CommandBoardRecommentLikeDTO) {
+        if (redisTemplate.hasKey(commandBoardRecommentLikeDTO.idempotencyKey)) {
+            throw CommonException(ErrorCode.ALREADY_REQUESTED)
+        }
+
         val boardRecommentSetKey = "board-recomment-like:${commandBoardRecommentLikeDTO.boardRecommentId}"
         val boardRecommentCountKey = "board-recomment-like:count:${commandBoardRecommentLikeDTO.boardRecommentId}"
         val memberSetKey = "board-recomment-like:${commandBoardRecommentLikeDTO.memberId}"
@@ -223,6 +254,28 @@ class CommandBoardRecommentLikeServiceImpl(
             )
 
         outboxService.createOutbox(outbox)
+
+        val idempotencyScript =
+            """
+            local res = redis.call("set", KEYS[1], ARGV[1], "EX", ARGV[2])
+            return res
+            """.trimIndent()
+
+        val idempotencyRedisScript = DefaultRedisScript<String>(idempotencyScript, String::class.java)
+        val ttlInSeconds = "3600" // 1시간 TTL
+
+        val result =
+            redisTemplate.execute(
+                idempotencyRedisScript,
+                listOf(commandBoardRecommentLikeDTO.idempotencyKey),
+                "PROCESSED",
+                ttlInSeconds,
+            )
+
+        // result가 "OK"이면 SET 명령이 성공적으로 실행된 것입니다.
+        if (result != "OK") {
+            throw CommonException(ErrorCode.REDIS_ERROR)
+        }
     }
 
     @Transactional

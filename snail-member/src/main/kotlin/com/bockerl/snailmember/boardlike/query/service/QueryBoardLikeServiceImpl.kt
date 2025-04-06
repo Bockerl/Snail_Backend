@@ -16,7 +16,11 @@ class QueryBoardLikeServiceImpl(
     private val queryBoardService: QueryBoardService,
     private val queryMemberService: QueryMemberService,
 ) : QueryBoardLikeService {
-    override fun readBoardLike(boardId: String): List<QueryBoardLikeMemberIdsResponseVO> {
+    override fun readBoardLike(
+        boardId: String,
+        lastId: Long?,
+        pageSize: Int,
+    ): List<QueryBoardLikeMemberIdsResponseVO> {
         val redisKey = "board-like:$boardId"
 
         // 1. Redis 캐시에서 멤버 ID 목록 조회
@@ -30,7 +34,7 @@ class QueryBoardLikeServiceImpl(
         // 2. 캐시의 데이터가 충분하지 않으면 DB에서 조회하고 캐시를 갱신
         val finalMemberIds =
             if (needAdditionalBoard(boardId, cachedMemberIds.size.toLong())) {
-                updateCacheWithDbMemberIds(redisKey, boardId)
+                updateCacheWithDbMemberIds(redisKey, boardId, lastId, pageSize)
             } else {
                 cachedMemberIds
             }
@@ -50,7 +54,11 @@ class QueryBoardLikeServiceImpl(
         }
     }
 
-    override fun readBoardIdsByMemberId(memberId: String): List<QueryBoardResponseVO> {
+    override fun readBoardIdsByMemberId(
+        memberId: String,
+        lastId: Long?,
+        pageSize: Int,
+    ): List<QueryBoardResponseVO> {
         val redisKey = "board-like:$memberId"
 
         // 1. Redis 캐시에서 게시글 ID 목록 조회
@@ -64,7 +72,7 @@ class QueryBoardLikeServiceImpl(
         // 2. 캐시의 데이터가 충분하지 않으면 DB에서 조회하고 캐시를 갱신
         val finalBoardIds =
             if (needAdditionalMember(memberId, cachedBoardIds.size.toLong())) {
-                updateCacheWithDbBoardIds(redisKey, memberId)
+                updateCacheWithDbBoardIds(redisKey, memberId, lastId, pageSize)
             } else {
                 cachedBoardIds
             }
@@ -106,11 +114,13 @@ class QueryBoardLikeServiceImpl(
     private fun updateCacheWithDbMemberIds(
         redisKey: String,
         boardId: String,
+        lastId: Long?,
+        pageSize: Int,
     ): List<String> {
         // DB에서 boardLikeMapper를 통해 멤버 ID 조회
         val dbMemberIds =
             boardLikeMapper
-                .selectMemberIdsByBoardId(extractDigits(boardId))
+                .selectMemberIdsByBoardId(extractDigits(boardId), lastId, pageSize)
                 .map { formattedMemberId(it.memberId) }
 
         // Redis 캐시 업데이트: 기존 캐시를 삭제 후 DB 결과를 저장
@@ -128,11 +138,13 @@ class QueryBoardLikeServiceImpl(
     private fun updateCacheWithDbBoardIds(
         redisKey: String,
         memberId: String,
+        lastId: Long?,
+        pageSize: Int,
     ): List<String> {
         // DB에서 boardLikeMapper를 통해 멤버 ID 조회
         val dbMemberIds =
             boardLikeMapper
-                .selectMemberIdsByBoardId(extractDigits(memberId))
+                .selectMemberIdsByBoardId(extractDigits(memberId), lastId, pageSize)
                 .map { formattedBoardId(it.boardId) }
 
         // Redis 캐시 업데이트: 기존 캐시를 삭제 후 DB 결과를 저장

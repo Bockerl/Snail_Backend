@@ -12,7 +12,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 
 @Validated
-data class ResponseDto<T>(
+data class ResponseDTO<T>(
     @field:JsonIgnore
     val httpStatus: HttpStatus? = null,
     @field:NotNull
@@ -24,8 +24,8 @@ data class ResponseDto<T>(
 ) {
     companion object {
         // 성공 응답 생성
-        fun <T> ok(data: T?): ResponseDto<T> =
-            ResponseDto(
+        fun <T> ok(data: T?): ResponseDTO<T> =
+            ResponseDTO(
                 httpStatus = HttpStatus.OK,
                 success = true,
                 data = data,
@@ -33,8 +33,8 @@ data class ResponseDto<T>(
             )
 
         // 커스텀 예외 기반 실패 응답
-        fun fail(e: CommonException): ResponseDto<Nothing> =
-            ResponseDto(
+        fun fail(e: CommonException): ResponseDTO<Nothing> =
+            ResponseDTO(
                 httpStatus = e.errorCode.httpStatus,
                 success = false,
                 data = null,
@@ -42,8 +42,8 @@ data class ResponseDto<T>(
             )
 
         // 파라미터 누락 예외 처리
-        fun fail(e: MissingServletRequestParameterException): ResponseDto<Nothing> =
-            ResponseDto(
+        fun fail(e: MissingServletRequestParameterException): ResponseDTO<Nothing> =
+            ResponseDTO(
                 httpStatus = HttpStatus.BAD_REQUEST,
                 success = false,
                 data = null,
@@ -51,8 +51,8 @@ data class ResponseDto<T>(
             )
 
         // 타입 불일치 예외 처리
-        fun fail(e: MethodArgumentTypeMismatchException): ResponseDto<Nothing> =
-            ResponseDto(
+        fun fail(e: MethodArgumentTypeMismatchException): ResponseDTO<Nothing> =
+            ResponseDTO(
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                 success = false,
                 data = null,

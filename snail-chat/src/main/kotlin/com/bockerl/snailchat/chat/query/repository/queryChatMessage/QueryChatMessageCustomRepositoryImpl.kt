@@ -3,6 +3,7 @@ package com.bockerl.snailchat.chat.query.repository.queryChatMessage
 import com.bockerl.snailchat.chat.command.domain.aggregate.entity.ChatMessage
 import com.bockerl.snailchat.chat.query.repository.queryUtil.MongoQueryUtil
 import org.bson.types.ObjectId
+import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.stereotype.Repository
 
@@ -43,5 +44,44 @@ class QueryChatMessageCustomRepositoryImpl(
             )
 
         return chatMessages
+    }
+
+    override fun findChatMessagesByChatRoomIdAndMessageContaining(
+        chatRoomId: ObjectId,
+        keyword: String,
+        page: Int,
+        pageSize: Int,
+    ): List<ChatMessage> {
+        val criteria =
+            Criteria
+                .where("chatRoomId")
+                .`is`(chatRoomId)
+                .and("message")
+                .regex(".*$keyword.*", "i") // 대소문자 구분 없이 포함 검색
+
+        val skip = page * pageSize
+
+        return mongoQueryUtil.findWithPagingSkip(
+            collection = ChatMessage::class.java,
+            criteria = criteria,
+            sortField = "_id", // 최신순 정렬 (MongoDB ObjectId는 시간순)
+            pageSize = pageSize,
+            skip = skip,
+            sortDirection = Sort.Direction.DESC,
+        )
+    }
+
+    override fun countChatMessagesByChatRoomIdAndMessageContaining(
+        chatRoomId: ObjectId,
+        keyword: String,
+    ): Long {
+        val criteria =
+            Criteria
+                .where("chatRoomId")
+                .`is`(chatRoomId)
+                .and("message")
+                .regex(".*$keyword.*", "i")
+
+        return mongoQueryUtil.countDocuments(ChatMessage::class.java, criteria)
     }
 }

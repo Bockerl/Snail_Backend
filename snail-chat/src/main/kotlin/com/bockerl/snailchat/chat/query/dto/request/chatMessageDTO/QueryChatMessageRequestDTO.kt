@@ -1,4 +1,4 @@
-package com.bockerl.snailchat.chat.query.dto.request
+package com.bockerl.snailchat.chat.query.dto.request.chatMessageDTO
 
 data class QueryChatMessageRequestDTO(
     val chatRoomId: String,

@@ -5,7 +5,7 @@ import com.bockerl.snailchat.chat.command.application.mapper.VoToDtoConverter
 import com.bockerl.snailchat.chat.command.application.service.CommandChatRoomService
 import com.bockerl.snailchat.chat.command.domain.aggregate.vo.request.CommandChatRoomDeleteRequestVo
 import com.bockerl.snailchat.chat.command.domain.aggregate.vo.request.CommandChatRoomJoinRequestVo
-import com.bockerl.snailchat.common.ResponseDto
+import com.bockerl.snailchat.common.ResponseDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -47,12 +47,12 @@ class CommandChatRoomController(
         @PathVariable memberId: String, // 향후 Principal을 통해 memberId, memberNickname, memberPhoto
         @PathVariable memberNickname: String,
         @PathVariable memberPhoto: String,
-    ): ResponseDto<*> {
+    ): ResponseDTO<*> {
         val commandChatRoomCreateRequestDto = CommandChatRoomCreateRequestDTO(memberId, memberNickname, memberPhoto)
 
         commandChatRoomService.createPersonalChatRoom(commandChatRoomCreateRequestDto)
 
-        return ResponseDto.ok(null)
+        return ResponseDTO.ok(null)
     }
 
     @Operation(
@@ -78,12 +78,12 @@ class CommandChatRoomController(
         @PathVariable memberId: String, // 향후 Principal을 통해 memberId, memberNickname, memberPhoto
         @PathVariable memberNickname: String,
         @PathVariable memberPhoto: String,
-    ): ResponseDto<*> {
+    ): ResponseDTO<*> {
         val commandChatRoomCreateRequestDto = CommandChatRoomCreateRequestDTO(memberId, memberNickname, memberPhoto)
 
         commandChatRoomService.createGroupChatRoom(commandChatRoomCreateRequestDto)
 
-        return ResponseDto.ok(null)
+        return ResponseDTO.ok(null)
     }
 
     @Operation(
@@ -110,13 +110,13 @@ class CommandChatRoomController(
         @PathVariable memberId: String, // 향후 Principal을 통해 memberId, memberNickname
         @PathVariable memberNickname: String,
         @PathVariable memberPhoto: String,
-    ): ResponseDto<*> {
+    ): ResponseDTO<*> {
         val commandChatRoomDeleteRequestDto =
             voToDtoConverter.commandChatRoomDeleteRequestVoTODto(commandChatRoomDeleteRequestVo, memberId, memberNickname, memberPhoto)
 
         commandChatRoomService.deletePersonalChatRoom(commandChatRoomDeleteRequestDto)
 
-        return ResponseDto.ok(null)
+        return ResponseDTO.ok(null)
     }
 
     @Operation(
@@ -143,13 +143,13 @@ class CommandChatRoomController(
         @PathVariable memberId: String, // 향후 Principal을 통해 memberId, memberNickname
         @PathVariable memberNickname: String,
         @PathVariable memberPhoto: String,
-    ): ResponseDto<*> {
+    ): ResponseDTO<*> {
         val commandChatRoomDeleteRequestDto =
             voToDtoConverter.commandChatRoomDeleteRequestVoTODto(commandChatRoomDeleteRequestVo, memberId, memberNickname, memberPhoto)
 
         commandChatRoomService.deleteGroupChatRoom(commandChatRoomDeleteRequestDto)
 
-        return ResponseDto.ok(null)
+        return ResponseDTO.ok(null)
     }
 
     @Operation(
@@ -176,12 +176,12 @@ class CommandChatRoomController(
         @PathVariable memberId: String, // 향후 Principal을 통해 memberId, memberNickname
         @PathVariable memberNickname: String,
         @PathVariable memberPhoto: String,
-    ): ResponseDto<*> {
+    ): ResponseDTO<*> {
         val commandChatRoomJoinRequestDto =
             voToDtoConverter.commandChatRoomJoinRequestVoToDto(commandChatRoomJoinRequestVo, memberId, memberNickname, memberPhoto)
 
         commandChatRoomService.joinGroupChatRoom(commandChatRoomJoinRequestDto)
 
-        return ResponseDto.ok(null)
+        return ResponseDTO.ok(null)
     }
 }

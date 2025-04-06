@@ -1,9 +1,9 @@
 package com.bockerl.snailchat.chat.query.service
 
-import com.bockerl.snailchat.chat.query.dto.request.QueryGroupChatRoomRequestDTO
-import com.bockerl.snailchat.chat.query.dto.request.QueryPersonalChatRoomRequestDTO
-import com.bockerl.snailchat.chat.query.dto.response.QueryGroupChatRoomResponseDTO
-import com.bockerl.snailchat.chat.query.dto.response.QueryPersonalChatRoomResponseDTO
+import com.bockerl.snailchat.chat.query.dto.request.chatRoomDTO.QueryGroupChatRoomRequestDTO
+import com.bockerl.snailchat.chat.query.dto.request.chatRoomDTO.QueryPersonalChatRoomRequestDTO
+import com.bockerl.snailchat.chat.query.dto.response.chatRoomDTO.QueryGroupChatRoomResponseDTO
+import com.bockerl.snailchat.chat.query.dto.response.chatRoomDTO.QueryPersonalChatRoomResponseDTO
 import com.bockerl.snailchat.chat.query.repository.queryGroupChatRoom.QueryGroupChatRoomRepository
 import com.bockerl.snailchat.chat.query.repository.queryPersonalChatRoom.QueryPersonalChatRoomRepository
 import org.bson.types.ObjectId

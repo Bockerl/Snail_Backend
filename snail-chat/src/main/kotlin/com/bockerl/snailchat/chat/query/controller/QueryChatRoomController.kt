@@ -3,10 +3,10 @@
 package com.bockerl.snailchat.chat.query.controller
 
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomCreateRequestDTO
-import com.bockerl.snailchat.chat.query.dto.request.QueryGroupChatRoomRequestDTO
-import com.bockerl.snailchat.chat.query.dto.request.QueryPersonalChatRoomRequestDTO
+import com.bockerl.snailchat.chat.query.dto.request.chatRoomDTO.QueryGroupChatRoomRequestDTO
+import com.bockerl.snailchat.chat.query.dto.request.chatRoomDTO.QueryPersonalChatRoomRequestDTO
 import com.bockerl.snailchat.chat.query.service.QueryChatRoomService
-import com.bockerl.snailchat.common.ResponseDto
+import com.bockerl.snailchat.common.ResponseDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -42,12 +42,12 @@ class QueryChatRoomController(
         @PathVariable memberId: String,
         @RequestParam(required = false) lastId: String? = null,
         @RequestParam(defaultValue = "10") pageSize: Int,
-    ): ResponseDto<*> {
+    ): ResponseDTO<*> {
         val queryPersonalChatRoomRequestDto = QueryPersonalChatRoomRequestDTO(memberId, lastId, pageSize)
 
         val personalChatRoomList = queryChatRoomService.getPersonalChatRoomList(queryPersonalChatRoomRequestDto)
 
-        return ResponseDto.ok(personalChatRoomList)
+        return ResponseDTO.ok(personalChatRoomList)
     }
 
     @Operation(
@@ -73,11 +73,11 @@ class QueryChatRoomController(
         @PathVariable memberId: String,
         @RequestParam(required = false) lastId: String? = null,
         @RequestParam(defaultValue = "10") pageSize: Int,
-    ): ResponseDto<*> {
+    ): ResponseDTO<*> {
         val queryGroupChatRoomRequestDto = QueryGroupChatRoomRequestDTO(memberId, lastId, pageSize)
 
         val groupChatRoomList = queryChatRoomService.getGroupChatRoomList(queryGroupChatRoomRequestDto)
 
-        return ResponseDto.ok(groupChatRoomList)
+        return ResponseDTO.ok(groupChatRoomList)
     }
 }

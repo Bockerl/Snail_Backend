@@ -14,4 +14,16 @@ interface QueryChatMessageCustomRepository {
         lastId: ObjectId,
         pageSize: Int,
     ): List<ChatMessage>
+
+    fun findChatMessagesByChatRoomIdAndMessageContaining(
+        chatRoomId: ObjectId,
+        keyword: String,
+        page: Int,
+        pageSize: Int,
+    ): List<ChatMessage>
+
+    fun countChatMessagesByChatRoomIdAndMessageContaining(
+        chatRoomId: ObjectId,
+        keyword: String,
+    ): Long
 }

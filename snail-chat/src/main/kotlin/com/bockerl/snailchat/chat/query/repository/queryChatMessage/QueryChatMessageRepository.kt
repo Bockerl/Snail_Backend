@@ -4,8 +4,9 @@ import com.bockerl.snailchat.chat.command.domain.aggregate.entity.ChatMessage
 import com.bockerl.snailchat.chat.command.domain.aggregate.enums.ChatMessageType
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.repository.MongoRepository
+import org.springframework.stereotype.Repository
 
-// @Repository
+@Repository
 interface QueryChatMessageRepository :
     MongoRepository<ChatMessage, ObjectId>,
     QueryChatMessageCustomRepository {

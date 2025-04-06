@@ -2,15 +2,15 @@ package com.bockerl.snailchat.chat.query.mapper
 
 import com.bockerl.snailchat.chat.command.domain.aggregate.entity.ChatMessage
 import com.bockerl.snailchat.chat.query.dto.LatestChatMessageDTO
-import com.bockerl.snailchat.chat.query.dto.response.QueryChatMessageResponseDTO
+import com.bockerl.snailchat.chat.query.dto.response.chatMessageDTO.QueryChatMessageResponseDTO
 import org.springframework.stereotype.Component
 
 @Component
 class EntityToDtoConverter {
     // 채팅방 메시지 Entity -> Dto
-    fun chatMessageToQueryChatMessageResponseDto(entity: ChatMessage) =
+    fun chatMessageToQueryChatMessageResponseDTO(entity: ChatMessage) =
         QueryChatMessageResponseDTO(
-            messageId = entity.chatMessageId.toHexString(),
+            chatMessageId = entity.chatMessageId.toHexString(),
             chatRoomId = entity.chatRoomId.toHexString(),
             memberId = entity.memberId,
             memberNickname = entity.memberNickname,
@@ -21,7 +21,7 @@ class EntityToDtoConverter {
         )
 
     // 채팅방 최신 메시지 Entity -> Dto
-    fun latestChatMessageToLatestChatMessageDto(entity: ChatMessage) =
+    fun latestChatMessageToLatestChatMessageDTO(entity: ChatMessage) =
         LatestChatMessageDTO(
             message = entity.message ?: "",
             createdAt = entity.createdAt,

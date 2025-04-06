@@ -3,9 +3,10 @@
 package com.bockerl.snailchat.chat.query.controller
 
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatMessageRequestDTO
-import com.bockerl.snailchat.chat.query.dto.request.QueryChatMessageRequestDTO
+import com.bockerl.snailchat.chat.query.dto.request.chatMessageDTO.QueryChatMessageRequestDTO
+import com.bockerl.snailchat.chat.query.dto.request.chatMessageDTO.QuerySearchChatMessageRequestDTO
 import com.bockerl.snailchat.chat.query.service.QueryChatMessageService
-import com.bockerl.snailchat.common.ResponseDto
+import com.bockerl.snailchat.common.ResponseDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -45,12 +46,12 @@ class QueryChatMessageController(
         @PathVariable chatRoomId: String,
         @RequestParam(required = false) lastId: String? = null,
         @RequestParam(defaultValue = "10") pageSize: Int,
-    ): ResponseDto<*> {
-        val queryChatMessageRequestDto = QueryChatMessageRequestDTO(chatRoomId, lastId, pageSize)
+    ): ResponseDTO<*> {
+        val queryChatMessageRequestDTO = QueryChatMessageRequestDTO(chatRoomId, lastId, pageSize)
 
-        val chatMessageList = queryChatMessageService.getChatMessageByChatRoomId(queryChatMessageRequestDto)
+        val chatMessageList = queryChatMessageService.getChatMessageByChatRoomId(queryChatMessageRequestDTO)
 
-        return ResponseDto.ok(chatMessageList)
+        return ResponseDTO.ok(chatMessageList)
     }
 
     @Operation(
@@ -75,9 +76,40 @@ class QueryChatMessageController(
     fun isFirstJoin(
         @PathVariable chatRoomId: String,
         @PathVariable memberId: String,
-    ): ResponseDto<*> {
+    ): ResponseDTO<*> {
         val isFirstJoinStatus = queryChatMessageService.getIsFirstJoin(chatRoomId, memberId)
 
-        return ResponseDto.ok(isFirstJoinStatus)
+        return ResponseDTO.ok(isFirstJoinStatus)
+    }
+
+    @Operation(
+        summary = "채팅 메시지 검색",
+        description = "선택한 채팅방 메시지 키워드로 검색",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "채팅 검색 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = CommandChatMessageRequestDTO::class),
+                    ),
+                ],
+            ),
+        ],
+    )
+    @GetMapping("/search")
+    fun searchChatMessageByKeyword(
+        @RequestParam chatRoomId: String,
+        @RequestParam(required = false) keyword: String,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "20") pageSize: Int,
+    ): ResponseDTO<*> {
+        val querySearchChatMessageRequestDTO = QuerySearchChatMessageRequestDTO(chatRoomId, keyword, pageSize, page)
+        val searchResults = queryChatMessageService.searchChatMessageByKeyword(querySearchChatMessageRequestDTO)
+
+        return ResponseDTO.ok(searchResults)
     }
 }

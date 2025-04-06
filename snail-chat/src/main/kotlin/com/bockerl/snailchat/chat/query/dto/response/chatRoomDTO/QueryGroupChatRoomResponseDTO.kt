@@ -1,4 +1,4 @@
-package com.bockerl.snailchat.chat.query.dto.response
+package com.bockerl.snailchat.chat.query.dto.response.chatRoomDTO
 
 import java.time.Instant
 

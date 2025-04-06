@@ -44,6 +44,7 @@ class CommandBoardRecommentController(
     )
     @PostMapping("contents")
     fun postBoardComment(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestBody commandBoardRecommentCreateRequestVO: CommandBoardRecommentCreateRequestVO,
     ): ResponseDTO<*> {
         val commandBoardRecommentCreateDTO =
@@ -52,6 +53,7 @@ class CommandBoardRecommentController(
                 memberId = commandBoardRecommentCreateRequestVO.memberId,
                 boardId = commandBoardRecommentCreateRequestVO.boardId,
                 boardCommentId = commandBoardRecommentCreateRequestVO.boardCommentId,
+                idempotencyKey = idempotencyKey,
             )
         commandBoardRecommentService.createBoardRecomment(commandBoardRecommentCreateDTO)
 

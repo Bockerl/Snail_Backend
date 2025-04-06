@@ -81,8 +81,8 @@
             <if test="lastId != null">
                 board_id &lt; #{lastId} and
             </if>
-            board_type = #{boardType} and
-            active = true
+<!--            board_type = #{boardType} and-->
+            active = true and
             <if test="boardTagList != null and boardTagList.size() > 0">
                 board_tag IN
                 <foreach collection="boardTagList" item="board_tag" open="(" separator="," close=")">

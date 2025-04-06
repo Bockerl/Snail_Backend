@@ -1,0 +1,3 @@
+package com.bockerl.snailmember.gathering.query.controller
+
+class QueryGatheringController

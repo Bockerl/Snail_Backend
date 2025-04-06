@@ -11,4 +11,5 @@ enum class FileTargetType {
     BOARD_COMMENT,
     BOARD_RECOMMENT,
     MEMBER,
+    GATHERING,
 }

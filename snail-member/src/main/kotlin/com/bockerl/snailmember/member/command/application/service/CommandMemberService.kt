@@ -9,11 +9,17 @@ import com.bockerl.snailmember.member.command.application.dto.request.ProfileReq
 import org.springframework.web.multipart.MultipartFile
 
 interface CommandMemberService {
-    fun putLastAccessTime(memberEmail: String)
+    fun putLastAccessTime(
+        email: String,
+        ipAddress: String,
+        userAgent: String,
+        idempotencyKey: String,
+    )
 
     fun postActivityArea(
         memberId: String,
         requestDTO: ActivityAreaRequestDTO,
+        idempotencyKey: String,
     )
 
     fun patchProfile(

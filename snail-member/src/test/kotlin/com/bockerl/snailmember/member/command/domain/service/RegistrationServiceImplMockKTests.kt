@@ -9,9 +9,9 @@ import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.service.AuthService
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.Member
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.SignUpPath
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.SignUpStep
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.VerificationType
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.SignUpPath
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.SignUpStep
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.VerificationType
 import com.bockerl.snailmember.member.command.domain.repository.MemberRepository
 import com.bockerl.snailmember.member.command.domain.repository.TempMemberRepository
 import com.bockerl.snailmember.utils.*

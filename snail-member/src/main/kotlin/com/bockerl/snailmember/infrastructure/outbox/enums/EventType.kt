@@ -7,4 +7,7 @@ enum class EventType(
     LIKE("board-like-events"),
     FILE_CREATED("file-events"),
     FILE_DELETED("file-events"),
+    FILE("file-events"),
+    MEMBER("member-events"),
+    ACTIVITY_AREA("activity-area-events"),
 }

@@ -170,7 +170,10 @@ class AuthenticationFilter(
             )
         log.info { "전달한 loginVO: $loginVO" }
         log.info { "멤버 마지막 로그인 시각 변경 시작" }
-        commandMemberService.putLastAccessTime(customMember.memberEmail)
+        val ipAddress = request.remoteAddr
+        val userAgent = request.getHeader("User-Agent")
+        val idempotencyKey = request.getHeader("IdempotencyKey")
+        commandMemberService.putLastAccessTime(customMember.memberEmail, ipAddress, userAgent, idempotencyKey)
 
         log.info { "ResponseDTO 생성 시작" }
         val responseDTO = ResponseDTO.ok(loginVO)

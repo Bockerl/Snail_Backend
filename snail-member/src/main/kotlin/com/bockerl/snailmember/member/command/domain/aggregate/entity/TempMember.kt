@@ -1,5 +1,6 @@
-package com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember
+package com.bockerl.snailmember.member.command.domain.aggregate.entity
 
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.SignUpStep
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.Id

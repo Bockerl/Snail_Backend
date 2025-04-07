@@ -25,6 +25,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
@@ -61,12 +62,14 @@ class CommandMemberController(
     )
     @PostMapping("/activity_area")
     fun postActivityArea(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestBody requestVO: ActivityAreaRequestVO,
-        @Parameter(hidden = true) @CurrentMemberId memberId: String,
+        @Parameter(hidden = true)
+        @CurrentMemberId memberId: String,
     ): ResponseDTO<*> {
         logger.info { "활동지역 설정 요청 controller에 도착" }
         val requestDTO = memberConverter.activityAreaRequestVOToDTO(requestVO)
-        commandMemberService.postActivityArea(memberId, requestDTO)
+        commandMemberService.postActivityArea(memberId, requestDTO, idempotencyKey)
         return ResponseDTO.ok("활동지역 설정 성공")
     }
 

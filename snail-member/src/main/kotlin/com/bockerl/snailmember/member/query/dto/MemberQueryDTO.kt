@@ -1,8 +1,8 @@
 package com.bockerl.snailmember.member.query.dto
 
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.Gender
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.Language
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.MemberStatus
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Gender
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Language
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.MemberStatus
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 import java.time.LocalDateTime

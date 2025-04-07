@@ -8,7 +8,7 @@ import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.dto.request.ActivityAreaRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.ProfileRequestDTO
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.Gender
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Gender
 import com.bockerl.snailmember.member.command.domain.vo.request.ActivityAreaRequestVO
 import com.bockerl.snailmember.member.command.domain.vo.request.ProfileRequestVO
 import com.bockerl.snailmember.member.command.domain.vo.response.MemberResponseVO

@@ -12,9 +12,9 @@ import com.bockerl.snailmember.member.command.application.dto.request.*
 import com.bockerl.snailmember.member.command.application.service.AuthService
 import com.bockerl.snailmember.member.command.application.service.RegistrationService
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.Member
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.SignUpStep
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.TempMember
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.VerificationType
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.TempMember
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.SignUpStep
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.VerificationType
 import com.bockerl.snailmember.member.command.domain.repository.MemberRepository
 import com.bockerl.snailmember.member.command.domain.repository.TempMemberRepository
 import org.junit.jupiter.api.*

@@ -82,5 +82,3 @@ logging:
         org:
             springframework:
                 transaction: TRACE
-            apache:
-                kafka: OFF

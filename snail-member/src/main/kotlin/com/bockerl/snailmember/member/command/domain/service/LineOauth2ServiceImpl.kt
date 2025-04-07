@@ -3,16 +3,20 @@ package com.bockerl.snailmember.member.command.domain.service
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.infrastructure.config.TransactionalConfig
+import com.bockerl.snailmember.infrastructure.outbox.dto.OutboxDTO
+import com.bockerl.snailmember.infrastructure.outbox.enums.EventType
+import com.bockerl.snailmember.infrastructure.outbox.service.OutboxService
 import com.bockerl.snailmember.member.client.LineAuthClient
 import com.bockerl.snailmember.member.command.application.dto.response.LinePayloadDTO
 import com.bockerl.snailmember.member.command.application.dto.response.LoginResponseDTO
 import com.bockerl.snailmember.member.command.application.service.LineOauth2Service
 import com.bockerl.snailmember.member.command.config.Oauth2LoginProperties
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.Gender
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.Language
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.Member
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.MemberStatus
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.SignUpPath
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Gender
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Language
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.MemberStatus
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.SignUpPath
+import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberCreateEvent
 import com.bockerl.snailmember.member.command.domain.repository.MemberRepository
 import com.bockerl.snailmember.security.CustomMember
 import com.bockerl.snailmember.security.Oauth2JwtUtils
@@ -21,7 +25,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 import java.time.LocalDate
 import java.util.Base64
 import java.util.UUID
@@ -32,19 +36,20 @@ class LineOauth2ServiceImpl(
     private val memberRepository: MemberRepository,
     private val loginProperties: Oauth2LoginProperties,
     private val jwtUtils: Oauth2JwtUtils,
-    // jwt 추가 예정
+    private val objectMapper: ObjectMapper,
+    private val outboxService: OutboxService,
 ) : LineOauth2Service {
     private val logger = KotlinLogging.logger {}
 
-    @Transactional
-    override fun lineLogin(code: String): LoginResponseDTO {
-        // 코드 기반으로 요청을 보낸 뒤 id token만 추출
-        val idToken = requestTokenFromLine(code)
-        // 유저 정보 디코딩
-        val customMember = TransactionalConfig.run { decodeUserInfoFromToken(idToken) as CustomMember }
-        val response = jwtUtils.generateJwtResponse(customMember)
-        return response
-    }
+    override fun lineLogin(code: String): LoginResponseDTO =
+        TransactionalConfig.run {
+            // 코드 기반으로 요청을 보낸 뒤 id token만 추출
+            val idToken = requestTokenFromLine(code)
+            // 유저 정보 디코딩
+            val customMember = decodeUserInfoFromToken(idToken) as CustomMember
+            val response = jwtUtils.generateJwtResponse(customMember)
+            return@run response
+        }
 
     private fun requestTokenFromLine(code: String): String {
         logger.info { "라인 코드 기반 인증 토큰 요청 시작" }
@@ -129,7 +134,7 @@ class LineOauth2ServiceImpl(
         email: String,
         lineResponse: LinePayloadDTO,
     ): Member {
-        val newGoogleMember =
+        val newLineMember =
             Member(
                 memberEmail = email,
                 memberPhoneNumber = UUID.randomUUID().toString(),
@@ -145,9 +150,35 @@ class LineOauth2ServiceImpl(
                 selfIntroduction = "",
             )
 
-        logger.info { "새로 생성되는 라인 계정 멤버: $newGoogleMember" }
-        memberRepository.save(newGoogleMember)
+        logger.info { "새로 생성되는 라인 계정 멤버: $newLineMember" }
+        memberRepository.save(newLineMember)
         logger.info { "라인 계정 새 멤버 저장 성공" }
-        return newGoogleMember
+        // outbox 이벤트 발행(회원 생성)
+        val event =
+            MemberCreateEvent(
+                memberId = newLineMember.formattedId,
+                timestamp = Instant.now(),
+                memberEmail = newLineMember.memberEmail,
+                memberPhoneNumber = newLineMember.memberPhoneNumber,
+                memberStatus = newLineMember.memberStatus,
+                memberRegion = newLineMember.memberRegion,
+                memberGender = newLineMember.memberGender,
+                memberNickname = newLineMember.memberNickname,
+                memberPhoto = newLineMember.memberPhoto,
+                memberBirth = newLineMember.memberBirth,
+                memberLanguage = newLineMember.memberLanguage,
+                signUpPath = SignUpPath.LINE,
+            )
+        val jsonPayLoad = objectMapper.writeValueAsString(event)
+        val outBox =
+            OutboxDTO(
+                aggregateId = newLineMember.formattedId,
+                eventType = EventType.MEMBER,
+                payload = jsonPayLoad,
+                // 회원가입은 1번만 발생하므로, pk를 멱등키로
+                idempotencyKey = newLineMember.formattedId,
+            )
+        outboxService.createOutbox(outBox)
+        return newLineMember
     }
 }

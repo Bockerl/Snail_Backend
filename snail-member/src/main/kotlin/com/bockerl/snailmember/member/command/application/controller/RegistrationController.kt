@@ -54,10 +54,11 @@ class RegistrationController(
     )
     @PostMapping("/initiation/email")
     fun postEmailRegistration(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestBody requestVO: EmailRequestVO,
     ): ResponseDTO<*> {
         val requestDTO = authConverter.emailRequestVOToDTO(requestVO)
-        val redisId = registrationService.initiateRegistration(requestDTO)
+        val redisId = registrationService.initiateRegistration(requestDTO, idempotencyKey)
         return ResponseDTO.ok(redisId)
     }
 
@@ -81,9 +82,10 @@ class RegistrationController(
     )
     @PostMapping("/verification/email/refresh/{redisId}")
     fun postEmailRefreshCode(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @PathVariable redisId: String,
     ): ResponseDTO<*> {
-        registrationService.createEmailRefreshCode(redisId)
+        registrationService.createEmailRefreshCode(redisId, idempotencyKey)
         return ResponseDTO.ok("메일 인증 코드가 재발급되었습니다.")
     }
 
@@ -107,10 +109,11 @@ class RegistrationController(
     )
     @PostMapping("/verification/email")
     fun postEmailVerification(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestBody requestVO: EmailVerifyRequestVO,
     ): ResponseDTO<*> {
         val requestDTO = authConverter.emailVerifyRequestVOToDTO(requestVO)
-        val redisId = registrationService.verifyEmailCode(requestDTO)
+        val redisId = registrationService.verifyEmailCode(requestDTO, idempotencyKey)
         return ResponseDTO.ok(redisId)
     }
 
@@ -134,10 +137,11 @@ class RegistrationController(
     )
     @PostMapping("/initiation/phone")
     fun postPhoneRegistration(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestBody requestVO: PhoneRequestVO,
     ): SingleMessageSentResponse? {
         val requestDTO = authConverter.phoneRequestVOToDTO(requestVO)
-        val verificationCode = registrationService.createPhoneVerificationCode(requestDTO)
+        val verificationCode = registrationService.createPhoneVerificationCode(requestDTO, idempotencyKey)
         // 발신번호 및 수신번호는 반드시 01012345678 형태로 입력되어야 함
         val message =
             Message(
@@ -170,10 +174,11 @@ class RegistrationController(
     )
     @PostMapping("/verification/phone/refresh")
     fun postPhoneRefreshCode(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestBody requestVO: PhoneRequestVO,
     ): SingleMessageSentResponse? {
         val requestDTO = authConverter.phoneRequestVOToDTO(requestVO)
-        val refreshCode = registrationService.createPhoneRefreshCode(requestDTO)
+        val refreshCode = registrationService.createPhoneRefreshCode(requestDTO, idempotencyKey)
         val message =
             Message(
                 from = coolSender,
@@ -205,10 +210,11 @@ class RegistrationController(
     )
     @PostMapping("/verification/phone")
     fun postPhoneVerification(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestBody requestVO: PhoneVerifyRequestVO,
     ): ResponseDTO<*> {
         val requestDTO = authConverter.phoneVerifyRequestVOToDTO(requestVO)
-        val redisId = registrationService.verifyPhoneCode(requestDTO)
+        val redisId = registrationService.verifyPhoneCode(requestDTO, idempotencyKey)
         return ResponseDTO.ok(redisId)
     }
 
@@ -232,10 +238,11 @@ class RegistrationController(
     )
     @PostMapping("/password")
     fun postPasswordRegistration(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestBody requestVO: PasswordRequestVO,
     ): ResponseDTO<*> {
         val requestDTO = authConverter.passwordRequestVOToDTO(requestVO)
-        val redisId = registrationService.postPassword(requestDTO)
+        val redisId = registrationService.postPassword(requestDTO, idempotencyKey)
         return ResponseDTO.ok(redisId)
     }
 
@@ -259,10 +266,11 @@ class RegistrationController(
     )
     @PostMapping("/activity_area")
     fun postActivityAreas(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestBody requestVO: ActivityAreaRegisterRequestVO,
     ): ResponseDTO<*> {
         val requestDTO = authConverter.activityAreaRegisterRequestVOToDTO(requestVO)
-        registrationService.postActivityArea(requestDTO)
+        registrationService.postActivityArea(requestDTO, idempotencyKey)
         return ResponseDTO.ok("회원가입에 성공했습니다.")
     }
 }

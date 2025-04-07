@@ -107,7 +107,7 @@ class JwtFilter(
                 sendErrorResponse(response, ErrorCode.INVALID_TOKEN_ERROR)
                 return false
             }
-            processValidRefreshToken(claims, refreshToken, response)
+            processValidRefreshToken(claims, refreshToken, request, response)
             true
         } catch (e: ExpiredJwtException) {
             log.warn { "만료된 refreshToken: ${e.message}" }
@@ -123,6 +123,7 @@ class JwtFilter(
     private fun processValidRefreshToken(
         claims: Claims,
         refreshToken: String,
+        request: HttpServletRequest,
         response: HttpServletResponse,
     ) {
         // 액세스 토큰 발급
@@ -139,21 +140,12 @@ class JwtFilter(
                 refreshToken
             }
         // 사용자 마지막 로그인 시간 업데이트
-        updateLastAccessTime(claims.subject)
+        val ipAddress = request.remoteAddr
+        val userAgent = request.getHeader("User-Agent")
+        val idempotencyKey = request.getHeader("IdempotencyKey")
+        commandMemberService.putLastAccessTime(claims.subject, ipAddress, userAgent, idempotencyKey)
         // 응답 데이터 생성 및 전송
         sendTokenResponse(response, newAccessToken, finalRefreshToken)
-    }
-
-    private fun updateLastAccessTime(email: String) {
-        commandMemberService
-            .runCatching {
-                log.info { "멤버 마지막 로그인 시각 변경 시작" }
-                putLastAccessTime(email)
-            }.onSuccess {
-                log.info { "멤버 마지막 로그인 시각 변경 성공" }
-            }.onFailure { e ->
-                log.warn { "멤버 마지막 로그인 시각 변경 실패: ${e.message}" }
-            }
     }
 
     private fun sendTokenResponse(

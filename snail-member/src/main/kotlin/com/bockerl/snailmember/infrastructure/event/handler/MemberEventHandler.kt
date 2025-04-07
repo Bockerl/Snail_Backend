@@ -17,7 +17,7 @@ class MemberEventHandler {
     }
 
     fun handleLogin(event: MemberLoginEvent) {
-        // 멤버 로그인 이벤트의 소비처 = ES(로깅)
+        // 멤버 로그인 이벤트의 소비처 = ES(로깅
         TODO("Not yet implemented")
     }
 

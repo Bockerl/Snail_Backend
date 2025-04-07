@@ -5,6 +5,8 @@ package com.bockerl.snailchat.chat.query.controller
 import com.bockerl.snailchat.chat.command.application.dto.request.CommandChatRoomCreateRequestDTO
 import com.bockerl.snailchat.chat.query.dto.request.chatRoomDTO.QueryGroupChatRoomRequestDTO
 import com.bockerl.snailchat.chat.query.dto.request.chatRoomDTO.QueryPersonalChatRoomRequestDTO
+import com.bockerl.snailchat.chat.query.dto.request.chatRoomDTO.QuerySearchGroupChatRoomRequestDTO
+import com.bockerl.snailchat.chat.query.dto.request.chatRoomDTO.QuerySearchPersonalChatRoomRequestDTO
 import com.bockerl.snailchat.chat.query.service.QueryChatRoomService
 import com.bockerl.snailchat.common.ResponseDTO
 import io.swagger.v3.oas.annotations.Operation
@@ -41,7 +43,7 @@ class QueryChatRoomController(
     fun getPersonalChatRoomListByMemberId(
         @PathVariable memberId: String,
         @RequestParam(required = false) lastId: String? = null,
-        @RequestParam(defaultValue = "10") pageSize: Int,
+        @RequestParam(defaultValue = "50") pageSize: Int,
     ): ResponseDTO<*> {
         val queryPersonalChatRoomRequestDto = QueryPersonalChatRoomRequestDTO(memberId, lastId, pageSize)
 
@@ -79,5 +81,65 @@ class QueryChatRoomController(
         val groupChatRoomList = queryChatRoomService.getGroupChatRoomList(queryGroupChatRoomRequestDto)
 
         return ResponseDTO.ok(groupChatRoomList)
+    }
+
+    @Operation(
+        summary = "개인 채팅방 키워드 검색 (live)",
+        description = "사용자가 본인이 참여하고 있는 개인 채팅방을 키워드를 통해 검색한다.",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "개인 채팅방 검색 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = CommandChatRoomCreateRequestDTO::class),
+                    ),
+                ],
+            ),
+        ],
+    )
+    @GetMapping("/personal/search/{memberId}")
+    fun searchPersonalChatRoomByKeyword(
+        @PathVariable memberId: String,
+        @RequestParam(required = false) keyword: String,
+        @RequestParam(defaultValue = "10") limit: Int,
+    ): ResponseDTO<*> {
+        val querySearchPersonalChatRoomDTO = QuerySearchPersonalChatRoomRequestDTO(memberId, keyword, limit)
+        val searchPersonalChatRoomList = queryChatRoomService.searchPersonalChatRoomByKeyword(querySearchPersonalChatRoomDTO)
+
+        return ResponseDTO.ok(searchPersonalChatRoomList)
+    }
+
+    @Operation(
+        summary = "그룹 채팅방 키워드 검색 (live)",
+        description = "사용자가 본인이 참여하고 있는 그룹 채팅방을 키워드를 통해 검색한다.",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "그룹 채팅방 검색 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = CommandChatRoomCreateRequestDTO::class),
+                    ),
+                ],
+            ),
+        ],
+    )
+    @GetMapping("/group/search/{memberId}")
+    fun searchGroupChatRoomByKeyword(
+        @PathVariable memberId: String,
+        @RequestParam(required = false) keyword: String,
+        @RequestParam(defaultValue = "10") limit: Int,
+    ): ResponseDTO<*> {
+        val querySearchGroupChatRoomDTO = QuerySearchGroupChatRoomRequestDTO(memberId, keyword, limit)
+        val searchGroupChatRoomList = queryChatRoomService.searchGroupChatRoomByKeyword(querySearchGroupChatRoomDTO)
+
+        return ResponseDTO.ok(searchGroupChatRoomList)
     }
 }

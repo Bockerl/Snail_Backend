@@ -100,9 +100,9 @@ class QueryChatMessageController(
             ),
         ],
     )
-    @GetMapping("/search")
+    @GetMapping("/search/{chatRoomId}")
     fun searchChatMessageByKeyword(
-        @RequestParam chatRoomId: String,
+        @PathVariable chatRoomId: String,
         @RequestParam(required = false) keyword: String,
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "20") pageSize: Int,

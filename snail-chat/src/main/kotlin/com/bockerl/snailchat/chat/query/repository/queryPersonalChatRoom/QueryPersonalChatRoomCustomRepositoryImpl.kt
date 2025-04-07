@@ -44,4 +44,25 @@ class QueryPersonalChatRoomCustomRepositoryImpl(
 
         return personalChatRoom
     }
+
+    override fun findPersonalChatRoomsByMemberIdAndChatRoomNameContainingKeyword(
+        memberId: String,
+        keyword: String,
+        limit: Int,
+    ): List<PersonalChatRoom> {
+        // 존재 여부 체크
+        val criteria = Criteria.where("participants.memberId").`is`(memberId)
+
+        // 채팅방 이름 (상대방 이름) 중 keyword 포함
+        val regexCriteria = Criteria.where("chatRoomName.$memberId").regex(".*$keyword.*", "i")
+
+        val finalCriteria = Criteria().andOperator(criteria, regexCriteria)
+
+        return mongoQueryUtil.findWithLimitAndSort(
+            collection = PersonalChatRoom::class.java,
+            criteria = finalCriteria,
+            sortField = "updatedAt",
+            limit = limit,
+        )
+    }
 }

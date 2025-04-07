@@ -46,7 +46,7 @@ class QueryChatMessageCustomRepositoryImpl(
         return chatMessages
     }
 
-    override fun findChatMessagesByChatRoomIdAndMessageContaining(
+    override fun findChatMessagesByChatRoomIdAndMessageContainingKeyword(
         chatRoomId: ObjectId,
         keyword: String,
         page: Int,
@@ -71,7 +71,7 @@ class QueryChatMessageCustomRepositoryImpl(
         )
     }
 
-    override fun countChatMessagesByChatRoomIdAndMessageContaining(
+    override fun countChatMessagesByChatRoomIdAndMessageContainingKeyword(
         chatRoomId: ObjectId,
         keyword: String,
     ): Long {

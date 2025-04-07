@@ -14,4 +14,10 @@ interface QueryGroupChatRoomCustomRepository {
         lastId: ObjectId,
         pageSize: Int,
     ): List<GroupChatRoom>
+
+    fun findGroupChatRoomsByMemberIdAndChatRoomNameContainingKeyword(
+        memberId: String,
+        keyword: String,
+        limit: Int,
+    ): List<GroupChatRoom>
 }

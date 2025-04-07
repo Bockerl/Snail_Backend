@@ -68,9 +68,13 @@ class CommandChatRoomServiceImpl(
     @Transactional
     override fun createGroupChatRoom(commandChatRoomCreateRequestDTO: CommandChatRoomCreateRequestDTO) {
         // FeignClient 적용 전 임시데이터
-        val meetingName = "Gangnam Climbing"
-        val meetingPhoto = "Climbing.jpg"
-        val meetingCategory = "Climbing"
+//        val meetingName = "Gangnam Climbing"
+//        val meetingPhoto = "Climbing.jpg"
+//        val meetingCategory = "Climbing"
+
+        val meetingName = "Movie"
+        val meetingPhoto = "Movie.jpg"
+        val meetingCategory = "Movie"
 
         val participants =
             listOf(

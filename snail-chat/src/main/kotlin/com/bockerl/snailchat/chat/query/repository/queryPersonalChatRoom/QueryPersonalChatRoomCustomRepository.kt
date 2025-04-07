@@ -14,4 +14,10 @@ interface QueryPersonalChatRoomCustomRepository {
         lastId: ObjectId,
         pageSize: Int,
     ): List<PersonalChatRoom>
+
+    fun findPersonalChatRoomsByMemberIdAndChatRoomNameContainingKeyword(
+        memberId: String,
+        keyword: String,
+        limit: Int,
+    ): List<PersonalChatRoom>
 }

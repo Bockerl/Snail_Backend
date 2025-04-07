@@ -90,7 +90,7 @@ class QueryChaMessageServiceImpl(
         }
 
         val chatMessagesByKeyword: List<ChatMessage> =
-            queryChatMessageRepository.findChatMessagesByChatRoomIdAndMessageContaining(
+            queryChatMessageRepository.findChatMessagesByChatRoomIdAndMessageContainingKeyword(
                 chatRoomId,
                 querySearchChatMessageRequestDTO.keyword,
                 querySearchChatMessageRequestDTO.page,
@@ -101,7 +101,7 @@ class QueryChaMessageServiceImpl(
             chatMessagesByKeyword.map { entityToDtoConverter.chatMessageToQueryChatMessageResponseDTO(it) }
 
         val totalCount =
-            queryChatMessageRepository.countChatMessagesByChatRoomIdAndMessageContaining(
+            queryChatMessageRepository.countChatMessagesByChatRoomIdAndMessageContainingKeyword(
                 chatRoomId,
                 querySearchChatMessageRequestDTO.keyword,
             )

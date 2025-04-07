@@ -51,6 +51,22 @@ class MongoQueryUtil(
         return mongoTemplate.find(query, collection)
     }
 
+    fun <T> findWithLimitAndSort(
+        collection: Class<T>,
+        criteria: Criteria,
+        sortField: String,
+        limit: Int,
+        sortDirection: Sort.Direction = Sort.Direction.DESC,
+    ): List<T> {
+        val query =
+            Query
+                .query(criteria)
+                .with(Sort.by(sortDirection, sortField))
+                .limit(limit)
+
+        return mongoTemplate.find(query, collection)
+    }
+
     /**
      * 특정 컬렉션에서 정렬된 데이터 조회
      * @param collection 조회할 컬렉션의 클래스 타입

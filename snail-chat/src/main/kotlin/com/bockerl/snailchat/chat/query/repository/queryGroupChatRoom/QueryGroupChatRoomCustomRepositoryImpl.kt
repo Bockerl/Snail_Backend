@@ -44,4 +44,23 @@ class QueryGroupChatRoomCustomRepositoryImpl(
 
         return groupChatRoom
     }
+
+    override fun findGroupChatRoomsByMemberIdAndChatRoomNameContainingKeyword(
+        memberId: String,
+        keyword: String,
+        limit: Int,
+    ): List<GroupChatRoom> {
+        val criteria =
+            Criteria().andOperator(
+                Criteria.where("participants.memberId").`is`(memberId),
+                Criteria.where("chatRoomName").regex(".*$keyword.*", "i"), // 대소문자 무시 포함 검색
+            )
+
+        return mongoQueryUtil.findWithLimitAndSort(
+            collection = GroupChatRoom::class.java,
+            criteria = criteria,
+            sortField = "updatedAt",
+            limit = limit,
+        )
+    }
 }

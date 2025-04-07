@@ -4,23 +4,36 @@ package com.bockerl.snailmember.member.command.domain.service
 
 import com.bockerl.snailmember.area.command.domain.aggregate.entity.ActivityArea
 import com.bockerl.snailmember.area.command.domain.aggregate.entity.AreaType
+import com.bockerl.snailmember.area.command.domain.aggregate.event.ActivityAreaCreateEvent
 import com.bockerl.snailmember.area.command.domain.repository.ActivityAreaRepository
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
+import com.bockerl.snailmember.infrastructure.outbox.dto.OutboxDTO
+import com.bockerl.snailmember.infrastructure.outbox.enums.EventType
+import com.bockerl.snailmember.infrastructure.outbox.service.OutboxService
 import com.bockerl.snailmember.member.command.application.dto.request.*
 import com.bockerl.snailmember.member.command.application.service.AuthService
 import com.bockerl.snailmember.member.command.application.service.RegistrationService
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.*
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.SignUpStep
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.TempMember
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.VerificationType
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.TempMember
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Gender
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Language
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.MemberStatus
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.SignUpPath
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.SignUpStep
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.VerificationType
+import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberCreateEvent
 import com.bockerl.snailmember.member.command.domain.repository.MemberRepository
 import com.bockerl.snailmember.member.command.domain.repository.TempMemberRepository
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 import java.time.LocalDateTime
+import java.util.UUID
 
 @Service
 class RegistrationServiceImpl(
@@ -29,13 +42,23 @@ class RegistrationServiceImpl(
     private val memberRepository: MemberRepository,
     private val activityAreaRepository: ActivityAreaRepository,
     private val bcryptPasswordEncoder: BCryptPasswordEncoder,
+    private val redisTemplate: RedisTemplate<String, String>,
+    private val objectMapper: ObjectMapper,
+    private val outboxService: OutboxService,
 ) : RegistrationService {
     private val logger = KotlinLogging.logger {}
 
     // 1.회원가입 시작(닉네임, 이메일, 생년월일 입력 및 이메일 코드 생성)
     @Transactional
-    override fun initiateRegistration(requestDTO: EmailRequestDTO): String {
+    override fun initiateRegistration(
+        requestDTO: EmailRequestDTO,
+        idempotencyKey: String,
+    ): String {
         logger.info { "임시회원 생성 시작" }
+        // 멱등한 요청인지 확인
+        redisTemplate.opsForValue().get(idempotencyKey)?.let { cacheResult ->
+            throw CommonException(ErrorCode.INVALID_IDEMPOTENCY, "이미 처리된 임시회원 생성 요청입니다.")
+        }
         // 넘어온 이메일이 이미 존재하는지 확인
         memberRepository.findMemberByMemberEmail(requestDTO.memberEmail)?.let { existingMember ->
             logger.warn { "이미 존재하는 이메일로 회원가입 시도, email: $requestDTO.email" }
@@ -53,13 +76,22 @@ class RegistrationServiceImpl(
         logger.info { "임시 회원 객체 redis에 저장 성공 redisId: $redisId" }
         // 이메일 인증 요청
         authService.createEmailVerificationCode(requestDTO.memberEmail)
+        // 멱등성을 위해
+        redisTemplate.opsForValue().set(idempotencyKey, UUID.randomUUID().toString())
         return redisId
     }
 
     // 1-1.이메일 인증 코드 재요청
     @Transactional
-    override fun createEmailRefreshCode(redisId: String) {
+    override fun createEmailRefreshCode(
+        redisId: String,
+        idempotencyKey: String,
+    ) {
         logger.info { "이메일 인증 코드 재요청 시작" }
+        // 멱등한 요청인지 확인
+        redisTemplate.opsForValue().get(idempotencyKey)?.let { cacheResult ->
+            throw CommonException(ErrorCode.INVALID_IDEMPOTENCY, "이미 처리된 이메일 코드 재요청 요청입니다.")
+        }
         val tempMember =
             tempMemberRepository.find(redisId)
                 ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
@@ -70,11 +102,20 @@ class RegistrationServiceImpl(
             throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
         }
         authService.createEmailVerificationCode(tempMember.email)
+        // 멱등성을 위해
+        redisTemplate.opsForValue().set(idempotencyKey, UUID.randomUUID().toString())
     }
 
     // 2.이메일 인증 요청
     @Transactional
-    override fun verifyEmailCode(requestDTO: EmailVerifyRequestDTO): String {
+    override fun verifyEmailCode(
+        requestDTO: EmailVerifyRequestDTO,
+        idempotencyKey: String,
+    ): String {
+        // 멱등한 요청인지 확인
+        redisTemplate.opsForValue().get(idempotencyKey)?.let { cacheResult ->
+            throw CommonException(ErrorCode.INVALID_IDEMPOTENCY, "이미 처리된 이메일 인증 요청입니다.")
+        }
         val redisId = requestDTO.redisId
         logger.info { "이메일 인증 시작 - redisId: $redisId" }
         // redis에서 tempMember 조회
@@ -101,12 +142,21 @@ class RegistrationServiceImpl(
             }.onFailure {
                 logger.warn { "redis에 tempMember 저장 중 오류 발생, redisId: $redisId, error: $it" }
             }
+        // 멱등성을 위해
+        redisTemplate.opsForValue().set(idempotencyKey, UUID.randomUUID().toString())
         return redisId
     }
 
     // 3. 휴대폰 인증 코드 생성
     @Transactional
-    override fun createPhoneVerificationCode(requestDTO: PhoneRequestDTO): String {
+    override fun createPhoneVerificationCode(
+        requestDTO: PhoneRequestDTO,
+        idempotencyKey: String,
+    ): String {
+        // 멱등한 요청인지 확인
+        redisTemplate.opsForValue().get(idempotencyKey)?.let { cacheResult ->
+            throw CommonException(ErrorCode.INVALID_IDEMPOTENCY, "이미 처리된 휴대폰 인증 코드 생성 요청입니다.")
+        }
         val redisId = requestDTO.redisId
         logger.info { "휴대폰 인증 시작 - redisId: $redisId" }
         // redis에서 tempMember조회
@@ -132,13 +182,21 @@ class RegistrationServiceImpl(
                 logger.warn { "redis에 tempMember 저장 중 오류 발생, redisId: $redisId, error: $it" }
             }
         logger.info { "휴대폰 인증 코드 발송 성공" }
+        // 멱등성을 위해
+        redisTemplate.opsForValue().set(idempotencyKey, UUID.randomUUID().toString())
         return verificationCode
     }
 
     // 3-1. 휴대폰 인증 코드 재요청
     @Transactional
-    override fun createPhoneRefreshCode(requestDTO: PhoneRequestDTO): String {
+    override fun createPhoneRefreshCode(
+        requestDTO: PhoneRequestDTO,
+        idempotencyKey: String,
+    ): String {
         logger.info { "휴대폰 인증 코드 재요청 시작" }
+        redisTemplate.opsForValue().get(idempotencyKey)?.let { cacheResult ->
+            throw CommonException(ErrorCode.INVALID_IDEMPOTENCY, "이미 처리된 휴대폰 인증 코드 재요청 요청입니다.")
+        }
         val redisId = requestDTO.redisId
         logger.info { "휴대폰 인증 시작 - redisId: $redisId" }
         val tempMember =
@@ -151,12 +209,21 @@ class RegistrationServiceImpl(
         }
         val code = authService.createPhoneVerificationCode(tempMember.phoneNumber)
         logger.info { "새로 재생성된 핸드폰 인증 코드: $code" }
+        // 멱등성을 위해
+        redisTemplate.opsForValue().set(idempotencyKey, UUID.randomUUID().toString())
         return code
     }
 
     // 4. 휴대폰 인증 요청
     @Transactional
-    override fun verifyPhoneCode(requestDTO: PhoneVerifyRequestDTO): String {
+    override fun verifyPhoneCode(
+        requestDTO: PhoneVerifyRequestDTO,
+        idempotencyKey: String,
+    ): String {
+        // 멱등한 요청인지 확인
+        redisTemplate.opsForValue().get(idempotencyKey)?.let { cacheResult ->
+            throw CommonException(ErrorCode.INVALID_IDEMPOTENCY, "이미 처리된 휴대폰 인증 요청입니다.")
+        }
         val redisId = requestDTO.redisId
         logger.info { "이메일 인증 시작 - redisId: $redisId" }
         // redis에서 tempMember 조회
@@ -184,12 +251,21 @@ class RegistrationServiceImpl(
                 logger.info { "redis에 임시회원 휴대폰 번호 업데이트 실패 - redisId: $redisId" }
                 throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
             }
+        // 멱등성을 위해
+        redisTemplate.opsForValue().set(idempotencyKey, UUID.randomUUID().toString())
         return redisId
     }
 
     // 5. 비밀번호 입력
     @Transactional
-    override fun postPassword(requestDTO: PasswordRequestDTO): String {
+    override fun postPassword(
+        requestDTO: PasswordRequestDTO,
+        idempotencyKey: String,
+    ): String {
+        // 멱등한 요청인지 확인
+        redisTemplate.opsForValue().get(idempotencyKey)?.let { cacheResult ->
+            throw CommonException(ErrorCode.INVALID_IDEMPOTENCY, "이미 처리된 비밀번호 입력 요청입니다.")
+        }
         val redisId = requestDTO.redisId
         logger.info { "비밀번호 입력 시작 - redisId: $redisId" }
         // redis에서 tempMember 조회
@@ -213,12 +289,21 @@ class RegistrationServiceImpl(
                 logger.info { "redis에 임시회원 비밀번호 업데이트 실패 - redisId: $redisId" }
                 throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
             }
+        // 멱등성을 위해
+        redisTemplate.opsForValue().set(idempotencyKey, UUID.randomUUID().toString())
         return redisId
     }
 
     // 6. 활동지역 등록(회원가입 완료)
     @Transactional
-    override fun postActivityArea(requestDTO: ActivityAreaRegisterRequestDTO) {
+    override fun postActivityArea(
+        requestDTO: ActivityAreaRegisterRequestDTO,
+        idempotencyKey: String,
+    ) {
+        // 멱등한 요청인지 확인
+        redisTemplate.opsForValue().get(idempotencyKey)?.let { cacheResult ->
+            throw CommonException(ErrorCode.INVALID_IDEMPOTENCY, "이미 처리된 회원가입 완료 요청입니다.")
+        }
         val redisId = requestDTO.redisId
         logger.info { "활동지역 등록 시작 - redisId: $redisId" }
         // redis에서 tempMember 조회
@@ -319,6 +404,48 @@ class RegistrationServiceImpl(
                 throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
             }
         logger.info { "회원 가입 종료 - 회원 가입 성공" }
+        // 멱등성을 위해
+        redisTemplate.opsForValue().set(idempotencyKey, UUID.randomUUID().toString())
+        // 회원 생성 이벤트, 활동지역 생성 이벤트 발생
+        val memberEvent =
+            MemberCreateEvent(
+                memberId = newMember.formattedId,
+                memberEmail = newMember.memberEmail,
+                memberPhoneNumber = newMember.memberPhoneNumber,
+                memberNickname = newMember.memberNickname,
+                memberGender = newMember.memberGender,
+                memberLanguage = newMember.memberLanguage,
+                memberRegion = newMember.memberRegion,
+                memberPhoto = newMember.memberPhoto,
+                memberBirth = newMember.memberBirth,
+                memberStatus = newMember.memberStatus,
+                signUpPath = SignUpPath.EMAIL,
+            )
+        val jsonPayLoad = objectMapper.writeValueAsString(memberEvent)
+        val outBox =
+            OutboxDTO(
+                newMember.formattedId,
+                EventType.MEMBER,
+                jsonPayLoad,
+                idempotencyKey,
+            )
+        val areaEvent =
+            ActivityAreaCreateEvent(
+                memberId = newMember.formattedId,
+                timeStamp = Instant.now(),
+                primaryId = requestDTO.primaryFormattedId,
+                workplaceId = requestDTO.workplaceFormattedId,
+            )
+        val areaJsonPayLoad = objectMapper.writeValueAsString(areaEvent)
+        val areaOutBox =
+            OutboxDTO(
+                newMember.formattedId,
+                EventType.ACTIVITY_AREA,
+                areaJsonPayLoad,
+                idempotencyKey,
+            )
+        val outboxList = listOf(outBox, areaOutBox)
+        outboxService.createOutboxes(outboxList)
     }
 
     private fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()

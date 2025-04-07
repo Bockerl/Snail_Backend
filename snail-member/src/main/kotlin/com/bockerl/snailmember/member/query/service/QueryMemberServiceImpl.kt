@@ -6,7 +6,7 @@ package com.bockerl.snailmember.member.query.service
 
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.MemberStatus
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.MemberStatus
 import com.bockerl.snailmember.member.query.dto.MemberQueryDTO
 import com.bockerl.snailmember.member.query.repository.MemberMapper
 import com.bockerl.snailmember.member.query.vo.MemberProfileResponseVO

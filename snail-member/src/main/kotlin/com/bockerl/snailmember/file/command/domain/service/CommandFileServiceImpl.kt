@@ -41,7 +41,7 @@ class CommandFileServiceImpl(
     override fun createSingleFile(
         file: MultipartFile,
         commandFileDTO: CommandFileDTO,
-    ) {
+    ): String {
         val fileName = generateUniqueFileName(file.originalFilename)
         val blobClient = blobContainerClient.getBlobClient(fileName)
 
@@ -80,6 +80,7 @@ class CommandFileServiceImpl(
             )
 
         outboxService.createOutbox(outbox)
+        return fileUrl
     }
 
     @Transactional
@@ -188,7 +189,7 @@ class CommandFileServiceImpl(
     override fun updateProfileImage(
         file: MultipartFile,
         commandFileDTO: CommandFileDTO,
-    ) {
+    ): String {
         if (!file.contentType?.startsWith("image/")!!) {
             throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT)
         }
@@ -255,6 +256,7 @@ class CommandFileServiceImpl(
             )
 
         outboxService.createOutbox(createOutbox)
+        return fileUrl
     }
 
     // 설명. 삭제할 파일 삭제 후 새로운 파일 추가

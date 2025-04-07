@@ -3,6 +3,7 @@ package com.bockerl.snailmember.security
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.dto.response.LoginResponseDTO
+import com.bockerl.snailmember.member.command.application.service.CommandMemberService
 import com.bockerl.snailmember.security.config.TokenType
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.jsonwebtoken.Claims
@@ -11,7 +12,11 @@ import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.core.env.Environment
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import java.lang.Exception
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.Date
 import javax.crypto.spec.SecretKeySpec
 
@@ -19,6 +24,7 @@ import javax.crypto.spec.SecretKeySpec
 class Oauth2JwtUtils(
     environment: Environment,
     private val redisTemplate: RedisTemplate<String, String>,
+    private val commandMemberService: CommandMemberService,
 ) {
     companion object {
         private const val REDIS_RT_PREFIX = "RT:"
@@ -48,6 +54,15 @@ class Oauth2JwtUtils(
         val accessToken = generateAccessToken(customMember)
         // RefreshToken 처리
         val refreshToken = getOrCreateRefreshToken(email, customMember.authorities.firstOrNull()?.authority)
+        // 로그인 시간 변경 메서드
+        val request = RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes
+        val httpRequest = request.request
+        val ipAddress = httpRequest.remoteAddr
+        val userAgent = httpRequest.getHeader("User-Agent")
+        // 멱등키 생성(id + sec)
+        val currentTime = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+        val idempotencyKey = "$email:$currentTime"
+        commandMemberService.putLastAccessTime(email, ipAddress, userAgent, idempotencyKey)
         return LoginResponseDTO(accessToken, refreshToken)
     }
 

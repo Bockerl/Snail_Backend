@@ -3,16 +3,20 @@ package com.bockerl.snailmember.member.command.domain.service
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.infrastructure.config.TransactionalConfig
+import com.bockerl.snailmember.infrastructure.outbox.dto.OutboxDTO
+import com.bockerl.snailmember.infrastructure.outbox.enums.EventType
+import com.bockerl.snailmember.infrastructure.outbox.service.OutboxService
 import com.bockerl.snailmember.member.client.GoogleAuthClient
 import com.bockerl.snailmember.member.command.application.dto.response.GooglePayloadDTO
 import com.bockerl.snailmember.member.command.application.dto.response.LoginResponseDTO
 import com.bockerl.snailmember.member.command.application.service.GoogleOauth2Service
 import com.bockerl.snailmember.member.command.config.Oauth2LoginProperties
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.Gender
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.Language
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.Member
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.MemberStatus
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.SignUpPath
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Gender
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Language
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.MemberStatus
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.SignUpPath
+import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberCreateEvent
 import com.bockerl.snailmember.member.command.domain.repository.MemberRepository
 import com.bockerl.snailmember.security.CustomMember
 import com.bockerl.snailmember.security.Oauth2JwtUtils
@@ -21,7 +25,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 import java.time.LocalDate
 import java.util.Base64
 import java.util.UUID
@@ -32,19 +36,20 @@ class GoogleOauth2ServiceImpl(
     private val loginProperties: Oauth2LoginProperties,
     private val googleAuthClient: GoogleAuthClient,
     private val jwtUtils: Oauth2JwtUtils,
-    // 추후 jwt 발행도 덧붙일 것
+    private val objectMapper: ObjectMapper,
+    private val outboxService: OutboxService,
 ) : GoogleOauth2Service {
     private val logger = KotlinLogging.logger {}
 
-    @Transactional
-    override fun googleLogin(code: String): LoginResponseDTO {
-        // 코드 기반으로 요청을 보낸 뒤 id token만 추출
-        val idToken = requestTokenFromGoogle(code)
-        // 유저 정보 디코딩
-        val customMember = TransactionalConfig.run { decodeUserInfoFromToken(idToken) as CustomMember }
-        val response = jwtUtils.generateJwtResponse(customMember)
-        return response
-    }
+    override fun googleLogin(code: String): LoginResponseDTO =
+        TransactionalConfig.run {
+            // 코드 기반으로 요청을 보낸 뒤 id token만 추출
+            val idToken = requestTokenFromGoogle(code)
+            // 유저 정보 디코딩
+            val customMember = decodeUserInfoFromToken(idToken) as CustomMember
+            val response = jwtUtils.generateJwtResponse(customMember)
+            return@run response
+        }
 
     private fun requestTokenFromGoogle(code: String): String {
         logger.info { "구글 코드 기반 인증 토큰 요청 시작" }
@@ -146,6 +151,32 @@ class GoogleOauth2ServiceImpl(
         logger.info { "새로 생성되는 구글 계정 멤버: $newGoogleMember" }
         memberRepository.save(newGoogleMember)
         logger.info { "구글 계정 새 멤버 저장 성공" }
+        // outbox 이벤트 발행(회원 생성)
+        val event =
+            MemberCreateEvent(
+                memberId = newGoogleMember.formattedId,
+                timestamp = Instant.now(),
+                memberEmail = newGoogleMember.memberEmail,
+                memberPhoneNumber = newGoogleMember.memberPhoneNumber,
+                memberStatus = newGoogleMember.memberStatus,
+                memberRegion = newGoogleMember.memberRegion,
+                memberGender = newGoogleMember.memberGender,
+                memberNickname = newGoogleMember.memberNickname,
+                memberPhoto = newGoogleMember.memberPhoto,
+                memberBirth = newGoogleMember.memberBirth,
+                memberLanguage = newGoogleMember.memberLanguage,
+                signUpPath = SignUpPath.Google,
+            )
+        val jsonPayLoad = objectMapper.writeValueAsString(event)
+        val outBox =
+            OutboxDTO(
+                aggregateId = newGoogleMember.formattedId,
+                eventType = EventType.MEMBER,
+                payload = jsonPayLoad,
+                // 회원가입은 1번만 발생하므로, pk를 멱등키로
+                idempotencyKey = newGoogleMember.formattedId,
+            )
+        outboxService.createOutbox(outBox)
         return newGoogleMember
     }
 }

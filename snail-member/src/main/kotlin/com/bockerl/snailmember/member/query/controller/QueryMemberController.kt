@@ -6,6 +6,7 @@ package com.bockerl.snailmember.member.query.controller
 
 import com.bockerl.snailmember.common.ResponseDTO
 import com.bockerl.snailmember.member.command.application.mapper.MemberConverter
+import com.bockerl.snailmember.member.query.dto.MemberProfileResponseDTO
 import com.bockerl.snailmember.member.query.dto.MemberQueryDTO
 import com.bockerl.snailmember.member.query.service.QueryMemberService
 import com.bockerl.snailmember.member.query.vo.MemberProfileResponseVO
@@ -88,6 +89,25 @@ class QueryMemberController(
         return ResponseDTO.ok(memberConverter.dtoToResponseVO(memberDTO))
     }
 
+    @Operation(
+        summary = "액세스 토큰으로 프로필 조회",
+        description = "Security ContextHolder의 Authentication Principal의 memberid를 사용해 프로필을 조회합니다.",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "프로필 조회 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = MemberProfileResponseDTO::class),
+                    ),
+                ],
+            ),
+        ],
+    )
+    @GetMapping("/profile")
     fun getMemberProfile(
         @Parameter(hidden = true) @CurrentMemberId memberId: String,
     ): ResponseDTO<*> {

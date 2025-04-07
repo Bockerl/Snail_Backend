@@ -10,8 +10,12 @@ import com.bockerl.snailmember.member.command.application.dto.request.PhoneReque
 import com.bockerl.snailmember.member.command.application.dto.request.PhoneVerifyRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.response.KaKaoTokenResponseDTO
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.*
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.SignUpStep
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.TempMember
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.TempMember
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Gender
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Language
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.MemberStatus
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.SignUpPath
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.SignUpStep
 import java.sql.Timestamp
 import java.time.LocalDate
 

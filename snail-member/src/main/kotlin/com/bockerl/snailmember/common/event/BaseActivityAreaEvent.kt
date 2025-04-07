@@ -12,8 +12,8 @@ import java.time.Instant
     property = "eventType",
 )
 @JsonSubTypes(
-    JsonSubTypes.Type(value = ActivityAreaCreateEvent::class),
-    JsonSubTypes.Type(value = ActivityAreaUpdateEvent::class),
+    JsonSubTypes.Type(value = ActivityAreaCreateEvent::class, name = "ACTIVITY_AREA_CREATE"),
+    JsonSubTypes.Type(value = ActivityAreaUpdateEvent::class, name = "ACTIVITY_AREA_UPDATE"),
 )
 interface BaseActivityAreaEvent {
     val memberId: String

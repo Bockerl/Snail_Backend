@@ -5,9 +5,9 @@ import jakarta.persistence.Embeddable
 import java.io.Serializable
 
 @Embeddable
-class GatheringMemberId(
+data class GatheringMemberId(
     @Column(name = "gathering_id", nullable = false)
-    var gatheringId: Long,
+    val gatheringId: Long,
     @Column(name = "member_id", nullable = false)
-    var memberId: Long,
+    val memberId: Long,
 ) : Serializable

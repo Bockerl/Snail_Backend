@@ -16,4 +16,6 @@ class GatheringMember(
     val gathering: Gathering,
     @Column(name = "gathering_role", nullable = false, length = 255)
     var gatheringRole: GatheringRole,
+    @Column(name = "active", nullable = false)
+    var active: Boolean = true,
 )

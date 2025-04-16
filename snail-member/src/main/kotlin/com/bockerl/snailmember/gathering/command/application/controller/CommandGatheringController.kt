@@ -5,10 +5,9 @@ package com.bockerl.snailmember.gathering.command.application.controller
 import com.bockerl.snailmember.common.ResponseDTO
 import com.bockerl.snailmember.gathering.command.application.mapper.GatheringConverter
 import com.bockerl.snailmember.gathering.command.application.service.CommandGatheringService
-import com.bockerl.snailmember.gathering.command.domain.aggregate.vo.request.CommandGatheringCreateRequestVO
-import com.bockerl.snailmember.gathering.command.domain.aggregate.vo.request.CommandGatheringDeleteRequestVO
-import com.bockerl.snailmember.gathering.command.domain.aggregate.vo.request.CommandGatheringUpdateRequestVO
+import com.bockerl.snailmember.gathering.command.domain.aggregate.vo.request.*
 import com.bockerl.snailmember.infrastructure.config.OpenApiBody
+import com.bockerl.snailmember.security.CustomMember
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Encoding
@@ -16,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.http.MediaType
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
@@ -147,6 +147,153 @@ class CommandGatheringController(
     }
 
     // 모임 권한 수정 api
-    // 모임 탈퇴 api
+    @Operation(
+        summary = "모임 권한 수정",
+        description =
+            """
+            입력된 모임 정보, 멤버 id, 바뀐 권한정보를 바탕으로 모임 별 모임원 테이블을 수정합니다.
+        """,
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "모임 권한 수정 성공",
+                content = [
+                    Content(mediaType = "application/json", schema = Schema(implementation = ResponseDTO::class)),
+                ],
+            ),
+        ],
+    )
+    @PatchMapping("authorization")
+    fun patchGatheringAuthorization(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
+        @RequestBody commandGatheringAuthorizationUpdateRequestVO: CommandGatheringAuthorizationUpdateRequestVO,
+    ): ResponseDTO<*> {
+        val commandGatheringAuthorizationUpdateDTO =
+            gatheringConverter.updateAuthorizationRequestVOToDTO(
+                commandGatheringAuthorizationUpdateRequestVO,
+                idempotencyKey,
+            )
+
+        commandGatheringService.updateGatheringAuthorization(commandGatheringAuthorizationUpdateDTO)
+
+        return ResponseDTO.ok(null)
+    }
+
     // 모임 참여 api
+    @Operation(
+        summary = "모임 참여",
+        description =
+            """
+            입력된 모임 정보, 멤버 id를 바탕으로 모임에 참여합니다.
+        """,
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "모임 참여 성공",
+                content = [
+                    Content(mediaType = "application/json", schema = Schema(implementation = ResponseDTO::class)),
+                ],
+            ),
+        ],
+    )
+    @PostMapping("member")
+    fun postGatheringMember(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
+        @RequestParam("gatheringId") gatheringId: String,
+        authentication: Authentication,
+    ): ResponseDTO<*> {
+        val customMember = authentication.principal as CustomMember
+
+        val memberId = customMember.memberId
+
+        val commandGatheringMemberCreateDTO =
+            gatheringConverter.memberRequestVOToDTO(
+                gatheringId,
+                memberId,
+                idempotencyKey,
+            )
+
+        commandGatheringService.createGatheringMember(commandGatheringMemberCreateDTO)
+
+        return ResponseDTO.ok(null)
+    }
+
+    // 모임 탈퇴 api(본인)
+    @Operation(
+        summary = "모임 탈퇴(본인)",
+        description =
+            """
+            입력된 모임 정보, 멤버 id를 바탕으로 모임에 탈퇴합니다.(본인)
+        """,
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "모임 탈퇴 성공",
+                content = [
+                    Content(mediaType = "application/json", schema = Schema(implementation = ResponseDTO::class)),
+                ],
+            ),
+        ],
+    )
+    @DeleteMapping("member")
+    fun deleteGatheringMember(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
+        @RequestParam("gatheringId") gatheringId: String,
+        authentication: Authentication,
+    ): ResponseDTO<*> {
+        val customMember = authentication.principal as CustomMember
+
+        val memberId = customMember.memberId
+
+        val commandGatheringMemberCreateDTO =
+            gatheringConverter.memberRequestVOToDTO(
+                gatheringId,
+                memberId,
+                idempotencyKey,
+            )
+
+        commandGatheringService.deleteGatheringMember(commandGatheringMemberCreateDTO)
+
+        return ResponseDTO.ok(null)
+    }
+
+    @Operation(
+        summary = "모임 탈퇴(운영진)",
+        description =
+            """
+            입력된 모임 정보, 멤버 id를 바탕으로 모임에 퇴장시킵니다.(운영진)
+        """,
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "모임 탈퇴 성공",
+                content = [
+                    Content(mediaType = "application/json", schema = Schema(implementation = ResponseDTO::class)),
+                ],
+            ),
+        ],
+    )
+    @DeleteMapping("executive")
+    fun deleteGatheringMemberByExecutive(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
+        @RequestBody commandGatheringMemberDeleteRequestVO: CommandGatheringMemberDeleteRequestVO,
+    ): ResponseDTO<*> {
+        val commandGatheringMemberCreateDTO =
+            gatheringConverter.deleteMemberRequestVOToDTO(
+                commandGatheringMemberDeleteRequestVO,
+                idempotencyKey,
+            )
+
+        commandGatheringService.deleteGatheringMember(commandGatheringMemberCreateDTO)
+
+        return ResponseDTO.ok(null)
+    }
 }

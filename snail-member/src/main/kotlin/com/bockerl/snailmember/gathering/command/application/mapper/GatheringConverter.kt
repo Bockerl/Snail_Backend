@@ -1,11 +1,7 @@
 package com.bockerl.snailmember.gathering.command.application.mapper
 
-import com.bockerl.snailmember.gathering.command.application.dto.CommandGatheringCreateDTO
-import com.bockerl.snailmember.gathering.command.application.dto.CommandGatheringDeleteDTO
-import com.bockerl.snailmember.gathering.command.application.dto.CommandGatheringUpdateDTO
-import com.bockerl.snailmember.gathering.command.domain.aggregate.vo.request.CommandGatheringCreateRequestVO
-import com.bockerl.snailmember.gathering.command.domain.aggregate.vo.request.CommandGatheringDeleteRequestVO
-import com.bockerl.snailmember.gathering.command.domain.aggregate.vo.request.CommandGatheringUpdateRequestVO
+import com.bockerl.snailmember.gathering.command.application.dto.*
+import com.bockerl.snailmember.gathering.command.domain.aggregate.vo.request.*
 import org.springframework.stereotype.Component
 
 @Component
@@ -44,6 +40,38 @@ class GatheringConverter {
         idempotencyKey: String,
     ): CommandGatheringDeleteDTO =
         CommandGatheringDeleteDTO(
+            gatheringId = requestVO.gatheringId,
+            memberId = requestVO.memberId,
+            idempotencyKey = idempotencyKey,
+        )
+
+    fun updateAuthorizationRequestVOToDTO(
+        requestVO: CommandGatheringAuthorizationUpdateRequestVO,
+        idempotencyKey: String,
+    ): CommandGatheringAuthorizationUpdateDTO =
+        CommandGatheringAuthorizationUpdateDTO(
+            gatheringId = requestVO.gatheringId,
+            memberId = requestVO.memberId,
+            gatheringRole = requestVO.gatheringRole,
+            idempotencyKey = idempotencyKey,
+        )
+
+    fun memberRequestVOToDTO(
+        gatheringId: String,
+        memberId: String,
+        idempotencyKey: String,
+    ): CommandGatheringMemberCreateDTO =
+        CommandGatheringMemberCreateDTO(
+            gatheringId = gatheringId,
+            memberId = memberId,
+            idempotencyKey = idempotencyKey,
+        )
+
+    fun deleteMemberRequestVOToDTO(
+        requestVO: CommandGatheringMemberDeleteRequestVO,
+        idempotencyKey: String,
+    ): CommandGatheringMemberCreateDTO =
+        CommandGatheringMemberCreateDTO(
             gatheringId = requestVO.gatheringId,
             memberId = requestVO.memberId,
             idempotencyKey = idempotencyKey,

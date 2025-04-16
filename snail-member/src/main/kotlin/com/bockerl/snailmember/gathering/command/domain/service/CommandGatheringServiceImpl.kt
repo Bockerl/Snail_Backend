@@ -5,9 +5,7 @@ import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
 import com.bockerl.snailmember.file.command.application.service.CommandFileService
 import com.bockerl.snailmember.file.command.domain.aggregate.enums.FileTargetType
-import com.bockerl.snailmember.gathering.command.application.dto.CommandGatheringCreateDTO
-import com.bockerl.snailmember.gathering.command.application.dto.CommandGatheringDeleteDTO
-import com.bockerl.snailmember.gathering.command.application.dto.CommandGatheringUpdateDTO
+import com.bockerl.snailmember.gathering.command.application.dto.*
 import com.bockerl.snailmember.gathering.command.application.service.CommandGatheringService
 import com.bockerl.snailmember.gathering.command.domain.aggregate.entity.Gathering
 import com.bockerl.snailmember.gathering.command.domain.aggregate.entity.GatheringMember
@@ -25,7 +23,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 
 @Service
-class CommandGatheringSerivceImpl(
+class CommandGatheringServiceImpl(
     private val commandGatheringRepository: CommandGatheringRepository,
     private val commandFileService: CommandFileService,
     private val redisTemplate: RedisTemplate<String, Any>,
@@ -62,7 +60,7 @@ class CommandGatheringSerivceImpl(
                             memberId = extractDigits(commandGatheringCreateDTO.memberId),
                         ),
                     gathering = gatheringEntity,
-                    gatheringRole = GatheringRole.LEADER,
+                    gatheringRole = GatheringRole.ROLE_LEADER,
                 )
             }
 
@@ -187,6 +185,11 @@ class CommandGatheringSerivceImpl(
             active = false
         }
 
+        // 모임 별 모임원도 active = false 해줘야함
+//        val gatheringMember =
+//            commandGatheringMemberRepository.findByIdGatheringId(gatheringId)
+        commandGatheringMemberRepository.updateActiveByGatheringId(gatheringId)
+
         val commandFileDTO =
             CommandFileDTO(
                 fileTargetType = FileTargetType.GATHERING,
@@ -213,6 +216,153 @@ class CommandGatheringSerivceImpl(
             redisTemplate.execute(
                 idempotencyRedisScript,
                 listOf(commandGatheringDeleteDTO.idempotencyKey),
+                "PROCESSED",
+                ttlInSeconds,
+            )
+
+        // result가 "OK"이면 SET 명령이 성공적으로 실행된 것입니다.
+        if (result != "OK") {
+            throw CommonException(ErrorCode.REDIS_ERROR)
+        }
+    }
+
+    @Transactional
+    override fun updateGatheringAuthorization(commandGatheringAuthorizationUpdateDTO: CommandGatheringAuthorizationUpdateDTO) {
+        // 따닥 방지
+        if (redisTemplate.hasKey(commandGatheringAuthorizationUpdateDTO.idempotencyKey)) {
+            throw CommonException(ErrorCode.ALREADY_REQUESTED)
+        }
+
+        val gatheringId = extractDigits(commandGatheringAuthorizationUpdateDTO.gatheringId)
+        val memberId = extractDigits(commandGatheringAuthorizationUpdateDTO.memberId)
+
+        val compositeKey =
+            GatheringMemberId(
+                gatheringId = gatheringId,
+                memberId = memberId,
+            )
+
+        val gatheringMember =
+            commandGatheringMemberRepository
+                .findById(
+                    compositeKey,
+                ).orElseThrow { CommonException(ErrorCode.NOT_FOUND_GATHERING) }
+
+        gatheringMember.apply {
+            gatheringRole = commandGatheringAuthorizationUpdateDTO.gatheringRole
+        }
+
+        val idempotencyScript =
+            """
+            local res = redis.call("set", KEYS[1], ARGV[1], "EX", ARGV[2])
+            return res
+            """.trimIndent()
+
+        val idempotencyRedisScript = DefaultRedisScript<String>(idempotencyScript, String::class.java)
+        val ttlInSeconds = "3600" // 1시간 TTL
+
+        val result =
+            redisTemplate.execute(
+                idempotencyRedisScript,
+                listOf(commandGatheringAuthorizationUpdateDTO.idempotencyKey),
+                "PROCESSED",
+                ttlInSeconds,
+            )
+
+        // result가 "OK"이면 SET 명령이 성공적으로 실행된 것입니다.
+        if (result != "OK") {
+            throw CommonException(ErrorCode.REDIS_ERROR)
+        }
+    }
+
+    @Transactional
+    override fun createGatheringMember(commandGatheringMemberCreateDTO: CommandGatheringMemberCreateDTO) {
+        // 따닥 방지
+        if (redisTemplate.hasKey(commandGatheringMemberCreateDTO.idempotencyKey)) {
+            throw CommonException(ErrorCode.ALREADY_REQUESTED)
+        }
+
+        val gatheringId = extractDigits(commandGatheringMemberCreateDTO.gatheringId)
+        val memberId = extractDigits(commandGatheringMemberCreateDTO.memberId)
+
+        val gathering = commandGatheringRepository.findById(gatheringId).orElseThrow { CommonException(ErrorCode.NOT_FOUND_GATHERING) }
+
+        val gatheringMember =
+            GatheringMember(
+                id =
+                    GatheringMemberId(
+                        gatheringId = gatheringId,
+                        memberId = memberId,
+                    ),
+                gathering = gathering,
+                gatheringRole = GatheringRole.ROLE_MEMBER,
+            )
+
+        gatheringMember.let {
+            commandGatheringMemberRepository.save(it)
+        }
+
+        val idempotencyScript =
+            """
+            local res = redis.call("set", KEYS[1], ARGV[1], "EX", ARGV[2])
+            return res
+            """.trimIndent()
+
+        val idempotencyRedisScript = DefaultRedisScript<String>(idempotencyScript, String::class.java)
+        val ttlInSeconds = "3600" // 1시간 TTL
+
+        val result =
+            redisTemplate.execute(
+                idempotencyRedisScript,
+                listOf(commandGatheringMemberCreateDTO.idempotencyKey),
+                "PROCESSED",
+                ttlInSeconds,
+            )
+
+        // result가 "OK"이면 SET 명령이 성공적으로 실행된 것입니다.
+        if (result != "OK") {
+            throw CommonException(ErrorCode.REDIS_ERROR)
+        }
+    }
+
+    override fun deleteGatheringMember(commandGatheringMemberCreateDTO: CommandGatheringMemberCreateDTO) {
+        // 따닥 방지
+        if (redisTemplate.hasKey(commandGatheringMemberCreateDTO.idempotencyKey)) {
+            throw CommonException(ErrorCode.ALREADY_REQUESTED)
+        }
+
+        val gatheringId = extractDigits(commandGatheringMemberCreateDTO.gatheringId)
+        val memberId = extractDigits(commandGatheringMemberCreateDTO.memberId)
+
+        val compositeKey =
+            GatheringMemberId(
+                gatheringId = gatheringId,
+                memberId = memberId,
+            )
+
+        val gatheringMember =
+            commandGatheringMemberRepository
+                .findById(
+                    compositeKey,
+                ).orElseThrow { CommonException(ErrorCode.NOT_FOUND_GATHERING) }
+
+        gatheringMember.apply {
+            active = false
+        }
+
+        val idempotencyScript =
+            """
+            local res = redis.call("set", KEYS[1], ARGV[1], "EX", ARGV[2])
+            return res
+            """.trimIndent()
+
+        val idempotencyRedisScript = DefaultRedisScript<String>(idempotencyScript, String::class.java)
+        val ttlInSeconds = "3600" // 1시간 TTL
+
+        val result =
+            redisTemplate.execute(
+                idempotencyRedisScript,
+                listOf(commandGatheringMemberCreateDTO.idempotencyKey),
                 "PROCESSED",
                 ttlInSeconds,
             )

@@ -1,8 +1,6 @@
 package com.bockerl.snailmember.gathering.command.application.service
 
-import com.bockerl.snailmember.gathering.command.application.dto.CommandGatheringCreateDTO
-import com.bockerl.snailmember.gathering.command.application.dto.CommandGatheringDeleteDTO
-import com.bockerl.snailmember.gathering.command.application.dto.CommandGatheringUpdateDTO
+import com.bockerl.snailmember.gathering.command.application.dto.*
 import org.springframework.web.multipart.MultipartFile
 
 interface CommandGatheringService {
@@ -17,4 +15,10 @@ interface CommandGatheringService {
     )
 
     fun deleteGathering(commandGatheringDeleteDTO: CommandGatheringDeleteDTO)
+
+    fun updateGatheringAuthorization(commandGatheringAuthorizationUpdateDTO: CommandGatheringAuthorizationUpdateDTO)
+
+    fun createGatheringMember(commandGatheringMemberCreateDTO: CommandGatheringMemberCreateDTO)
+
+    fun deleteGatheringMember(commandGatheringMemberCreateDTO: CommandGatheringMemberCreateDTO)
 }

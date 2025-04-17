@@ -26,7 +26,7 @@ import org.springframework.web.multipart.MultipartFile
 class CommandGatheringServiceImpl(
     private val commandGatheringRepository: CommandGatheringRepository,
     private val commandFileService: CommandFileService,
-    private val redisTemplate: RedisTemplate<String, Any>,
+    private val redisTemplate: RedisTemplate<String, String>,
     private val commandGatheringMemberRepository: CommandGatheringMemberRepository,
 ) : CommandGatheringService {
     @Transactional

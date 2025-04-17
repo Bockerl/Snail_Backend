@@ -1,6 +1,6 @@
 package com.bockerl.snailmember.member.command.application.dto.request
 
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.Gender
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Gender
 import java.time.LocalDate
 
 class ProfileRequestDTO(

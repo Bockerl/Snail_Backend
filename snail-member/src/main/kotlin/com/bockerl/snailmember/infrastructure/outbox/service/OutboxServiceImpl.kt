@@ -21,6 +21,7 @@ class OutboxServiceImpl(
                 payload = outBoxDTO.payload,
                 idempotencyKey = outBoxDTO.idempotencyKey,
             )
+        // Consumer ->
         if (outbox.eventId == null) {
             val nextVal =
                 (

@@ -1,1 +1,40 @@
-spring.application.name=snail-eureka-gateway
+server:
+  port: 8000
+
+spring:
+  application:
+    name: snail-gateway
+  cloud:
+    kubernetes:
+      discovery:
+        enabled: true # K8S 서비스를 discovery에 등록
+      config:
+        enabled: true # ConfigMap 사용 활성화
+    gateway:
+      routes:
+        - id: member-email-registration
+          uri: lb://snail-member-service
+          predicates:
+            - Path=/api/registration/**
+            - Method=POST
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10  # 초당 허용 요청 수
+                redis-rate-limiter.burstCapacity: 20  # 최대 버스트 요청 수
+
+        - id: member-oauth
+          uri: lb://snail-member-service
+          predicates:
+            - Path=/api/user/oauth2
+            - Method=GET
+
+        - id: command-member
+          uri: lb://snail-member-service
+          predicates:
+            - Path=/api/member/**
+          filters:
+            - AuthorizationHeaderFilter
+            - name: RequestSize
+              args:
+                maxSize: 10MB

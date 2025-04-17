@@ -2,7 +2,7 @@ package com.bockerl.snailmember.member.command.domain.repository
 
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.TempMember
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.TempMember
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Repository
 import java.time.Duration

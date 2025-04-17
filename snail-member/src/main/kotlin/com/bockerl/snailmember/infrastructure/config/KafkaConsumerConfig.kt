@@ -47,6 +47,7 @@ class KafkaConsumerConfig(
             )
 
         val objectMapper = ObjectMapper().registerKotlinModule()
+        // 리플렉션 + @Payload 타입 기반으로 동적으로 타입을 결정해 역직렬화 가능
         val deserializer =
             JsonDeserializer(Any::class.java, objectMapper).apply {
                 addTrustedPackages("*")

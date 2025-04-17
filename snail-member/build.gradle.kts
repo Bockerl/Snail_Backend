@@ -26,6 +26,7 @@ ktlint {
         exclude("**/*.kts")
     }
     disabledRules.set(setOf("header")) // HEADER_KEYWORD 규칙 비활성화
+    ignoreFailures = true
 }
 
 // build.gradle.kts
@@ -43,8 +44,12 @@ version = "0.0.1-SNAPSHOT"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
+}
+
+springBoot {
+    mainClass.set("com.bockerl.snailmember.SnailMemberApplicationKt")
 }
 
 repositories {

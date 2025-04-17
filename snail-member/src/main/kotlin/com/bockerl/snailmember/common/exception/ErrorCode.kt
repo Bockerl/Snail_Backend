@@ -30,6 +30,7 @@ enum class ErrorCode(
     OVERSIZE_KEYWORD_LENGTH(40015, HttpStatus.BAD_REQUEST, "검색어가 최대 글자 수 제한을 넘었습니다."),
     SQL_INJECTION_DETECTED(40016, HttpStatus.BAD_REQUEST, "SQL INJECTION이 탐지되었습니다."),
     OAUTH2_API_CLIENT_ERROR(40017, HttpStatus.BAD_REQUEST, "Oauth2 Api 요청에 실패했습니다."),
+    INVALID_IDEMPOTENCY(40018, HttpStatus.BAD_REQUEST, "이미 처리된 요청입니다."),
     ALREADY_REQUESTED(40017, HttpStatus.BAD_REQUEST, "이미 요청이 왔습니다."),
 
     // 401: 인증 실패 (Unauthorized)
@@ -90,7 +91,8 @@ enum class ErrorCode(
     INTERNAL_SERVER_ERROR(50000, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다"),
     MAIL_SEND_FAIL(50001, HttpStatus.INTERNAL_SERVER_ERROR, "인증 메일 전송에 실패했습니다."),
     BLOB_STORAGE_ERROR(50002, HttpStatus.INTERNAL_SERVER_ERROR, "blob storage 파일 업로드에 실패했습니다."),
-    REDIS_ERROR(50002, HttpStatus.INTERNAL_SERVER_ERROR, "REDIS 명령 수행을 실패했습니다."),
+    REDIS_ERROR(50003, HttpStatus.INTERNAL_SERVER_ERROR, "REDIS 명령 수행을 실패했습니다."),
+    EVENT_CONSUMER_ERROR(50004, HttpStatus.INTERNAL_SERVER_ERROR, "EVENT CONSUME에 실패했습니다."),
     ;
 
     companion object {

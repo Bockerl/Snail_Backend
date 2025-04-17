@@ -7,15 +7,15 @@ import com.bockerl.snailmember.gathering.command.application.mapper.GatheringCon
 import com.bockerl.snailmember.gathering.command.application.service.CommandGatheringService
 import com.bockerl.snailmember.gathering.command.domain.aggregate.vo.request.*
 import com.bockerl.snailmember.infrastructure.config.OpenApiBody
-import com.bockerl.snailmember.security.CustomMember
+import com.bockerl.snailmember.security.config.CurrentMemberId
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Encoding
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.http.MediaType
-import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
@@ -204,12 +204,8 @@ class CommandGatheringController(
     fun postGatheringMember(
         @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestParam("gatheringId") gatheringId: String,
-        authentication: Authentication,
+        @Parameter(hidden = true) @CurrentMemberId memberId: String,
     ): ResponseDTO<*> {
-        val customMember = authentication.principal as CustomMember
-
-        val memberId = customMember.memberId
-
         val commandGatheringMemberCreateDTO =
             gatheringConverter.memberRequestVOToDTO(
                 gatheringId,
@@ -245,12 +241,8 @@ class CommandGatheringController(
     fun deleteGatheringMember(
         @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestParam("gatheringId") gatheringId: String,
-        authentication: Authentication,
+        @Parameter(hidden = true) @CurrentMemberId memberId: String,
     ): ResponseDTO<*> {
-        val customMember = authentication.principal as CustomMember
-
-        val memberId = customMember.memberId
-
         val commandGatheringMemberCreateDTO =
             gatheringConverter.memberRequestVOToDTO(
                 gatheringId,

@@ -14,6 +14,7 @@ import com.bockerl.snailmember.gathering.command.domain.enums.GatheringRole
 import com.bockerl.snailmember.gathering.command.domain.enums.GatheringType
 import com.bockerl.snailmember.gathering.command.domain.repository.CommandGatheringMemberRepository
 import com.bockerl.snailmember.gathering.command.domain.repository.CommandGatheringRepository
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
 import org.springframework.data.redis.core.Cursor
 import org.springframework.data.redis.core.RedisTemplate
@@ -29,6 +30,8 @@ class CommandGatheringServiceImpl(
     private val redisTemplate: RedisTemplate<String, String>,
     private val commandGatheringMemberRepository: CommandGatheringMemberRepository,
 ) : CommandGatheringService {
+    private val logger = KotlinLogging.logger {}
+
     @Transactional
     override fun createGathering(
         commandGatheringCreateDTO: CommandGatheringCreateDTO,
@@ -325,6 +328,7 @@ class CommandGatheringServiceImpl(
         }
     }
 
+    @Transactional
     override fun deleteGatheringMember(commandGatheringMemberCreateDTO: CommandGatheringMemberCreateDTO) {
         // 따닥 방지
         if (redisTemplate.hasKey(commandGatheringMemberCreateDTO.idempotencyKey)) {
@@ -345,6 +349,11 @@ class CommandGatheringServiceImpl(
                 .findById(
                     compositeKey,
                 ).orElseThrow { CommonException(ErrorCode.NOT_FOUND_GATHERING) }
+
+        logger.info {
+            "gatheringMember: ${gatheringMember.gathering}, ${gatheringMember.gatheringRole}, ${gatheringMember.active}, " +
+                "${gatheringMember.id.gatheringId}, ${gatheringMember.id.memberId}"
+        }
 
         gatheringMember.apply {
             active = false

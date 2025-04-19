@@ -28,13 +28,15 @@ spring:
         consumer:
             group-id: ${KAFKA_GROUP_ID}
     data:
-        #        redis:
-        #            sentinel:
-        #                master: ${REDIS_MASTER}
-        #                nodes:
-        #                    - ${REDIS_PORT1}
-        #                    - ${REDIS_PORT2}
-        #                    - ${REDIS_PORT3}
+        redis:
+            port: 6379
+            host: localhost
+#            sentinel:
+#                master: ${REDIS_MASTER}
+#                nodes:
+#                    - ${REDIS_PORT1}
+#                    - ${REDIS_PORT2}
+#                    - ${REDIS_PORT3}
         mongodb:
             uri: mongodb://${DB_USERNAME}:${DB_PASSWORD}@${MONGO_REPLICA_ADDRESS}/${MONGO_DATABASE_NAME}?authSource=snail&replicaSet=rs0&retryWrites=true
             database: ${MONGO_DATABASE_NAME}

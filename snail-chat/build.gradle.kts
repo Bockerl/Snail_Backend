@@ -56,7 +56,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
     implementation("org.springdoc:springdoc-openapi-starter-common:2.3.0")
-//    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("com.azure.spring:spring-cloud-azure-starter-storage")
 //    implementation("org.springframework.boot:spring-boot-starter-jdbc")
 //    implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
@@ -81,8 +81,8 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers:1.19.3")
 
     "developmentOnly"("org.springframework.boot:spring-boot-devtools")
-//    runtimeOnly("org.postgresql:postgresql")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    runtimeOnly("org.postgresql:postgresql")
+//    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // csv 파일 처리
     implementation("com.opencsv:opencsv:5.9")
@@ -101,7 +101,7 @@ dependencies {
 //    implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
 
     // redis sentinel 가용을 위한
-//    implementation("io.lettuce:lettuce-core") // Redis Sentinel 지원을 위해 Lettuce 클라이언트 사용
+    implementation("io.lettuce:lettuce-core") // Redis Sentinel 지원을 위해 Lettuce 클라이언트 사용
 
     // websocket 설정
     implementation("org.springframework.boot:spring-boot-starter-websocket")

@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  es_container:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: es_container
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - app_network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.0
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    depends_on:
+      - es_container
+    networks:
+      - app_network
+
+  ollama:
+    build:
+      context: .  
+      dockerfile: ollama.Dockerfile 
+    container_name: ollama_container
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - app_network
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        ollama serve &
+        sleep 2  
+        ollama pull llama3.2
+        wait
+
+  fastapi:
+    build: .  
+    container_name: fastapi_chatbot
+    ports:
+      - "${FASTAPI_PORT:-8000}:8000"  
+    env_file:                         
+      - .env
+    depends_on:
+      - ollama
+      - es_container  
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  esdata:
+    driver: local
+  ollama_data:
+    driver: local

@@ -21,6 +21,7 @@ import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberUpdat
 import com.bockerl.snailmember.member.command.domain.repository.MemberRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
@@ -33,6 +34,7 @@ class CommandMemberServiceImpl(
     private val activityAreaRepository: ActivityAreaRepository,
     private val commandFileService: CommandFileService,
     private val outboxService: OutboxService,
+    private val eventPublisher: ApplicationEventPublisher,
     private val objectMapper: ObjectMapper,
 ) : CommandMemberService {
     private val logger = KotlinLogging.logger {}
@@ -65,15 +67,19 @@ class CommandMemberServiceImpl(
                             ipAddress = ipAddress,
                             userAgent = userAgent,
                         )
-                    val jsonPayload = objectMapper.writeValueAsString(event)
-                    val outBox =
-                        OutboxDTO(
-                            aggregateId = member.formattedId,
-                            eventType = EventType.MEMBER,
-                            payload = jsonPayload,
-                            idempotencyKey = idempotencyKey,
-                        )
-                    outboxService.createOutbox(outBox)
+                    // logging을 위한 비동기 리스너 이벤트 처리
+                    logger.info { "현재 Thread: ${Thread.currentThread().name}" }
+                    eventPublisher.publishEvent(event)
+                    // outBox를 통한 이벤트 처리
+//                    val jsonPayload = objectMapper.writeValueAsString(event)
+//                    val outBox =
+//                        OutboxDTO(
+//                            aggregateId = member.formattedId,
+//                            eventType = EventType.MEMBER,
+//                            payload = jsonPayload,
+//                            idempotencyKey = idempotencyKey,
+//                        )
+//                    outboxService.createOutbox(outBox)
                 }.onSuccess {
                     logger.info { "마지막 로그인 시간 업데이트 성공 - email: $email" }
                 }.onFailure {
@@ -155,6 +161,9 @@ class CommandMemberServiceImpl(
                 primaryId = requestDTO.primaryId,
                 workplaceId = requestDTO.workplaceId,
             )
+        // logging을 위한 비동기 리스너 이벤트 처리
+        logger.info { "현재 Thread: ${Thread.currentThread().name}" }
+//        eventPublisher.publishEvent(event)
         val jsonPayLoad = objectMapper.writeValueAsString(event)
         val outBox =
             OutboxDTO(
@@ -231,6 +240,9 @@ class CommandMemberServiceImpl(
                     memberLanguage = member.memberLanguage,
                     memberStatus = member.memberStatus,
                 )
+            // logging을 위한 비동기 리스너 이벤트 처리
+            logger.info { "현재 Thread: ${Thread.currentThread().name}" }
+            eventPublisher.publishEvent(event)
             val jsonPayLoad = objectMapper.writeValueAsString(event)
             val outBox =
                 OutboxDTO(

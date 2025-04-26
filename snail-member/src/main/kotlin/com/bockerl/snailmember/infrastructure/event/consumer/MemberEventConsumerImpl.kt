@@ -6,7 +6,6 @@ import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.infrastructure.event.processor.MemberEventProcessor
 import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberCreateEvent
 import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberDeleteEvent
-import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberLoginEvent
 import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberUpdateEvent
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.kafka.annotation.KafkaListener
@@ -41,7 +40,7 @@ class MemberEventConsumerImpl(
         try {
             when (event) {
                 is MemberCreateEvent -> memberEventProcessor.processCreate(event, eventId, idempotencyKey)
-                is MemberLoginEvent -> memberEventProcessor.processLogin(event, eventId, idempotencyKey)
+//                is MemberLoginEvent -> memberEventProcessor.processLogin(event, eventId, idempotencyKey)
                 is MemberUpdateEvent -> memberEventProcessor.processUpdate(event, eventId, idempotencyKey)
                 is MemberDeleteEvent -> memberEventProcessor.processDelete(event, eventId, idempotencyKey)
                 else -> logger.warn { "알 수 없는 event: $event, eventId: $eventId" }

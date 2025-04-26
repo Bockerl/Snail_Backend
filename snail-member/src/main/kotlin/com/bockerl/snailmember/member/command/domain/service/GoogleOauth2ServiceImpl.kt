@@ -22,6 +22,7 @@ import com.bockerl.snailmember.security.CustomMember
 import com.bockerl.snailmember.security.Oauth2JwtUtils
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
@@ -37,6 +38,7 @@ class GoogleOauth2ServiceImpl(
     private val googleAuthClient: GoogleAuthClient,
     private val jwtUtils: Oauth2JwtUtils,
     private val objectMapper: ObjectMapper,
+    private val eventPublisher: ApplicationEventPublisher,
     private val outboxService: OutboxService,
 ) : GoogleOauth2Service {
     private val logger = KotlinLogging.logger {}
@@ -167,6 +169,9 @@ class GoogleOauth2ServiceImpl(
                 memberLanguage = newGoogleMember.memberLanguage,
                 signUpPath = SignUpPath.Google,
             )
+        // logging을 위한 비동기 리스너 이벤트 처리
+        logger.info { "현재 Thread: ${Thread.currentThread().name}" }
+        eventPublisher.publishEvent(event)
         val jsonPayLoad = objectMapper.writeValueAsString(event)
         val outBox =
             OutboxDTO(

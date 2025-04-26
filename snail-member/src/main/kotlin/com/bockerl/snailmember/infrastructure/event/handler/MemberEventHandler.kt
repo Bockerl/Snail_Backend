@@ -2,7 +2,6 @@ package com.bockerl.snailmember.infrastructure.event.handler
 
 import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberCreateEvent
 import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberDeleteEvent
-import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberLoginEvent
 import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberUpdateEvent
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
@@ -16,10 +15,10 @@ class MemberEventHandler {
         TODO("Not yet implemented")
     }
 
-    fun handleLogin(event: MemberLoginEvent) {
-        // 멤버 로그인 이벤트의 소비처 = ES(로깅
-        TODO("Not yet implemented")
-    }
+//    fun handleLogin(event: MemberLoginEvent) {
+//        // 멤버 로그인 이벤트의 소비처 = ES(로깅
+//        TODO("Not yet implemented")
+//    }
 
     fun handleUpdate(event: MemberUpdateEvent) {
         // 멤버 업데이트 이벤트의 소비처 = Es(새로운 인덱싱, 로깅), Mongo(실시간 채팅 반영)

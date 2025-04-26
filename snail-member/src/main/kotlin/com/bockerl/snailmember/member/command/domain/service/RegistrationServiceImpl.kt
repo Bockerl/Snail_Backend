@@ -27,6 +27,7 @@ import com.bockerl.snailmember.member.command.domain.repository.MemberRepository
 import com.bockerl.snailmember.member.command.domain.repository.TempMemberRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
@@ -44,6 +45,7 @@ class RegistrationServiceImpl(
     private val bcryptPasswordEncoder: BCryptPasswordEncoder,
     private val redisTemplate: RedisTemplate<String, String>,
     private val objectMapper: ObjectMapper,
+    private val eventPublisher: ApplicationEventPublisher,
     private val outboxService: OutboxService,
 ) : RegistrationService {
     private val logger = KotlinLogging.logger {}
@@ -421,6 +423,10 @@ class RegistrationServiceImpl(
                 memberStatus = newMember.memberStatus,
                 signUpPath = SignUpPath.EMAIL,
             )
+        // logging을 위한 비동기 리스너 이벤트 처리
+        logger.info { "현재 Thread: ${Thread.currentThread().name}" }
+        eventPublisher.publishEvent(memberEvent)
+        // outbox 이벤트 처리
         val jsonPayLoad = objectMapper.writeValueAsString(memberEvent)
         val outBox =
             OutboxDTO(

@@ -3,7 +3,6 @@ package com.bockerl.snailmember.infrastructure.event.processor
 import com.bockerl.snailmember.infrastructure.event.handler.MemberEventHandler
 import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberCreateEvent
 import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberDeleteEvent
-import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberLoginEvent
 import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberUpdateEvent
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.dao.DuplicateKeyException
@@ -40,20 +39,20 @@ class MemberEventProcessor(
         logger.info { "멤버 생성 이벤트 처리 성공" }
     }
 
-    @Retryable(
-        value = [TransientDataAccessException::class, DuplicateKeyException::class],
-        maxAttempts = 3,
-        backoff = Backoff(delay = 1000, multiplier = 2.0, random = true),
-    )
-    fun processLogin(
-        event: MemberLoginEvent,
-        eventId: String,
-        idempotencyKey: String?,
-    ) {
-        logger.info { "멤버 로그인 이벤트 처리 시작: $event" }
-        memberEventHandler.handleLogin(event)
-        logger.info { "멤버 로그인 이벤트 처리 성공" }
-    }
+//    @Retryable(
+//        value = [TransientDataAccessException::class, DuplicateKeyException::class],
+//        maxAttempts = 3,
+//        backoff = Backoff(delay = 1000, multiplier = 2.0, random = true),
+//    )
+//    fun processLogin(
+//        event: MemberLoginEvent,
+//        eventId: String,
+//        idempotencyKey: String?,
+//    ) {
+//        logger.info { "멤버 로그인 이벤트 처리 시작: $event" }
+//        memberEventHandler.handleLogin(event)
+//        logger.info { "멤버 로그인 이벤트 처리 성공" }
+//    }
 
     @Retryable(
         value = [TransientDataAccessException::class, DuplicateKeyException::class],
@@ -94,14 +93,14 @@ class MemberEventProcessor(
         dlqProcessor.sendToDlq(event)
     }
 
-    @Recover
-    fun recoverLogin(
-        ex: Exception,
-        event: MemberLoginEvent,
-    ) {
-        logger.error { "멤버 로그인 이벤트 처리 실패, exception: $ex" }
-        dlqProcessor.sendToDlq(event)
-    }
+//    @Recover
+//    fun recoverLogin(
+//        ex: Exception,
+//        event: MemberLoginEvent,
+//    ) {
+//        logger.error { "멤버 로그인 이벤트 처리 실패, exception: $ex" }
+//        dlqProcessor.sendToDlq(event)
+//    }
 
     @Recover
     fun recoverUpdate(

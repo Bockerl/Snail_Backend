@@ -3,7 +3,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 # LLM 모델 초기화
-llm = ChatOllama(model="llama3.1-instruct-8b:latest")
+llm = ChatOllama(model="llama3.2")
 
 # ChatPromptTemplate 생성 
 prompt = ChatPromptTemplate.from_messages(

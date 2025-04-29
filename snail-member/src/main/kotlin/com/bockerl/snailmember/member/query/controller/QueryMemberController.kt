@@ -9,7 +9,6 @@ import com.bockerl.snailmember.member.command.application.mapper.MemberConverter
 import com.bockerl.snailmember.member.query.dto.MemberProfileResponseDTO
 import com.bockerl.snailmember.member.query.dto.MemberQueryDTO
 import com.bockerl.snailmember.member.query.service.QueryMemberService
-import com.bockerl.snailmember.member.query.vo.MemberProfileResponseVO
 import com.bockerl.snailmember.security.config.CurrentMemberId
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.swagger.v3.oas.annotations.Operation
@@ -112,8 +111,10 @@ class QueryMemberController(
         @Parameter(hidden = true) @CurrentMemberId memberId: String,
     ): ResponseDTO<*> {
         logger.info { "회원 프로필 조회 기능 컨트롤러 도착, memberId: $memberId" }
-        val responseVO: MemberProfileResponseVO = queryMemberService.selectMemberProfileByMemberId(memberId)
+        val responseVO = queryMemberService.selectMemberProfileByMemberId(memberId)
+        logger.info { "서비스에서 돌아온 responseVO: $responseVO" }
         val responseDTO = memberConverter.profileResponseVOToDTO(responseVO)
+        logger.info { "responseDTO로 변환된 VO: $responseDTO" }
         return ResponseDTO.ok(responseDTO)
     }
 }

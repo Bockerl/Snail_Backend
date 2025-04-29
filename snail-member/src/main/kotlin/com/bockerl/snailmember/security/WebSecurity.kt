@@ -22,6 +22,7 @@ class WebSecurity(
     private val redisTemplate: RedisTemplate<String, String>,
     private val queryMemberService: QueryMemberService,
     private val commandMemberService: CommandMemberService,
+    private val authenticationFailureHandler: CustomAuthenticationFailureHandler,
     private val authenticationEntryPoint: CustomAuthenticationEntryPoint,
     private val environment: Environment,
     private val jwtUtils: JwtUtils,
@@ -45,8 +46,8 @@ class WebSecurity(
                 logout.logoutUrl("/api/member/logout")
                 logout.addLogoutHandler(CustomLogoutHandler(redisTemplate, jwtUtils))
                 logout.logoutSuccessHandler(CustomLogoutSuccessfulHandler())
-            }.exceptionHandling { exceptions ->
-                exceptions.authenticationEntryPoint(authenticationEntryPoint)
+            }.exceptionHandling { exception ->
+                exception.authenticationEntryPoint(authenticationEntryPoint)
             }.authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers("/swagger-ui/**")
@@ -77,6 +78,7 @@ class WebSecurity(
                     queryMemberService,
                     commandMemberService,
                     jwtUtils,
+                    authenticationEntryPoint,
                     redisTemplate,
                     environment,
                 ),
@@ -102,6 +104,7 @@ class WebSecurity(
                 environment = environment,
             )
         authenticationFilter.setFilterProcessesUrl("/api/member/login")
+        authenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler)
         return authenticationFilter
     }
 }

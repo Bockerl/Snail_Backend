@@ -11,6 +11,6 @@ data class MemberEmailLoginRequestVO(
     @JsonProperty("memberPassword")
     val memberPassword: String,
     @field:Schema
-    @JsonProperty("eventId")
-    val eventId: String,
+    @JsonProperty("idempotencyKey")
+    val idempotencyKey: String,
 )

@@ -82,3 +82,4 @@ logging:
         org:
             springframework:
                 transaction: TRACE
+                security: DEBUG

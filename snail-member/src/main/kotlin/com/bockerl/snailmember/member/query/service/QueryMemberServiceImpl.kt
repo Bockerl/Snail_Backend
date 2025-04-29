@@ -53,6 +53,7 @@ class QueryMemberServiceImpl(
 
     @Transactional(readOnly = true)
     override fun selectMemberProfileByMemberId(memberId: String): MemberProfileResponseVO {
+        logger.info { "자기 프로필 조회 서비스 메서드 시작" }
         val memberDTO =
             memberMapper.selectMemberByMemberId(extractDigits(memberId))
                 ?: throw CommonException(ErrorCode.NOT_FOUND_MEMBER)

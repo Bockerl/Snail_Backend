@@ -71,7 +71,6 @@ class AuthConverter {
     // 로그인 토큰 dto to vo
     fun loginDTOToVO(responseDTO: LoginResponseDTO): LoginResponseVO =
         LoginResponseVO(
-            accessToken = responseDTO.accessToken,
             refreshToken = responseDTO.refreshToken,
         )
 }

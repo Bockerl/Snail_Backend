@@ -124,9 +124,11 @@ class GoogleOauth2ServiceImpl(
             }
             val authority = listOf(SimpleGrantedAuthority(member.memberStatus.toString()))
             CustomMember(member, authority)
-        } catch (e: Exception) {
+        } catch (e: IllegalArgumentException) {
             logger.error(e) { "구글 ID 토큰 디코딩 실패" }
             throw IllegalArgumentException("Invalid ID token", e)
+        } catch (e: CommonException) {
+            throw e
         }
     }
 

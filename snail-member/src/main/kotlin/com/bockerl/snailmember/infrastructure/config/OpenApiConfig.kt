@@ -202,6 +202,11 @@ class OpenApiConfig(
                                 StringSchema()
                                     ._default("password")
                                     .description("로그인에 사용할 비밀번호"),
+                            ).addProperty(
+                                "idempotencyKey",
+                                StringSchema()
+                                    ._default("idempotency-key")
+                                    .description("로그인에 사용될 멱등성키"),
                             )
 
                     // 요청 바디 설정

@@ -4,6 +4,7 @@ import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.query.service.QueryMemberService
 import com.bockerl.snailmember.security.config.TokenType
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
@@ -11,6 +12,8 @@ import io.jsonwebtoken.SignatureAlgorithm
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.security.authentication.BadCredentialsException
+import org.springframework.security.authentication.InsufficientAuthenticationException
 import org.springframework.stereotype.Component
 import java.lang.Exception
 import java.util.Date
@@ -28,6 +31,7 @@ class JwtUtils(
     private val refreshExpiration: Long,
     private val memberService: QueryMemberService,
     private val redisTemplate: RedisTemplate<String, String>,
+    private val objectMapper: ObjectMapper,
 ) {
     companion object {
         private const val REDIS_RT_PREFIX = "RT:"
@@ -52,59 +56,58 @@ class JwtUtils(
             if (token.startsWith("Bearer ")) {
                 token.substringAfter("Bearer ")
             } else {
-                throw CommonException(ErrorCode.TOKEN_TYPE_ERROR)
+                return null
             }
         }
 
     fun extractRefreshToken(request: HttpServletRequest): String {
-        logger.info { "쿠키에서 rt 추출 시작" }
-
-        val cookies = request.cookies
-        if (cookies == null || cookies.isEmpty()) {
-            logger.warn { "쿠키가 null이거나 비어있음" }
-            throw CommonException(ErrorCode.COOKIE_ERROR)
+        logger.info { "RequestBody에서 rt 추출 시작" }
+        val body = request.reader.use { it.readText() }
+        val jsonObject = objectMapper.readTree(body)
+        val refreshToken = jsonObject["refreshToken"]
+        if (refreshToken == null || refreshToken.isNull) {
+            logger.warn { "requestBody에 refreshToken이 없음, requestBody: $jsonObject" }
+            throw InsufficientAuthenticationException("refreshToken이 없습니다.")
         }
-
-        val refreshToken =
-            cookies.find { it.name == "refreshToken" }?.value
-                ?: run {
-                    logger.warn { "쿠키에 rt가 존재하지 않음" }
-                    throw CommonException(ErrorCode.TOKEN_TYPE_ERROR)
-                }
-        return refreshToken
+        return refreshToken.asText()
     }
 
     fun generateAccessToken(claims: Claims): String {
         logger.info { "새로운 at 생성 시작" }
         // 넘어오는 claim은 refreshClaim이므로 sub밖에 없다(email)
-        val email = claims.subject ?: throw CommonException(ErrorCode.TOKEN_MALFORMED_ERROR)
+        val email = claims.subject ?: throw BadCredentialsException("RT의 claims의 sub가 null")
         // at용 claim을 위해 유저 조회
         logger.info { "새로운 at를 위해 email로 유저 조회" }
-        val member = memberService.loadUserByUsername(email) as CustomMember
-        logger.info { "새로운 at를 위한 at용 claim 생성 시작" }
-        val accessClaims =
-            Jwts.claims().apply {
-                subject = email
-            }
-        val authority = member.authorities.firstOrNull()?.authority
-        accessClaims["auth"] = authority
-        accessClaims["memberNickname"] = member.memberNickname
-        accessClaims["memberId"] = member.memberId
-        accessClaims["memberPhoto"] = member.memberPhoto
-        val accessTokenExpiration = System.currentTimeMillis() + accessExpiration * 1000
-        val accessToken =
-            Jwts
-                .builder()
-                // accessClaim으로 제작
-                .setClaims(accessClaims)
-                .setIssuedAt(Date())
-                .setExpiration(Date(accessTokenExpiration))
-                .setIssuer(tokenIssuer)
-                .signWith(SecretKeySpec(tokenSecret.toByteArray(), SignatureAlgorithm.HS512.jcaName))
-                .compact()!!
-        logger.info { "새로운 at 생성 성공 - at: $accessToken" }
-        saveToken(email, accessToken, TokenType.ACCESS_TOKEN)
-        return accessToken
+        try {
+            val member = memberService.loadUserByUsername(email) as CustomMember
+            logger.info { "새로운 at를 위한 at용 claim 생성 시작" }
+            val accessClaims =
+                Jwts.claims().apply {
+                    subject = email
+                }
+            val authority = member.authorities.firstOrNull()?.authority
+            accessClaims["auth"] = authority
+            accessClaims["memberNickname"] = member.memberNickname
+            accessClaims["memberId"] = member.memberId
+            accessClaims["memberPhoto"] = member.memberPhoto
+            val accessTokenExpiration = System.currentTimeMillis() + accessExpiration * 1000
+            val accessToken =
+                Jwts
+                    .builder()
+                    // accessClaim으로 제작
+                    .setClaims(accessClaims)
+                    .setIssuedAt(Date())
+                    .setExpiration(Date(accessTokenExpiration))
+                    .setIssuer(tokenIssuer)
+                    .signWith(SecretKeySpec(tokenSecret.toByteArray(), SignatureAlgorithm.HS512.jcaName))
+                    .compact()!!
+            logger.info { "새로운 at 생성 성공 - at: $accessToken" }
+            saveToken(email, accessToken, TokenType.ACCESS_TOKEN)
+            return accessToken
+        } catch (e: Exception) {
+            logger.warn { "엑세스 토큰 생성 중 예외 발생: ${e.message}" }
+            throw e
+        }
     }
 
     fun generateRefreshToken(claims: Claims): String {
@@ -157,9 +160,10 @@ class JwtUtils(
                     expiration,
                 )
                 connection.exec()
+                logger.info { "redis에 $type 저장 성공" }
             } catch (e: Exception) {
-                logger.warn { "redis $type 저장 중 오류 발생, message: ${e.message}" }
-                throw CommonException(ErrorCode.TOKEN_GENERATION_ERROR)
+                logger.warn { "redis에 $type 저장 중 오류 발생, message: ${e.message}" }
+                throw e
             }
         }
     }

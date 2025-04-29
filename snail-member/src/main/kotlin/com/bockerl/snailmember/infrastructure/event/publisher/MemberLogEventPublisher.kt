@@ -31,7 +31,7 @@ class MemberLogEventPublisher(
         } catch (e: Exception) {
             logger.warn { "로그 이벤트 전송 실패: ${topic.topic}" }
             // discord webhook
-//            discordNotifier.notify(topic.topic, e.message)
+            discordNotifier.notify(topic.topic, e.message)
         }
     }
 }

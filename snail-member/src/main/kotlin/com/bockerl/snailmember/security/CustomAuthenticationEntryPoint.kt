@@ -29,7 +29,6 @@ class CustomAuthenticationEntryPoint(
         log.info { "AuthenticationEntryPoint.commence 호출됨" }
         log.info { "예외 클래스: ${authException.javaClass.name}" }
         log.info { "예외 메시지: ${authException.message}" }
-
         val (statusCode, message, failType) =
             when (authException) {
                 is LockedException -> Triple(HttpServletResponse.SC_FORBIDDEN, "블랙리스트로 등록된 아이디입니다.", FailType.BLACK_LIST.code)
@@ -51,14 +50,11 @@ class CustomAuthenticationEntryPoint(
                     )
                 else -> Triple(HttpServletResponse.SC_UNAUTHORIZED, "인증되지 않은 요청입니다.", FailType.UNKNOWN.code)
             }
-
         // 상태 코드 설정
         response.status = statusCode
         response.contentType = "application/json;charset=UTF-8"
-
-        // 로그인 실패, 이벤트 생성
+        // 인증 실패, 이벤트 생성
 //        val event =
-
         // json 응답 본문 설정
         val errorResponse =
             mapOf(
@@ -68,7 +64,6 @@ class CustomAuthenticationEntryPoint(
                 "path" to request.requestURL,
                 "cause" to authException.cause?.javaClass?.name,
             )
-
         val objectMapper = ObjectMapper()
         response.writer.write(objectMapper.writeValueAsString(errorResponse))
     }

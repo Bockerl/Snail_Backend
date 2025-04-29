@@ -42,6 +42,12 @@ class OpenApiConfig(
     private val applicationContext: ApplicationContext,
 ) {
     @Bean
+    fun openApiCustomizer(): OpenApiCustomizer =
+        OpenApiCustomizer { openApi ->
+            openApi.addExtension("x-codeSamples", listOf<Any>())
+        }
+
+    @Bean
     @Profile("!Prod")
     fun areaApi(): GroupedOpenApi =
         createGroupedOpenApi(

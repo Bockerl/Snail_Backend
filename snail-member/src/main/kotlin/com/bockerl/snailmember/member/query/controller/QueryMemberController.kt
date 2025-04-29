@@ -112,9 +112,7 @@ class QueryMemberController(
     ): ResponseDTO<*> {
         logger.info { "회원 프로필 조회 기능 컨트롤러 도착, memberId: $memberId" }
         val responseVO = queryMemberService.selectMemberProfileByMemberId(memberId)
-        logger.info { "서비스에서 돌아온 responseVO: $responseVO" }
         val responseDTO = memberConverter.profileResponseVOToDTO(responseVO)
-        logger.info { "responseDTO로 변환된 VO: $responseDTO" }
         return ResponseDTO.ok(responseDTO)
     }
 }

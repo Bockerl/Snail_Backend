@@ -5,9 +5,7 @@ package com.bockerl.snailmember.member.command.application.mapper
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.dto.request.*
-import com.bockerl.snailmember.member.command.application.dto.response.LoginResponseDTO
 import com.bockerl.snailmember.member.command.domain.vo.request.*
-import com.bockerl.snailmember.member.command.domain.vo.response.LoginResponseVO
 import org.springframework.stereotype.Component
 
 @Component
@@ -67,10 +65,4 @@ class AuthConverter {
             workplaceFormattedId = requestVO.workplaceFormattedId,
         )
     }
-
-    // 로그인 토큰 dto to vo
-    fun loginDTOToVO(responseDTO: LoginResponseDTO): LoginResponseVO =
-        LoginResponseVO(
-            refreshToken = responseDTO.refreshToken,
-        )
 }

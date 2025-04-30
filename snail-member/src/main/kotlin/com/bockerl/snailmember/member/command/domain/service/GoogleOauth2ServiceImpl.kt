@@ -8,7 +8,6 @@ import com.bockerl.snailmember.infrastructure.outbox.enums.EventType
 import com.bockerl.snailmember.infrastructure.outbox.service.OutboxService
 import com.bockerl.snailmember.member.client.GoogleAuthClient
 import com.bockerl.snailmember.member.command.application.dto.response.GooglePayloadDTO
-import com.bockerl.snailmember.member.command.application.dto.response.LoginResponseDTO
 import com.bockerl.snailmember.member.command.application.service.GoogleOauth2Service
 import com.bockerl.snailmember.member.command.config.Oauth2LoginProperties
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.Member
@@ -42,14 +41,13 @@ class GoogleOauth2ServiceImpl(
 ) : GoogleOauth2Service {
     private val logger = KotlinLogging.logger {}
 
-    override fun googleLogin(code: String): LoginResponseDTO =
+    override fun googleLogin(code: String) =
         TransactionalConfig.run {
             // 코드 기반으로 요청을 보낸 뒤 id token만 추출
             val idToken = requestTokenFromGoogle(code)
             // 유저 정보 디코딩
             val customMember = decodeUserInfoFromToken(idToken) as CustomMember
-            val response = jwtUtils.generateJwtResponse(customMember)
-            return@run response
+            jwtUtils.generateJwtResponse(customMember)
         }
 
     private fun requestTokenFromGoogle(code: String): String {

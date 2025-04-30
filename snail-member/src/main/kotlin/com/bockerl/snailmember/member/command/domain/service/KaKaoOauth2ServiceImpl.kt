@@ -8,7 +8,6 @@ import com.bockerl.snailmember.infrastructure.outbox.enums.EventType
 import com.bockerl.snailmember.infrastructure.outbox.service.OutboxService
 import com.bockerl.snailmember.member.client.KaKaoAuthClient
 import com.bockerl.snailmember.member.command.application.dto.response.KaKaoPayloadDTO
-import com.bockerl.snailmember.member.command.application.dto.response.LoginResponseDTO
 import com.bockerl.snailmember.member.command.application.service.KaKaoOauth2Service
 import com.bockerl.snailmember.member.command.config.Oauth2LoginProperties
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.Member
@@ -43,12 +42,11 @@ class KaKaoOauth2ServiceImpl(
 ) : KaKaoOauth2Service {
     private val logger = KotlinLogging.logger {}
 
-    override fun kakaoLogin(code: String): LoginResponseDTO =
+    override fun kakaoLogin(code: String) =
         TransactionalConfig.run {
             val idToken = requestTokenFromKaKao(code)
             val customMember = decodeUserInfoFromToken(idToken) as CustomMember
-            val response = jwtUtils.generateJwtResponse(customMember)
-            return@run response
+            jwtUtils.generateJwtResponse(customMember)
         }
 
     private fun requestTokenFromKaKao(code: String): String {

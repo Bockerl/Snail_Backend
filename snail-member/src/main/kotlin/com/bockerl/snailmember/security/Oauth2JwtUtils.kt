@@ -2,7 +2,6 @@ package com.bockerl.snailmember.security
 
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
-import com.bockerl.snailmember.member.command.application.dto.response.LoginResponseDTO
 import com.bockerl.snailmember.member.command.application.service.CommandMemberService
 import com.bockerl.snailmember.security.config.TokenType
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -47,23 +46,33 @@ class Oauth2JwtUtils(
         environment.getProperty("TOKEN_SECRET")
             ?: throw CommonException(ErrorCode.NOT_FOUND_ENV)
 
-    fun generateJwtResponse(customMember: CustomMember): LoginResponseDTO {
-        logger.info { "Oauth2 회원의 토큰 생성 시작" }
+    fun generateJwtResponse(customMember: CustomMember) {
         val email = customMember.memberEmail
-        // AccessToken 생성 및 저장
-        val accessToken = generateAccessToken(customMember)
-        // RefreshToken 처리
-        val refreshToken = getOrCreateRefreshToken(email, customMember.authorities.firstOrNull()?.authority)
-        // 로그인 시간 변경 메서드
-        val request = RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes
-        val httpRequest = request.request
+        // accessToken 생성
+        val accessToken =
+            runCatching { generateAccessToken(customMember) }
+                .getOrElse {
+                    logger.error { "accessToken 처리 중 에러 발생, memberId: ${customMember.memberId}" }
+                    throw CommonException(ErrorCode.TOKEN_GENERATION_ERROR)
+                }
+        // refreshToken 생성
+        val refreshToken =
+            runCatching { getOrCreateRefreshToken(email, customMember.authorities.firstOrNull()?.authority) }
+                .getOrElse {
+                    logger.error { "refreshToken 처리 중 에러 발생, memberId: ${customMember.memberId}" }
+                    throw CommonException(ErrorCode.TOKEN_GENERATION_ERROR)
+                }
+        // Header에 담기위한 response 꺼내기
+        val reqAttrs = RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes
+        val response = reqAttrs.response
+        response?.setHeader("Authorization", "Bearer $accessToken")
+        response?.setHeader("refreshToken", refreshToken)
+        // ipAddress, userAgent, idempotencyKey 추출
+        val httpRequest = reqAttrs.request
         val ipAddress = httpRequest.remoteAddr
         val userAgent = httpRequest.getHeader("User-Agent")
-        // 멱등키 생성(id + sec)
-        val currentTime = Instant.now().truncatedTo(ChronoUnit.SECONDS)
-        val idempotencyKey = "$email:$currentTime"
+        val idempotencyKey = "$email:${Instant.now().truncatedTo(ChronoUnit.SECONDS)}"
         commandMemberService.putLastAccessTime(email, ipAddress, userAgent, idempotencyKey)
-        return LoginResponseDTO(accessToken, refreshToken)
     }
 
     private fun generateAccessToken(customMember: CustomMember): String {

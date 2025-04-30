@@ -6,7 +6,7 @@ import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberLogin
 import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberUpdateEvent
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import java.time.Instant
+import java.time.OffsetDateTime
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
@@ -21,5 +21,5 @@ import java.time.Instant
 )
 interface BaseMemberEvent {
     val memberId: String
-    val timestamp: Instant
+    val timestamp: OffsetDateTime
 }

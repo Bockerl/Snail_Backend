@@ -52,7 +52,6 @@ class KafkaConsumerConfig(
             JsonDeserializer(Any::class.java, objectMapper).apply {
                 addTrustedPackages("*")
             }
-
 //        val deserializer =
 //            JsonDeserializer(BaseLikeEvent::class.java).apply {
 //                // 설명. 각각의 service를 추가해야 하지 않을까 싶습니다

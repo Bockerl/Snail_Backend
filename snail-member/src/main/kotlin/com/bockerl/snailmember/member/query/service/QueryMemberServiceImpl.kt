@@ -30,7 +30,6 @@ class QueryMemberServiceImpl(
         val memberDTO =
             memberMapper.selectMemberByMemberId(extractDigits(memberId))
                 ?: throw CommonException(ErrorCode.NOT_FOUND_MEMBER)
-        // Elvis 연산자로 왼쪽 값이 null일 경우 오른쪽 표현식 실행
         return memberDTO
     }
 
@@ -40,14 +39,11 @@ class QueryMemberServiceImpl(
         val member =
             memberMapper.selectMemberByMemberEmail(email)
                 ?: throw BadCredentialsException("사용자를 찾을 수 없습니다: $email")
-
         if (member.memberStatus == MemberStatus.ROLE_BLACKLIST) {
             logger.info { "블랙리스트 멤버 로그인, email: ${member.memberEmail}" }
             throw LockedException("이 계정은 현재 사용이 제한되어 있습니다.")
         }
-
         val role = listOf(SimpleGrantedAuthority(member.memberStatus.toString()))
-
         return CustomMember(member, role)
     }
 
@@ -57,9 +53,7 @@ class QueryMemberServiceImpl(
         val memberDTO =
             memberMapper.selectMemberByMemberId(extractDigits(memberId))
                 ?: throw CommonException(ErrorCode.NOT_FOUND_MEMBER)
-
         logger.info { "조회된 memberDTO: $memberDTO" }
-
         return MemberProfileResponseVO(
             memberEmail = memberDTO.memberEmail,
             memberNickname = memberDTO.memberNickname,

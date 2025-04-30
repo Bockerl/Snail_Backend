@@ -3,6 +3,7 @@ package com.bockerl.snailmember.security
 import com.bockerl.snailmember.member.command.application.service.CommandMemberService
 import com.bockerl.snailmember.member.query.service.QueryMemberService
 import com.bockerl.snailmember.security.config.CustomLogoutSuccessfulHandler
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
@@ -24,6 +25,7 @@ class WebSecurity(
     private val commandMemberService: CommandMemberService,
     private val authenticationFailureHandler: CustomAuthenticationFailureHandler,
     private val authenticationEntryPoint: CustomAuthenticationEntryPoint,
+    private val eventPublisher: ApplicationEventPublisher,
     private val environment: Environment,
     private val jwtUtils: JwtUtils,
 ) {
@@ -79,6 +81,7 @@ class WebSecurity(
                     commandMemberService,
                     jwtUtils,
                     authenticationEntryPoint,
+                    eventPublisher,
                     redisTemplate,
                     environment,
                 ),

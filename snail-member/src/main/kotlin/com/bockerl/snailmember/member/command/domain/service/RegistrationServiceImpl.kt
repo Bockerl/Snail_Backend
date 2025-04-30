@@ -32,7 +32,6 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.Instant
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -438,7 +437,6 @@ class RegistrationServiceImpl(
         val areaEvent =
             ActivityAreaCreateEvent(
                 memberId = newMember.formattedId,
-                timeStamp = Instant.now(),
                 primaryId = requestDTO.primaryFormattedId,
                 workplaceId = requestDTO.workplaceFormattedId,
             )

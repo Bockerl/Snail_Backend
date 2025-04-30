@@ -24,7 +24,6 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
-import java.time.Instant
 import java.time.LocalDateTime
 
 @Service
@@ -49,23 +48,17 @@ class CommandMemberServiceImpl(
         val member =
             memberRepository.findMemberByMemberEmail(email)
                 ?: throw CommonException(ErrorCode.NOT_FOUND_MEMBER)
-
         member.lastAccessTime = LocalDateTime.now()
-        // kafka 이벤트 발행
-        val event =
-            MemberLoginEvent(
-                // 국가, 성별,
-                memberId = member.formattedId,
-                timestamp = Instant.now(),
-                ipAddress = ipAddress,
-                userAgent = userAgent,
-            )
-        // logging을 위한 비동기 리스너 이벤트 처리
-//      logger.info { "현재 Thread: ${Thread.currentThread().name}" }
-        eventPublisher.publishEvent(event)
         memberRepository
             .runCatching {
                 memberRepository.save(member)
+                val event =
+                    MemberLoginEvent(
+                        memberId = member.formattedId,
+                        userAgent = userAgent,
+                        ipAddress = ipAddress,
+                    )
+                eventPublisher.publishEvent(event)
                 // outBox를 통한 이벤트 처리
 //                    val jsonPayload = objectMapper.writeValueAsString(event)
 //                    val outBox =
@@ -97,7 +90,6 @@ class CommandMemberServiceImpl(
         val event =
             ActivityAreaUpdateEvent(
                 memberId = member.formattedId,
-                timeStamp = Instant.now(),
                 primaryId = requestDTO.primaryId,
                 workplaceId = requestDTO.workplaceId,
             )
@@ -187,7 +179,6 @@ class CommandMemberServiceImpl(
         val event =
             MemberUpdateEvent(
                 memberId = memberId,
-                timestamp = Instant.now(),
                 memberNickname = member.memberNickname,
                 memberPhoneNumber = member.memberPhoneNumber,
                 memberBirth = member.memberBirth,

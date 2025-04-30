@@ -13,6 +13,7 @@ import io.jsonwebtoken.MalformedJwtException
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.core.env.Environment
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.security.authentication.AuthenticationServiceException
@@ -31,6 +32,7 @@ class JwtFilter(
     private val commandMemberService: CommandMemberService,
     private val jwtUtils: JwtUtils,
     private val authenticationEntryPoint: CustomAuthenticationEntryPoint,
+    private val eventPublisher: ApplicationEventPublisher,
     private val redisTemplate: RedisTemplate<String, String>,
     environment: Environment,
 ) : OncePerRequestFilter() {
@@ -159,8 +161,10 @@ class JwtFilter(
                 ?: throw InsufficientAuthenticationException("Idempotency-Key가 누락되었습니다.")
         log.info { "사용자 IdempotencyKey: $idempotencyKey" }
         commandMemberService.putLastAccessTime(claims.subject, ipAddress, userAgent, idempotencyKey)
-        // 새로운 at만 Header에 담기
+        // 새로운 at Header에 담기
         response.setHeader("Authorization", "Bearer $newAccessToken")
+        // RT Header에 담기
+        response.setHeader("refreshToken", finalRefreshToken)
     }
 
     private fun validateClaims(

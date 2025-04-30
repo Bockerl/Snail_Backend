@@ -4,12 +4,13 @@ import com.bockerl.snailmember.common.event.BaseMemberEvent
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Gender
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Language
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.MemberStatus
-import java.time.Instant
 import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 data class MemberUpdateEvent(
     override val memberId: String,
-    override val timestamp: Instant,
+    override val timestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
     val memberNickname: String,
     val memberPhoneNumber: String,
     val memberStatus: MemberStatus,

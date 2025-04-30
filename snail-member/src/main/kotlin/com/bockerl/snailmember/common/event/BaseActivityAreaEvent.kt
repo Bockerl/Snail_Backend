@@ -4,7 +4,7 @@ import com.bockerl.snailmember.area.command.domain.aggregate.event.ActivityAreaC
 import com.bockerl.snailmember.area.command.domain.aggregate.event.ActivityAreaUpdateEvent
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import java.time.Instant
+import java.time.OffsetDateTime
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
@@ -17,5 +17,5 @@ import java.time.Instant
 )
 interface BaseActivityAreaEvent {
     val memberId: String
-    val timeStamp: Instant
+    val timeStamp: OffsetDateTime
 }

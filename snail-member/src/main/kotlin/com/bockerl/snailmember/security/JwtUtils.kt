@@ -61,15 +61,9 @@ class JwtUtils(
         }
 
     fun extractRefreshToken(request: HttpServletRequest): String {
-        logger.info { "RequestBody에서 rt 추출 시작" }
-        val body = request.reader.use { it.readText() }
-        val jsonObject = objectMapper.readTree(body)
-        val refreshToken = jsonObject["refreshToken"]
-        if (refreshToken == null || refreshToken.isNull) {
-            logger.warn { "requestBody에 refreshToken이 없음, requestBody: $jsonObject" }
-            throw InsufficientAuthenticationException("refreshToken이 없습니다.")
-        }
-        return refreshToken.asText()
+        logger.info { "Header에서 rt 추출 시작" }
+        return request.getHeader("refreshToken")
+            ?: throw throw InsufficientAuthenticationException("refreshToken이 없습니다.")
     }
 
     fun generateAccessToken(claims: Claims): String {

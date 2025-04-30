@@ -26,7 +26,6 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
-import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Base64
@@ -152,7 +151,6 @@ class KaKaoOauth2ServiceImpl(
         val event =
             MemberCreateEvent(
                 memberId = newKaKaoMember.formattedId,
-                timestamp = Instant.now(),
                 memberEmail = newKaKaoMember.memberEmail,
                 memberPhoneNumber = newKaKaoMember.memberPhoneNumber,
                 memberStatus = newKaKaoMember.memberStatus,

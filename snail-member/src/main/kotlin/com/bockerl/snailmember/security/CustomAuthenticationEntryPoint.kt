@@ -1,6 +1,7 @@
 package com.bockerl.snailmember.security
 
 import com.bockerl.snailmember.security.config.FailType
+import com.bockerl.snailmember.security.config.event.AuthFailEvent
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletRequest
@@ -18,6 +19,8 @@ import java.time.LocalDateTime
 @Component
 class CustomAuthenticationEntryPoint(
     private val eventPublisher: ApplicationEventPublisher,
+    private val jwtUtils: JwtUtils,
+    private val objectMapper: ObjectMapper,
 ) : AuthenticationEntryPoint {
     private val log = KotlinLogging.logger {}
 
@@ -54,17 +57,39 @@ class CustomAuthenticationEntryPoint(
         response.status = statusCode
         response.contentType = "application/json;charset=UTF-8"
         // 인증 실패, 이벤트 생성
-//        val event =
+        val token =
+            try {
+                jwtUtils.extractAccessToken(request) ?: jwtUtils.extractRefreshToken(request)
+            } catch (e: Exception) {
+                null
+            }
+        val email =
+            token?.let {
+                try {
+                    jwtUtils.parseClaims(it).subject
+                } catch (e: Exception) {
+                    "UNKNOWN"
+                }
+            } ?: "UNKNOWN"
+        val event =
+            AuthFailEvent(
+                email = email,
+                failType = failType,
+                message = authException.message ?: message,
+                path = request.requestURL.toString(),
+                cause = authException.cause?.javaClass?.name ?: "UNKNOWN",
+                ipAddress = request.remoteAddr ?: "UNKNOWN",
+                userAgent = request.getHeader("User-Agent") ?: "UNKNOWN",
+            )
+        // 비동기 로그 이벤트 처리
+        eventPublisher.publishEvent(event)
         // json 응답 본문 설정
         val errorResponse =
             mapOf(
                 "timestamp" to LocalDateTime.now().toString(),
                 "message" to message,
                 "status" to statusCode,
-                "path" to request.requestURL,
-                "cause" to authException.cause?.javaClass?.name,
             )
-        val objectMapper = ObjectMapper()
         response.writer.write(objectMapper.writeValueAsString(errorResponse))
     }
 }

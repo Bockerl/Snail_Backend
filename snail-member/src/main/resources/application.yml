@@ -73,6 +73,20 @@ springdoc:
         enabled: true
         path: /swagger-ui.html
 
+management:
+  endpoints:
+    web:
+      exposure:
+          include: "prometheus"
+  endpoint:
+    prometheus:
+        enabled: true
+  metrics:
+      enable:
+          all: true
+      tags:
+        application: ${spring.application.name}
+
 spring.data.jpa.repositories.enabled: true
 logging:
     level:

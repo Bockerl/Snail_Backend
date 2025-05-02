@@ -6,10 +6,8 @@ package com.bockerl.snailmember.member.command.application.mapper
 
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
-import com.bockerl.snailmember.member.command.application.dto.request.ActivityAreaRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.ProfileRequestDTO
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Gender
-import com.bockerl.snailmember.member.command.domain.vo.request.ActivityAreaRequestVO
 import com.bockerl.snailmember.member.command.domain.vo.request.ProfileRequestVO
 import com.bockerl.snailmember.member.command.domain.vo.response.MemberResponseVO
 import com.bockerl.snailmember.member.query.dto.MemberProfileResponseDTO
@@ -42,23 +40,6 @@ class MemberConverter {
             lastAccessTime = dto.lastAccessTime,
             selfIntroduction = dto.selfIntroduction,
         )
-
-    // 활동지역 변경 혹은 oauth 회원을 위한 vo to dto
-    fun activityAreaRequestVOToDTO(requestVO: ActivityAreaRequestVO): ActivityAreaRequestDTO {
-        val primaryId = requestVO.primaryId
-
-        if (primaryId.isNullOrBlank() ||
-            !primaryId.startsWith("EMD") ||
-            primaryId == requestVO.workplaceId
-        ) {
-            logger.warn { "잘못된 형식의 활동번호, PrimaryId: $primaryId WorkplaceId: ${requestVO.workplaceId}" }
-            throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT, "활동지역PK가 유효하지 않습니다.")
-        }
-        return ActivityAreaRequestDTO(
-            primaryId = requestVO.primaryId,
-            workplaceId = requestVO.workplaceId,
-        )
-    }
 
     fun profileRequestVOToDTO(
         requestVO: ProfileRequestVO,

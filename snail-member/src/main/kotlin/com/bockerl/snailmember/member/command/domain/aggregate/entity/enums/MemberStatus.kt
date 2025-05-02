@@ -9,4 +9,5 @@ enum class MemberStatus {
     ROLE_TEMP,
     ROLE_ADMIN,
     ROLE_BLACKLIST,
+    ROLE_DELETED,
 }

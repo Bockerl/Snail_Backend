@@ -242,35 +242,7 @@ class RegistrationController(
         @RequestBody requestVO: PasswordRequestVO,
     ): ResponseDTO<*> {
         val requestDTO = authConverter.passwordRequestVOToDTO(requestVO)
-        val redisId = registrationService.postPassword(requestDTO, idempotencyKey)
-        return ResponseDTO.ok(redisId)
-    }
-
-    @Operation(
-        summary = "활동지역 등록",
-        description = "새 계정의 주 지역과 직장 지역을 등록합니다.",
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "활동지역 성공",
-                content = [
-                    Content(
-                        mediaType = "application/json",
-                        schema = Schema(implementation = ResponseDTO::class),
-                    ),
-                ],
-            ),
-        ],
-    )
-    @PostMapping("/activity_area")
-    fun postActivityAreas(
-        @RequestHeader("idempotencyKey") idempotencyKey: String,
-        @RequestBody requestVO: ActivityAreaRegisterRequestVO,
-    ): ResponseDTO<*> {
-        val requestDTO = authConverter.activityAreaRegisterRequestVOToDTO(requestVO)
-        registrationService.postActivityArea(requestDTO, idempotencyKey)
-        return ResponseDTO.ok("회원가입에 성공했습니다.")
+        registrationService.postPassword(requestDTO, idempotencyKey)
+        return ResponseDTO.ok("회원가입 성공")
     }
 }

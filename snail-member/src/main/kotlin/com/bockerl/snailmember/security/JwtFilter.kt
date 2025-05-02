@@ -59,7 +59,8 @@ class JwtFilter(
             path.startsWith("/favicon.ico") or
             path.startsWith("/v3/api-docs") or
             path.startsWith("/api/member/health") or
-            path.startsWith("/api/area/")
+            path.startsWith("/api/area/") or
+            path.startsWith("/actuator/prometheus")
     }
 
     override fun doFilterInternal(

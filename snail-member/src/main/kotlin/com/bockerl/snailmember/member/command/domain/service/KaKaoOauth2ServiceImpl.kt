@@ -101,7 +101,7 @@ class KaKaoOauth2ServiceImpl(
             logger.info { "디코딩된 카카오 계정 유저 정보: $kakaoResponse" }
             // 기존 회원 조회 또는 새 회원 생성
             val member =
-                memberRepository.findMemberByMemberEmail(email)
+                memberRepository.findMemberByMemberEmailAndMemberStatusNot(email, MemberStatus.ROLE_DELETED)
                     ?: createNewKaKaoMember(email, kakaoResponse)
             if (member.memberStatus == MemberStatus.ROLE_BLACKLIST) {
                 logger.warn { "카카오 블랙 리스트 멤버가 로그인 - email: $email" }

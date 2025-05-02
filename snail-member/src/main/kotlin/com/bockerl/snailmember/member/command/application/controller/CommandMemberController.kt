@@ -10,7 +10,6 @@ import com.bockerl.snailmember.common.ResponseDTO
 import com.bockerl.snailmember.infrastructure.config.OpenApiBody
 import com.bockerl.snailmember.member.command.application.mapper.MemberConverter
 import com.bockerl.snailmember.member.command.application.service.CommandMemberService
-import com.bockerl.snailmember.member.command.domain.vo.request.ActivityAreaRequestVO
 import com.bockerl.snailmember.member.command.domain.vo.request.ProfileRequestVO
 import com.bockerl.snailmember.security.config.CurrentMemberId
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -22,9 +21,8 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PatchMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
@@ -38,40 +36,6 @@ class CommandMemberController(
     private val memberConverter: MemberConverter,
 ) {
     private val logger = KotlinLogging.logger {}
-
-    @Operation(
-        summary = "활동지역 등록",
-        description = """
-        계정의 주 지역과 직장 지역을 등록합니다.
-        주 지역은 필수이고, 직장 지역은 선택입니다.
-    """,
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "활동지역 성공",
-                content = [
-                    Content(
-                        mediaType = "application/json",
-                        schema = Schema(implementation = ResponseDTO::class),
-                    ),
-                ],
-            ),
-        ],
-    )
-    @PostMapping("/activity_area")
-    fun postActivityArea(
-        @RequestHeader("idempotencyKey") idempotencyKey: String,
-        @RequestBody requestVO: ActivityAreaRequestVO,
-        @Parameter(hidden = true)
-        @CurrentMemberId memberId: String,
-    ): ResponseDTO<*> {
-        logger.info { "활동지역 설정 요청 controller에 도착" }
-        val requestDTO = memberConverter.activityAreaRequestVOToDTO(requestVO)
-        commandMemberService.postActivityArea(memberId, requestDTO, idempotencyKey)
-        return ResponseDTO.ok("활동지역 설정 성공")
-    }
 
     @Operation(
         summary = "프로필 수정",
@@ -117,10 +81,41 @@ class CommandMemberController(
         @RequestPart("file", required = false) file: MultipartFile?,
         @Parameter(hidden = true) @CurrentMemberId memberId: String,
     ): ResponseDTO<*> {
-        logger.info { "프로필 변경 요청 controller에 도착" }
+        logger.info { "프로필 변경 요청 controller 도착" }
         logger.info { "controller에 도착한 memberId: $memberId" }
         val requestDTO = memberConverter.profileRequestVOToDTO(requestVO, file)
         commandMemberService.patchProfile(memberId, requestDTO, file, idempotencyKey)
         return ResponseDTO.ok("프로필 변경 성공")
+    }
+
+    @Operation(
+        summary = "회원 탈퇴",
+        description = """
+        회원 탈퇴를 시작합니다.
+    """,
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "회원 탈퇴 성공",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = ResponseDTO::class),
+                    ),
+                ],
+            ),
+        ],
+    )
+    @DeleteMapping("/delete")
+    fun deleteMember(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
+        @Parameter(hidden = true) @CurrentMemberId memberId: String,
+    ): ResponseDTO<*> {
+        logger.info { "회원 탈퇴 요청 controller 도착" }
+        logger.info { "controller에 도착한 memberId: $memberId" }
+        commandMemberService.deleteMember(memberId, idempotencyKey)
+        return ResponseDTO.ok("회원 탈퇴 성공")
     }
 }

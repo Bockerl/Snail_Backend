@@ -27,7 +27,7 @@ ktlint {
         exclude("**/*.kts")
     }
     disabledRules.set(setOf("header")) // HEADER_KEYWORD 규칙 비활성화
-    ignoreFailures = true
+    ignoreFailures.set(true)
 }
 
 // build.gradle.kts
@@ -74,10 +74,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.kafka:spring-kafka")
+    implementation("org.apache.kafka:kafka-streams")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
@@ -119,6 +121,8 @@ dependencies {
     // 성능 테스트를 위한 jmh 추가
     jmh("org.openjdk.jmh:jmh-core:1.37")
     jmhAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:1.37")
+    // prometheus 추가
+    implementation("io.micrometer:micrometer-registry-prometheus")
 }
 dependencyManagement {
     imports {

@@ -68,7 +68,7 @@ class WebSecurity(
                     .permitAll()
                     .requestMatchers("/api/member/health")
                     .permitAll()
-                    .requestMatchers("/api/area/")
+                    .requestMatchers("/actuator/prometheus")
                     .permitAll()
                     .anyRequest()
                     .authenticated()

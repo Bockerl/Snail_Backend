@@ -2,10 +2,6 @@
 
 package com.bockerl.snailmember.member.command.domain.service
 
-import com.bockerl.snailmember.area.command.domain.aggregate.entity.ActivityArea
-import com.bockerl.snailmember.area.command.domain.aggregate.entity.AreaType
-import com.bockerl.snailmember.area.command.domain.aggregate.event.ActivityAreaCreateEvent
-import com.bockerl.snailmember.area.command.domain.repository.ActivityAreaRepository
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.infrastructure.outbox.dto.OutboxDTO
@@ -32,7 +28,6 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -40,7 +35,6 @@ class RegistrationServiceImpl(
     private val authService: AuthService,
     private val tempMemberRepository: TempMemberRepository,
     private val memberRepository: MemberRepository,
-    private val activityAreaRepository: ActivityAreaRepository,
     private val bcryptPasswordEncoder: BCryptPasswordEncoder,
     private val redisTemplate: RedisTemplate<String, String>,
     private val objectMapper: ObjectMapper,
@@ -61,10 +55,12 @@ class RegistrationServiceImpl(
             throw CommonException(ErrorCode.INVALID_IDEMPOTENCY, "이미 처리된 임시회원 생성 요청입니다.")
         }
         // 넘어온 이메일이 이미 존재하는지 확인
-        memberRepository.findMemberByMemberEmail(requestDTO.memberEmail)?.let { existingMember ->
-            logger.warn { "이미 존재하는 이메일로 회원가입 시도, email: $requestDTO.email" }
-            throw CommonException(ErrorCode.EXIST_USER)
-        }
+        memberRepository
+            .findMemberByMemberEmailAndMemberStatusNot(requestDTO.memberEmail, MemberStatus.ROLE_DELETED)
+            ?.let { existingMember ->
+                logger.warn { "이미 존재하는 회원 이메일로 회원가입 시도, email: $requestDTO.email" }
+                throw CommonException(ErrorCode.EXIST_USER)
+            }
         // redis에 저장할 임시회원 생성
         val tempMember =
             TempMember.initiate(
@@ -257,12 +253,12 @@ class RegistrationServiceImpl(
         return redisId
     }
 
-    // 5. 비밀번호 입력
+    // 5. 비밀번호 입력(회원가입 완료)
     @Transactional
     override fun postPassword(
         requestDTO: PasswordRequestDTO,
         idempotencyKey: String,
-    ): String {
+    ) {
         // 멱등한 요청인지 확인
         redisTemplate.opsForValue().get(idempotencyKey)?.let { cacheResult ->
             throw CommonException(ErrorCode.INVALID_IDEMPOTENCY, "이미 처리된 비밀번호 입력 요청입니다.")
@@ -279,44 +275,6 @@ class RegistrationServiceImpl(
             logger.error { "비밀번호 입력 순서가 아닌 상태에서 인증 요청이 날라온 에러 발성 - redisId: $redisId" }
             throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
         }
-        // 비밀번호 입력한 임시회원 상태로 변경
-        val updateMember = tempMember.verifyPassword(requestDTO.password)
-        tempMemberRepository
-            .runCatching {
-                update(redisId, updateMember)
-            }.onSuccess {
-                logger.info { "redis에 임시회원 비밀번호 업데이트 성공 - redisId: $redisId" }
-            }.onFailure {
-                logger.info { "redis에 임시회원 비밀번호 업데이트 실패 - redisId: $redisId" }
-                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
-            }
-        // 멱등성을 위해
-        redisTemplate.opsForValue().set(idempotencyKey, UUID.randomUUID().toString())
-        return redisId
-    }
-
-    // 6. 활동지역 등록(회원가입 완료)
-    @Transactional
-    override fun postActivityArea(
-        requestDTO: ActivityAreaRegisterRequestDTO,
-        idempotencyKey: String,
-    ) {
-        // 멱등한 요청인지 확인
-        redisTemplate.opsForValue().get(idempotencyKey)?.let { cacheResult ->
-            throw CommonException(ErrorCode.INVALID_IDEMPOTENCY, "이미 처리된 회원가입 완료 요청입니다.")
-        }
-        val redisId = requestDTO.redisId
-        logger.info { "활동지역 등록 시작 - redisId: $redisId" }
-        // redis에서 tempMember 조회
-        val tempMember =
-            tempMemberRepository.find(redisId)
-                ?: throw CommonException(ErrorCode.EXPIRED_SIGNUP_SESSION)
-        logger.info { "redis에서 조회된 tempMember: $tempMember" }
-        // 활동지역 등록 순서인지 확인
-        if (tempMember.signUpStep != SignUpStep.PASSWORD_VERIFIED) {
-            logger.error { "활동지역 등록 순서가 아닌 상태에서 등록 요청이 날라온 에러 발생 - redisId: $redisId" }
-            throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
-        }
         // 실제 회원 생성 후 등록
         val newMember =
             Member(
@@ -325,13 +283,13 @@ class RegistrationServiceImpl(
                 // tempMember의 timestamp를 localDate로 변환
                 memberBirth = tempMember.birth.toLocalDateTime().toLocalDate(),
                 // 비밀번호 암호화
-                memberPassword = bcryptPasswordEncoder.encode(tempMember.password),
+                memberPassword = bcryptPasswordEncoder.encode(requestDTO.password),
                 memberPhoneNumber = tempMember.phoneNumber,
                 memberPhoto = "",
                 memberGender = Gender.UNKNOWN,
                 memberLanguage = Language.KOR,
                 memberRegion = "",
-                memberStatus = MemberStatus.ROLE_USER,
+                memberStatus = MemberStatus.ROLE_TEMP,
                 signupPath = SignUpPath.EMAIL,
                 selfIntroduction = "",
             )
@@ -344,57 +302,6 @@ class RegistrationServiceImpl(
                 logger.warn { "메인 DB에 새 회원 저장 실패 - newMember: $newMember" }
                 throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
             }
-        val primaryId =
-            extractDigits(requestDTO.primaryFormattedId)
-                .also { logger.info { "추출된 primaryAreaId: $it" } }
-        // 활동지역 db에 저장
-        // 1. 주 지역은 반드시 존재하므로 그냥 저장
-        val primaryArea =
-            ActivityArea(
-                id =
-                    ActivityArea.ActivityId(
-                        memberId = newMember.memberId ?: throw CommonException(ErrorCode.NOT_FOUND_USER_ID),
-                        emdAreasId = primaryId,
-                    ),
-                areaType = AreaType.PRIMARY,
-                createdAt = LocalDateTime.now(),
-            ).also { logger.info { "새로 생성된 메인 활동 지역: $it" } }
-        activityAreaRepository
-            .runCatching {
-                save(primaryArea)
-            }.onSuccess {
-                logger.info { "메인 DB에 새 메인 활동 지역 저장 성공 - primaryArea: $primaryArea" }
-            }.onFailure {
-                logger.warn { "메인 DB에 새 메인 활동 지역 저장 실패 - primaryArea: $primaryArea" }
-                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
-            }
-        // 2. 직장 근처는 let을 통해 저장
-        requestDTO.workplaceFormattedId?.let { secondaryId ->
-            logger.info { "직장 근처 활동 지역 저장 시작, secondaryId: $secondaryId" }
-            if (secondaryId == requestDTO.primaryFormattedId) {
-                logger.error { "주 활동 지역과 직장 근처 활동 지역이 같은 종류로 등록되는 에러 발생, secondaryId: $secondaryId" }
-                throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
-            }
-            val workplaceArea =
-                ActivityArea(
-                    id =
-                        ActivityArea.ActivityId(
-                            memberId = newMember.memberId ?: throw CommonException(ErrorCode.NOT_FOUND_USER_ID),
-                            emdAreasId = extractDigits(secondaryId),
-                        ),
-                    areaType = AreaType.WORKPLACE,
-                    createdAt = LocalDateTime.now(),
-                ).also { logger.info { "새로 생성된 직장 근처 활동 지역: $it" } }
-            activityAreaRepository
-                .runCatching {
-                    save(workplaceArea)
-                }.onSuccess {
-                    logger.info { "메인 DB에 새 직장 활동 지역 저장 성공 - workplaceArea: $workplaceArea" }
-                }.onFailure {
-                    logger.warn { "메인 DB에 새 직장 활동 지역 저장 실패 - workplaceArea: $workplaceArea" }
-                    throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
-                }
-        }
         tempMemberRepository
             .runCatching {
                 delete(redisId)
@@ -407,7 +314,7 @@ class RegistrationServiceImpl(
         logger.info { "회원 가입 종료 - 회원 가입 성공" }
         // 멱등성을 위해
         redisTemplate.opsForValue().set(idempotencyKey, UUID.randomUUID().toString())
-        // 회원 생성 이벤트, 활동지역 생성 이벤트 발생
+        // 회원 생성 이벤트
         val memberEvent =
             MemberCreateEvent(
                 memberId = newMember.formattedId,
@@ -423,7 +330,6 @@ class RegistrationServiceImpl(
                 signUpPath = SignUpPath.EMAIL,
             )
         // logging을 위한 비동기 리스너 이벤트 처리
-        logger.info { "현재 Thread: ${Thread.currentThread().name}" }
         eventPublisher.publishEvent(memberEvent)
         // outbox 이벤트 처리
         val jsonPayLoad = objectMapper.writeValueAsString(memberEvent)
@@ -434,23 +340,6 @@ class RegistrationServiceImpl(
                 jsonPayLoad,
                 idempotencyKey,
             )
-        val areaEvent =
-            ActivityAreaCreateEvent(
-                memberId = newMember.formattedId,
-                primaryId = requestDTO.primaryFormattedId,
-                workplaceId = requestDTO.workplaceFormattedId,
-            )
-        val areaJsonPayLoad = objectMapper.writeValueAsString(areaEvent)
-        val areaOutBox =
-            OutboxDTO(
-                newMember.formattedId,
-                EventType.ACTIVITY_AREA,
-                areaJsonPayLoad,
-                idempotencyKey,
-            )
-        val outboxList = listOf(outBox, areaOutBox)
-        outboxService.createOutboxes(outboxList)
+        outboxService.createOutbox(outBox)
     }
-
-    private fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()
 }

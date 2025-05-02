@@ -20,6 +20,7 @@ class MemberLogEventPublisher(
     val logger = KotlinLogging.logger {}
 
     // 새로운 thread에서 비동기 병렬처리
+    // 회원 도메인 요청 시도 로그
     @Async("logTaskExecutor")
     @EventListener
     fun memberLogging(event: BaseMemberEvent) {
@@ -36,6 +37,9 @@ class MemberLogEventPublisher(
         }
     }
 
+    // 회원 도메인 요청 실패 로그
+
+    // 인증 실패 로그
     @Async("logTaskExecutor")
     @EventListener
     fun authLogging(event: AuthFailEvent) {

@@ -1,9 +1,6 @@
 package com.bockerl.snailmember.member.command.domain.service
 
-import com.bockerl.snailmember.area.command.domain.aggregate.entity.ActivityArea
-import com.bockerl.snailmember.area.command.domain.aggregate.entity.AreaType
-import com.bockerl.snailmember.area.command.domain.aggregate.event.ActivityAreaUpdateEvent
-import com.bockerl.snailmember.area.command.domain.repository.ActivityAreaRepository
+import com.bockerl.snailmember.area.command.application.service.CommandAreaService
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
@@ -12,9 +9,10 @@ import com.bockerl.snailmember.file.command.domain.aggregate.enums.FileTargetTyp
 import com.bockerl.snailmember.infrastructure.outbox.dto.OutboxDTO
 import com.bockerl.snailmember.infrastructure.outbox.enums.EventType
 import com.bockerl.snailmember.infrastructure.outbox.service.OutboxService
-import com.bockerl.snailmember.member.command.application.dto.request.ActivityAreaRequestDTO
 import com.bockerl.snailmember.member.command.application.dto.request.ProfileRequestDTO
 import com.bockerl.snailmember.member.command.application.service.CommandMemberService
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.MemberStatus
+import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberDeleteEvent
 import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberLoginEvent
 import com.bockerl.snailmember.member.command.domain.aggregate.event.MemberUpdateEvent
 import com.bockerl.snailmember.member.command.domain.repository.MemberRepository
@@ -29,7 +27,7 @@ import java.time.LocalDateTime
 @Service
 class CommandMemberServiceImpl(
     private val memberRepository: MemberRepository,
-    private val activityAreaRepository: ActivityAreaRepository,
+    private val activityAreaService: CommandAreaService,
     private val commandFileService: CommandFileService,
     private val outboxService: OutboxService,
     private val eventPublisher: ApplicationEventPublisher,
@@ -46,7 +44,7 @@ class CommandMemberServiceImpl(
     ) {
         logger.info { "마지막 접속 시간 업데이트 서비스 도착" }
         val member =
-            memberRepository.findMemberByMemberEmail(email)
+            memberRepository.findMemberByMemberEmailAndMemberStatusNot(email, MemberStatus.ROLE_DELETED)
                 ?: throw CommonException(ErrorCode.NOT_FOUND_MEMBER)
         member.lastAccessTime = LocalDateTime.now()
         memberRepository
@@ -72,90 +70,9 @@ class CommandMemberServiceImpl(
             }.onSuccess {
                 logger.info { "마지막 로그인 시간 업데이트 성공 - email: $email" }
             }.onFailure {
+                logger.info { "마지막 로그인 시간 업데이트 실패, memberId: ${member.formattedId}" }
                 throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "로그인 시간 업데이트 실패 - email: $email")
             }
-    }
-
-    @Transactional
-    override fun postActivityArea(
-        memberId: String,
-        requestDTO: ActivityAreaRequestDTO,
-        idempotencyKey: String,
-    ) {
-        logger.info { "활동지역 등록 서비스 도착" }
-        val member =
-            memberRepository.findMemberByMemberId(extractDigits(memberId))
-                ?: throw CommonException(ErrorCode.NOT_FOUND_MEMBER)
-        // 이벤트 생성
-        val event =
-            ActivityAreaUpdateEvent(
-                memberId = member.formattedId,
-                primaryId = requestDTO.primaryId,
-                workplaceId = requestDTO.workplaceId,
-            )
-        // logging을 위한 비동기 리스너 이벤트 처리
-        eventPublisher.publishEvent(event)
-        val foundedMemberId = member.memberId!!
-        val newEmdId = extractDigits(requestDTO.primaryId)
-        logger.info { "기존 주 활동지역부터 삭제" }
-        activityAreaRepository
-            .runCatching {
-                deleteByMemberIdAndAreaType(foundedMemberId, AreaType.PRIMARY)
-            }.onSuccess {
-                logger.info { "기존 주 활동지역 삭제 성공" }
-            }.onFailure {
-                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "기존 주 활동지역 삭제 실패")
-            }
-        logger.info { "새로운 주 활동지역 생성" }
-        val primaryId = ActivityArea.ActivityId(foundedMemberId, newEmdId)
-        val primaryArea =
-            ActivityArea(
-                primaryId,
-                areaType = AreaType.PRIMARY,
-            )
-        activityAreaRepository
-            .runCatching {
-                save(primaryArea)
-            }.onSuccess {
-                logger.info { "새로운 주 활동지역 저장 성공" }
-            }.onFailure {
-                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "새로운 주 활동지역 저장 실패")
-            }
-        requestDTO.workplaceId?.let {
-            logger.info { "직장근처 활동지역 수정 시작" }
-            activityAreaRepository
-                .runCatching {
-                    deleteByMemberIdAndAreaType(foundedMemberId, AreaType.WORKPLACE)
-                }.onSuccess {
-                    logger.info { "기존 직장근처 활동지역 삭제 성공" }
-                }.onFailure {
-                    throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "기존 직장근처 활동지역 삭제 실패")
-                }
-            logger.info { "새로운 직장근처 활동지역 생성" }
-            val newEmdId2 = extractDigits(requestDTO.workplaceId)
-            val workplaceId = ActivityArea.ActivityId(foundedMemberId, newEmdId2)
-            val workplaceArea =
-                ActivityArea(
-                    workplaceId,
-                    areaType = AreaType.WORKPLACE,
-                )
-            activityAreaRepository
-                .runCatching {
-                    save(workplaceArea)
-                }.onSuccess {
-                    logger.info { "새로운 직장근처 활동지역 저장 성공" }
-                }.onFailure {
-                    throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "새로운 직장근처 활동지역 저장 실패")
-                }
-        }
-        val jsonPayLoad = objectMapper.writeValueAsString(event)
-        val outBox =
-            OutboxDTO(
-                aggregateId = memberId,
-                eventType = EventType.ACTIVITY_AREA,
-                payload = jsonPayLoad,
-            )
-        outboxService.createOutbox(outBox)
     }
 
     @Transactional
@@ -167,7 +84,7 @@ class CommandMemberServiceImpl(
     ) {
         logger.info { "프로필 수정 서비스 도착" }
         val member =
-            memberRepository.findMemberByMemberId(extractDigits(memberId))
+            memberRepository.findMemberByMemberIdAndMemberStatusNot(extractDigits(memberId), MemberStatus.ROLE_DELETED)
                 ?: throw CommonException(ErrorCode.NOT_FOUND_MEMBER)
         member.apply {
             memberNickname = requestDTO.nickName
@@ -232,6 +149,46 @@ class CommandMemberServiceImpl(
                 EventType.MEMBER,
                 jsonPayLoad,
                 idempotencyKey,
+            )
+        outboxService.createOutbox(outBox)
+    }
+
+    @Transactional
+    override fun deleteMember(
+        memberId: String,
+        idempotencyKey: String,
+    ) {
+        logger.info { "멤버 탈퇴 서비스 도착" }
+        val member =
+            memberRepository
+                .findMemberByMemberIdAndMemberStatusNot(extractDigits(memberId), MemberStatus.ROLE_DELETED)
+                ?: throw CommonException(ErrorCode.NOT_FOUND_MEMBER)
+        val event =
+            MemberDeleteEvent(
+                memberId = memberId,
+                memberEmail = member.memberEmail,
+            )
+        eventPublisher.publishEvent(event)
+        member.memberStatus = MemberStatus.ROLE_DELETED
+        memberRepository
+            .runCatching {
+                logger.info { "멤버 탈퇴 시작" }
+                save(member)
+            }.onSuccess {
+                logger.info { "멤버 탈퇴 성공, memberId: $memberId" }
+            }.onFailure {
+                logger.info { "멤버 탈퇴 실패, memberId: $memberId" }
+                // 로그 전송 및 보상 트랜잭션 예상
+                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+            }
+        // 회원 삭제 이벤트 아웃박스 생성
+        val jsonPayLoad = objectMapper.writeValueAsString(event)
+        val outBox =
+            OutboxDTO(
+                aggregateId = memberId,
+                eventType = EventType.MEMBER,
+                payload = jsonPayLoad,
+                idempotencyKey = idempotencyKey,
             )
         outboxService.createOutbox(outBox)
     }

@@ -115,7 +115,7 @@ class LineOauth2ServiceImpl(
 
             // 기존 회원 조회 또는 새 회원 생성
             val member =
-                memberRepository.findMemberByMemberEmail(email)
+                memberRepository.findMemberByMemberEmailAndMemberStatusNot(email, MemberStatus.ROLE_DELETED)
                     ?: createNewLineMember(email, lineResponse)
             if (member.memberStatus == MemberStatus.ROLE_BLACKLIST) {
                 logger.warn { "라인 블랙 리스트 멤버가 로그인 - email: $email" }

@@ -5,9 +5,7 @@ package com.bockerl.snailmember.member.command.application.mapper
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.dto.request.*
-import com.bockerl.snailmember.member.command.application.dto.response.LoginResponseDTO
 import com.bockerl.snailmember.member.command.domain.vo.request.*
-import com.bockerl.snailmember.member.command.domain.vo.response.LoginResponseVO
 import org.springframework.stereotype.Component
 
 @Component
@@ -15,9 +13,15 @@ class AuthConverter {
     // 회원가입 요청 vo to dto
     fun emailRequestVOToDTO(requestVO: EmailRequestVO) =
         EmailRequestDTO(
-            memberEmail = requestVO.memberEmail ?: throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT),
-            memberNickName = requestVO.memberNickName ?: throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT),
-            memberBirth = requestVO.memberBirth ?: throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT),
+            memberEmail =
+                requestVO.memberEmail
+                    ?: throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT, "email이 null입니다."),
+            memberNickName =
+                requestVO.memberNickName
+                    ?: throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT, "닉네임이 null입니다."),
+            memberBirth =
+                requestVO.memberBirth
+                    ?: throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT, "생일이 null입니다."),
         )
 
     // 이메일 인증 코드 vo to dto
@@ -61,11 +65,4 @@ class AuthConverter {
             workplaceFormattedId = requestVO.workplaceFormattedId,
         )
     }
-
-    // 로그인 토큰 dto to vo
-    fun loginDTOToVO(responseDTO: LoginResponseDTO): LoginResponseVO =
-        LoginResponseVO(
-            accessToken = responseDTO.accessToken,
-            refreshToken = responseDTO.refreshToken,
-        )
 }

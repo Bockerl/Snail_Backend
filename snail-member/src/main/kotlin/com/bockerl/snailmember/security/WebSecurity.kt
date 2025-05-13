@@ -3,6 +3,7 @@ package com.bockerl.snailmember.security
 import com.bockerl.snailmember.member.command.application.service.CommandMemberService
 import com.bockerl.snailmember.member.query.service.QueryMemberService
 import com.bockerl.snailmember.security.config.CustomLogoutSuccessfulHandler
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
@@ -22,7 +23,9 @@ class WebSecurity(
     private val redisTemplate: RedisTemplate<String, String>,
     private val queryMemberService: QueryMemberService,
     private val commandMemberService: CommandMemberService,
+    private val authenticationFailureHandler: CustomAuthenticationFailureHandler,
     private val authenticationEntryPoint: CustomAuthenticationEntryPoint,
+    private val eventPublisher: ApplicationEventPublisher,
     private val environment: Environment,
     private val jwtUtils: JwtUtils,
 ) {
@@ -45,8 +48,8 @@ class WebSecurity(
                 logout.logoutUrl("/api/member/logout")
                 logout.addLogoutHandler(CustomLogoutHandler(redisTemplate, jwtUtils))
                 logout.logoutSuccessHandler(CustomLogoutSuccessfulHandler())
-            }.exceptionHandling { exceptions ->
-                exceptions.authenticationEntryPoint(authenticationEntryPoint)
+            }.exceptionHandling { exception ->
+                exception.authenticationEntryPoint(authenticationEntryPoint)
             }.authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers("/swagger-ui/**")
@@ -65,7 +68,7 @@ class WebSecurity(
                     .permitAll()
                     .requestMatchers("/api/member/health")
                     .permitAll()
-                    .requestMatchers("/api/area/")
+                    .requestMatchers("/actuator/prometheus")
                     .permitAll()
                     .anyRequest()
                     .authenticated()
@@ -77,6 +80,8 @@ class WebSecurity(
                     queryMemberService,
                     commandMemberService,
                     jwtUtils,
+                    authenticationEntryPoint,
+                    eventPublisher,
                     redisTemplate,
                     environment,
                 ),
@@ -102,6 +107,7 @@ class WebSecurity(
                 environment = environment,
             )
         authenticationFilter.setFilterProcessesUrl("/api/member/login")
+        authenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler)
         return authenticationFilter
     }
 }

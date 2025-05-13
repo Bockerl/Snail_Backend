@@ -1,8 +1,8 @@
 package com.bockerl.snailmember.member.query.dto
 
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.Gender
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.Language
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.MemberStatus
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Gender
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Language
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.MemberStatus
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -17,7 +17,7 @@ class MemberQueryDTO(
     @field:Schema(description = "멤버 닉네임", example = "Lin XaoMing", type = "String")
     val memberNickname: String,
     @field:Schema(description = "멤버 프로필 사진", example = "snail.PNG", type = "String")
-    val memberPhoto: String? = null,
+    val memberPhoto: String = "",
     @field:Schema(description = "선호 언어", example = "KOR", type = "String")
     val memberLanguage: Language,
     @field:Schema(description = "계정 생성 시각", example = "2024-12-11 14:45:30", type = "LocalDateTime")
@@ -37,7 +37,7 @@ class MemberQueryDTO(
     @field:Schema(description = "마지막 접속 시각", example = "2024-12-11 14:45:30", type = "LocalDateTime")
     val lastAccessTime: LocalDateTime,
     @field:Schema(description = "자기 소개", example = "중국인 유학생입니다 :)", type = "String")
-    val selfIntroduction: String? = null,
+    val selfIntroduction: String = "",
 ) {
     val formattedId: String
         get() = "MEM-${memberId.toString().padStart(8, '0')}"

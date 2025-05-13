@@ -4,7 +4,7 @@ import com.bockerl.snailmember.boardcommentlike.command.application.dto.CommandB
 import com.bockerl.snailmember.boardcommentlike.command.application.service.CommandBoardCommentLikeService
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.enums.BoardCommentLikeActionType
 import com.bockerl.snailmember.boardcommentlike.command.domain.aggregate.event.BoardCommentLikeEvent
-import com.bockerl.snailmember.boardlike.command.application.dto.CommandBoardLikeDTO
+import com.bockerl.snailmember.boardlike.command.application.dto.CommandBoardLikeEventDTO
 import com.bockerl.snailmember.boardlike.command.application.service.CommandBoardLikeService
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.enums.BoardLikeActionType
 import com.bockerl.snailmember.boardlike.command.domain.aggregate.event.BoardLikeEvent
@@ -23,19 +23,29 @@ class LikeEventHandler(
     private val commandBoardCommentLikeService: CommandBoardCommentLikeService,
     private val commandBoardRecommentLikeService: CommandBoardRecommentLikeService,
 ) {
-    private val boardLikeBuffer = mutableListOf<CommandBoardLikeDTO>()
+    private val boardLikeBuffer = mutableListOf<CommandBoardLikeEventDTO>()
     private val boardCommentLikeBuffer = mutableListOf<CommandBoardCommentLikeDTO>()
     private val boardRecommentLikeBuffer = mutableListOf<CommandBoardRecommentLikeDTO>()
     private val bufferSize = 1
     private val logger = KotlinLogging.logger {}
 
     @Transactional
-    fun handle(event: BaseLikeEvent) {
+    fun handle(
+        event: BaseLikeEvent,
+        eventId: String,
+        idempotencyKey: String,
+    ) {
         when (event) {
             is BoardLikeEvent -> {
                 when (event.boardLikeActionType) {
                     BoardLikeActionType.CREATE -> {
-                        val like = CommandBoardLikeDTO(memberId = event.memberId, boardId = event.boardId)
+                        val like =
+                            CommandBoardLikeEventDTO(
+                                memberId = event.memberId,
+                                boardId = event.boardId,
+                                eventId = eventId,
+                                idempotencyKey = idempotencyKey,
+                            )
                         boardLikeBuffer.add(like)
                         if (boardLikeBuffer.size >= bufferSize) {
                             commandBoardLikeService.createBoardLikeEventList(boardLikeBuffer)
@@ -45,9 +55,11 @@ class LikeEventHandler(
 
                     BoardLikeActionType.DELETE -> {
                         commandBoardLikeService.deleteBoardLikeEvent(
-                            CommandBoardLikeDTO(
+                            CommandBoardLikeEventDTO(
                                 memberId = event.memberId,
                                 boardId = event.boardId,
+                                eventId = eventId,
+                                idempotencyKey = eventId,
                             ),
                         )
                     }
@@ -62,6 +74,8 @@ class LikeEventHandler(
                                 memberId = event.memberId,
                                 boardId = event.boardId,
                                 boardCommentId = event.boardCommentId,
+                                eventId = eventId,
+                                idempotencyKey = idempotencyKey,
                             )
                         boardCommentLikeBuffer.add(like)
                         if (boardCommentLikeBuffer.size >= bufferSize) {
@@ -76,6 +90,8 @@ class LikeEventHandler(
                                 memberId = event.memberId,
                                 boardCommentId = event.boardCommentId,
                                 boardId = event.boardId,
+                                eventId = eventId,
+                                idempotencyKey = idempotencyKey,
                             ),
                         )
                     }
@@ -91,6 +107,8 @@ class LikeEventHandler(
                                 boardId = event.boardId,
                                 boardCommentId = event.boardCommentId,
                                 boardRecommentId = event.boardRecommentId,
+                                eventId = eventId,
+                                idempotencyKey = idempotencyKey,
                             )
                         boardRecommentLikeBuffer.add(like)
                         if (boardRecommentLikeBuffer.size >= bufferSize) {
@@ -106,6 +124,8 @@ class LikeEventHandler(
                                 boardId = event.boardId,
                                 boardCommentId = event.boardCommentId,
                                 boardRecommentId = event.boardRecommentId,
+                                eventId = eventId,
+                                idempotencyKey = idempotencyKey,
                             ),
                         )
                     }

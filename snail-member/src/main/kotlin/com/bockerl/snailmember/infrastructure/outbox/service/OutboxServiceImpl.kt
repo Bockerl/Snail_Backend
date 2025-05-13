@@ -19,7 +19,9 @@ class OutboxServiceImpl(
                 aggregateId = outBoxDTO.aggregateId,
                 eventType = outBoxDTO.eventType,
                 payload = outBoxDTO.payload,
+                idempotencyKey = outBoxDTO.idempotencyKey,
             )
+        // Consumer ->
         if (outbox.eventId == null) {
             val nextVal =
                 (
@@ -41,6 +43,8 @@ class OutboxServiceImpl(
                         aggregateId = outboxDTO.aggregateId,
                         eventType = outboxDTO.eventType,
                         payload = outboxDTO.payload,
+                        // eventId로만 멱등성 처리하기
+                        idempotencyKey = outboxDTO.idempotencyKey,
                     )
                 if (outbox.eventId == null) {
                     val nextVal =

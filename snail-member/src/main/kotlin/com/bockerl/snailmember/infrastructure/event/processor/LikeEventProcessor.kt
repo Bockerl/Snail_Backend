@@ -26,9 +26,13 @@ class LikeEventProcessor(
         maxAttempts = 3,
         backoff = Backoff(delay = 1000, multiplier = 2.0, random = true),
     )
-    fun process(event: BaseLikeEvent) {
+    fun process(
+        event: BaseLikeEvent,
+        eventId: String,
+        idempotencyKey: String,
+    ) {
         logger.info { "이벤트 처리 시작: $event" }
-        likeEventHandler.handle(event)
+        likeEventHandler.handle(event, eventId, idempotencyKey)
         logger.info { "이벤트 처리 성공: $event" }
     }
 

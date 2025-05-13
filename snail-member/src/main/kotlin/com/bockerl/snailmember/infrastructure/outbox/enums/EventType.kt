@@ -4,6 +4,12 @@ package com.bockerl.snailmember.infrastructure.outbox.enums
 enum class EventType(
     val topic: String,
 ) {
+    AUTH_LOGGING("auth-fail-log-events"),
     LIKE("board-like-events"),
+    FILE_CREATED("file-events"),
+    FILE_DELETED("file-events"),
     FILE("file-events"),
+    MEMBER("member-events"),
+    MEMBER_LOGGING("member-log-events"),
+    ACTIVITY_AREA("activity-area-events"),
 }

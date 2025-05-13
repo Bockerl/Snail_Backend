@@ -18,7 +18,7 @@ class DlqProcessor(
             logger.info { "DLQ 전송 성공: $event" }
         } catch (e: Exception) {
             logger.error(e) { "DLQ 전송 실패: $event" }
-            // 추가적인 모니터링이나 alerting 처리 가능
+            // 추가적인 모니터링이나 alerting 처리 가능 - ohhora!
         }
     }
 }

@@ -13,4 +13,6 @@ data class ActivityAreaRegisterRequestVO(
     @field:Schema(description = "직장 지역", example = "EMD-00000002", type = "String")
     @JsonProperty("workplaceId")
     val workplaceFormattedId: String? = null,
+    @JsonProperty("idempotencyKey")
+    val idempotencyKey: String? = null,
 )

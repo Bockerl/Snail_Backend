@@ -17,7 +17,7 @@
         member_id,
         board_id,
         created_at,
-        updated_at,
+        updated_at
         FROM
         board_like
         <where>
@@ -55,7 +55,7 @@
         member_id,
         board_id,
         created_at,
-        updated_at,
+        updated_at
         FROM
         board_like
         <where>

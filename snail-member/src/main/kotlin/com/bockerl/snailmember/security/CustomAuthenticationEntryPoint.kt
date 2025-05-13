@@ -1,10 +1,15 @@
 package com.bockerl.snailmember.security
 
+import com.bockerl.snailmember.security.config.FailType
+import com.bockerl.snailmember.security.config.event.AuthFailEvent
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.security.authentication.AuthenticationServiceException
 import org.springframework.security.authentication.BadCredentialsException
+import org.springframework.security.authentication.InsufficientAuthenticationException
 import org.springframework.security.authentication.LockedException
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.AuthenticationEntryPoint
@@ -12,7 +17,11 @@ import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
 @Component
-class CustomAuthenticationEntryPoint : AuthenticationEntryPoint {
+class CustomAuthenticationEntryPoint(
+    private val eventPublisher: ApplicationEventPublisher,
+    private val jwtUtils: JwtUtils,
+    private val objectMapper: ObjectMapper,
+) : AuthenticationEntryPoint {
     private val log = KotlinLogging.logger {}
 
     override fun commence(
@@ -23,37 +32,64 @@ class CustomAuthenticationEntryPoint : AuthenticationEntryPoint {
         log.info { "AuthenticationEntryPoint.commence 호출됨" }
         log.info { "예외 클래스: ${authException.javaClass.name}" }
         log.info { "예외 메시지: ${authException.message}" }
-
-        // 원인 예외 출력
-        if (authException.cause != null) {
-            log.info { "원인 예외 클래스: ${authException.cause!!.javaClass.name}" }
-            log.info { "원인 예외 메시지: ${authException.cause!!.message}" }
-        }
-
-        val (statusCode, message) =
+        val (statusCode, message, failType) =
             when (authException) {
-                // 블랙리스트
-                is LockedException -> HttpServletResponse.SC_FORBIDDEN to authException.message
-                // 잘못된 아이디 비밀번호
-                is BadCredentialsException -> HttpServletResponse.SC_UNAUTHORIZED to authException.message
-                // 인증 실패
-                else -> HttpServletResponse.SC_BAD_REQUEST to "인증에 실패했습니다."
+                is LockedException -> Triple(HttpServletResponse.SC_FORBIDDEN, "블랙리스트로 등록된 아이디입니다.", FailType.BLACK_LIST.code)
+                is BadCredentialsException -> Triple(HttpServletResponse.SC_FORBIDDEN, "잘못된 인증 정보입니다.", FailType.BAD_CREDENTIALS.code)
+                is InsufficientAuthenticationException ->
+                    Triple(
+                        HttpServletResponse.SC_FORBIDDEN,
+                        "만료된 인증 정보입니다.",
+                        FailType.TOKEN_EXPIRED.code,
+                    )
+//                is CredentialsExpiredException -> Triple(HttpServletResponse.SC_FORBIDDEN, "자격 증명이 만료되었습니다.", FailType.CREDENTIALS_EXPIRED.code)
+//                is AccountExpiredException -> Triple(HttpServletResponse.SC_FORBIDDEN, "계정 유효기간이 만료되었습니다.", FailType.ACCOUNT_EXPIRED.code)
+//                is DisabledException -> Triple(HttpServletResponse.SC_FORBIDDEN, "비활성화된 계정입니다.", FailType.DISABLED_ACCOUNT.code)
+                is AuthenticationServiceException ->
+                    Triple(
+                        HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                        "인증 서비스에 오류가 발생했습니다.",
+                        FailType.AUTH_SERVER_ERROR.code,
+                    )
+                else -> Triple(HttpServletResponse.SC_UNAUTHORIZED, "인증되지 않은 요청입니다.", FailType.UNKNOWN.code)
             }
-
         // 상태 코드 설정
         response.status = statusCode
         response.contentType = "application/json;charset=UTF-8"
-
+        // 인증 실패, 이벤트 생성
+        val token =
+            try {
+                jwtUtils.extractAccessToken(request) ?: jwtUtils.extractRefreshToken(request)
+            } catch (e: Exception) {
+                null
+            }
+        val email =
+            token?.let {
+                try {
+                    jwtUtils.parseClaims(it).subject
+                } catch (e: Exception) {
+                    "UNKNOWN"
+                }
+            } ?: "UNKNOWN"
+        val event =
+            AuthFailEvent(
+                email = email,
+                failType = failType,
+                message = authException.message ?: message,
+                path = request.requestURL.toString(),
+                cause = authException.cause?.javaClass?.name ?: "UNKNOWN",
+                ipAddress = request.remoteAddr ?: "UNKNOWN",
+                userAgent = request.getHeader("User-Agent") ?: "UNKNOWN",
+            )
+        // 비동기 로그 이벤트 처리
+        eventPublisher.publishEvent(event)
         // json 응답 본문 설정
         val errorResponse =
             mapOf(
                 "timestamp" to LocalDateTime.now().toString(),
                 "message" to message,
                 "status" to statusCode,
-                "path" to request.requestURL,
             )
-
-        val objectMapper = ObjectMapper()
         response.writer.write(objectMapper.writeValueAsString(errorResponse))
     }
 }

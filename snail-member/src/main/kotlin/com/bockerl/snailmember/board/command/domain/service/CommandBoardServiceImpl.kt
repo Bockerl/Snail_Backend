@@ -21,6 +21,7 @@ import jakarta.transaction.Transactional
 import org.springframework.data.redis.core.Cursor
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.core.ScanOptions
+import org.springframework.data.redis.core.script.DefaultRedisScript
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 
@@ -35,6 +36,11 @@ class CommandBoardServiceImpl(
         commandBoardCreateDTO: CommandBoardCreateDTO,
         files: List<MultipartFile>,
     ) {
+        // 따닥 방지
+        if (redisTemplate.hasKey(commandBoardCreateDTO.idempotencyKey)) {
+            throw CommonException(ErrorCode.ALREADY_REQUESTED)
+        }
+
         val board =
             Board(
                 boardContents = commandBoardCreateDTO.boardContents,
@@ -54,6 +60,7 @@ class CommandBoardServiceImpl(
                         fileTargetType = FileTargetType.BOARD,
                         fileTargetId = formattedBoardId(it),
                         memberId = commandBoardCreateDTO.memberId,
+                        idempotencyKey = commandBoardCreateDTO.idempotencyKey,
                     )
                 }
 
@@ -63,6 +70,22 @@ class CommandBoardServiceImpl(
         redisTemplate.delete("board/${commandBoardCreateDTO.boardTag}")
         invalidateByTag(board.boardTag)
         redisTemplate.delete("board/${commandBoardCreateDTO.boardType}")
+
+        val idempotencyScript =
+            """
+            local res = redis.call("set", KEYS[1], ARGV[1], "EX", ARGV[2])
+            return res
+            """.trimIndent()
+
+        val idempotencyRedisScript = DefaultRedisScript<String>(idempotencyScript, String::class.java)
+        val ttlInSeconds = "3600" // 1시간 TTL
+
+        val result = redisTemplate.execute(idempotencyRedisScript, listOf(commandBoardCreateDTO.idempotencyKey), "PROCESSED", ttlInSeconds)
+
+        // result가 "OK"이면 SET 명령이 성공적으로 실행된 것입니다.
+        if (result != "OK") {
+            throw CommonException(ErrorCode.REDIS_ERROR)
+        }
     }
 
     @Transactional
@@ -70,6 +93,11 @@ class CommandBoardServiceImpl(
         commandBoardUpdateDTO: CommandBoardUpdateDTO,
         files: List<MultipartFile>,
     ) {
+        // 따닥 방지
+        if (redisTemplate.hasKey(commandBoardUpdateDTO.idempotencyKey)) {
+            throw CommonException(ErrorCode.ALREADY_REQUESTED)
+        }
+
         val boardId = extractDigits(commandBoardUpdateDTO.boardId)
 
         val board = commandBoardRepository.findById(boardId).orElseThrow { CommonException(ErrorCode.NOT_FOUND_BOARD) }
@@ -92,6 +120,7 @@ class CommandBoardServiceImpl(
                         fileTargetType = FileTargetType.BOARD,
                         fileTargetId = formattedBoardId(it),
                         memberId = commandBoardUpdateDTO.memberId,
+                        idempotencyKey = commandBoardUpdateDTO.idempotencyKey,
                     )
                 }
 
@@ -101,10 +130,31 @@ class CommandBoardServiceImpl(
         redisTemplate.delete("board/${commandBoardUpdateDTO.boardTag}")
         invalidateByTag(board.boardTag)
         redisTemplate.delete("board/${commandBoardUpdateDTO.boardType}")
+
+        val idempotencyScript =
+            """
+            local res = redis.call("set", KEYS[1], ARGV[1], "EX", ARGV[2])
+            return res
+            """.trimIndent()
+
+        val idempotencyRedisScript = DefaultRedisScript<String>(idempotencyScript, String::class.java)
+        val ttlInSeconds = "3600" // 1시간 TTL
+
+        val result = redisTemplate.execute(idempotencyRedisScript, listOf(commandBoardUpdateDTO.idempotencyKey), "PROCESSED", ttlInSeconds)
+
+        // result가 "OK"이면 SET 명령이 성공적으로 실행된 것입니다.
+        if (result != "OK") {
+            throw CommonException(ErrorCode.REDIS_ERROR)
+        }
     }
 
     @Transactional
     override fun deleteBoard(commandBoardDeleteDTO: CommandBoardDeleteDTO) {
+        // 따닥 방지
+        if (redisTemplate.hasKey(commandBoardDeleteDTO.idempotencyKey)) {
+            throw CommonException(ErrorCode.ALREADY_REQUESTED)
+        }
+
         val boardId = extractDigits(commandBoardDeleteDTO.boardId)
         val board = commandBoardRepository.findById(boardId).orElseThrow { CommonException(ErrorCode.NOT_FOUND_BOARD) }
 
@@ -117,6 +167,7 @@ class CommandBoardServiceImpl(
                 fileTargetType = FileTargetType.BOARD,
                 fileTargetId = formattedBoardId(boardId),
                 memberId = commandBoardDeleteDTO.memberId,
+                idempotencyKey = commandBoardDeleteDTO.idempotencyKey,
             )
 
         commandFileService.deleteFile(commandFileDTO)
@@ -124,6 +175,22 @@ class CommandBoardServiceImpl(
         redisTemplate.delete("board/${board.boardTag}")
         invalidateByTag(board.boardTag)
         redisTemplate.delete("board/${board.boardType}")
+
+        val idempotencyScript =
+            """
+            local res = redis.call("set", KEYS[1], ARGV[1], "EX", ARGV[2])
+            return res
+            """.trimIndent()
+
+        val idempotencyRedisScript = DefaultRedisScript<String>(idempotencyScript, String::class.java)
+        val ttlInSeconds = "3600" // 1시간 TTL
+
+        val result = redisTemplate.execute(idempotencyRedisScript, listOf(commandBoardDeleteDTO.idempotencyKey), "PROCESSED", ttlInSeconds)
+
+        // result가 "OK"이면 SET 명령이 성공적으로 실행된 것입니다.
+        if (result != "OK") {
+            throw CommonException(ErrorCode.REDIS_ERROR)
+        }
     }
 
     private fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()

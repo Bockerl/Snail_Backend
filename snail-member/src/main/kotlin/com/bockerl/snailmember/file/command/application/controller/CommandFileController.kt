@@ -55,6 +55,7 @@ class CommandFileController(
     )
     @PostMapping("/single", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun postSingleFile(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestPart("file") file: MultipartFile,
         @RequestPart("commandFileRequestVO") commandFileRequestVO: CommandFileRequestVO,
     ): ResponseDTO<Void> {
@@ -63,6 +64,7 @@ class CommandFileController(
                 fileTargetType = commandFileRequestVO.fileTargetType,
                 fileTargetId = commandFileRequestVO.fileTargetId,
                 memberId = commandFileRequestVO.memberId,
+                idempotencyKey = idempotencyKey,
             )
 
         commandFileService.createSingleFile(file, commandFileDTO)
@@ -96,6 +98,7 @@ class CommandFileController(
     )
     @PostMapping("multi", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun postFiles(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestPart("files") files: List<MultipartFile>,
         @RequestPart("commandFileRequestVO")
         commandFileRequestVO: CommandFileRequestVO,
@@ -105,6 +108,7 @@ class CommandFileController(
                 fileTargetType = commandFileRequestVO.fileTargetType,
                 fileTargetId = commandFileRequestVO.fileTargetId,
                 memberId = commandFileRequestVO.memberId,
+                idempotencyKey = idempotencyKey,
             )
 
         commandFileService.createFiles(files, commandFileDTO)
@@ -138,6 +142,7 @@ class CommandFileController(
     )
     @PostMapping("/gathering", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun postFilesWithGatheringId(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestPart("files") files: List<MultipartFile>,
         @RequestPart("commandFileWithGatheringRequestVO") commandFileWithGatheringRequestVO: CommandFileWithGatheringRequestVO,
     ): ResponseDTO<Void> {
@@ -147,6 +152,7 @@ class CommandFileController(
                 fileTargetId = commandFileWithGatheringRequestVO.fileTargetId,
                 memberId = commandFileWithGatheringRequestVO.memberId,
                 gatheringId = commandFileWithGatheringRequestVO.gatheringId,
+                idempotencyKey = idempotencyKey,
             )
 
         commandFileService.createFilesWithGatheringId(files, commandFileWithGatheringDTO)
@@ -180,6 +186,7 @@ class CommandFileController(
     )
     @PatchMapping("/profile", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun patchProfileImage(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestPart("file") file: MultipartFile,
         @RequestPart("commandFileRequestVO") commandFileRequestVO: CommandFileRequestVO,
     ): ResponseDTO<Void> {
@@ -188,6 +195,7 @@ class CommandFileController(
                 fileTargetType = commandFileRequestVO.fileTargetType,
                 fileTargetId = commandFileRequestVO.fileTargetId,
                 memberId = commandFileRequestVO.memberId,
+                idempotencyKey = idempotencyKey,
             )
 
         commandFileService.updateProfileImage(file, commandFileDTO)
@@ -224,6 +232,7 @@ class CommandFileController(
     )
     @PatchMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun patchFiles(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestPart("commandFileRequestVO") commandFileRequestVO: CommandFileRequestVO,
         @RequestPart("deleteFilesIds") deleteFilesIds: List<Long>,
         @RequestPart("newFiles") newFiles: List<MultipartFile>,
@@ -233,6 +242,7 @@ class CommandFileController(
                 fileTargetType = commandFileRequestVO.fileTargetType,
                 fileTargetId = commandFileRequestVO.fileTargetId,
                 memberId = commandFileRequestVO.memberId,
+                idempotencyKey = idempotencyKey,
             )
 
         commandFileService.updateFiles(commandFileDTO, deleteFilesIds, newFiles)
@@ -269,6 +279,7 @@ class CommandFileController(
     )
     @PatchMapping("/gathering", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun patchFilesWithGatheringId(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestPart("commandFileRequestVO") commandFileWithGatheringRequestVO: CommandFileWithGatheringRequestVO,
         @RequestPart("deleteFilesIds") deleteFilesIds: List<Long>,
         @RequestPart("newFiles") newFiles: List<MultipartFile>,
@@ -279,6 +290,7 @@ class CommandFileController(
                 fileTargetId = commandFileWithGatheringRequestVO.fileTargetId,
                 memberId = commandFileWithGatheringRequestVO.memberId,
                 gatheringId = commandFileWithGatheringRequestVO.gatheringId,
+                idempotencyKey = idempotencyKey,
             )
 
         commandFileService.updateFilesWithGatheringId(commandFileWithGatheringDTO, deleteFilesIds, newFiles)
@@ -303,6 +315,7 @@ class CommandFileController(
     )
     @DeleteMapping("")
     fun deleteFile(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestBody commandFileRequestVO: CommandFileRequestVO,
     ): ResponseDTO<Void> {
         val commandFileDTO =
@@ -310,6 +323,7 @@ class CommandFileController(
                 fileTargetType = commandFileRequestVO.fileTargetType,
                 fileTargetId = commandFileRequestVO.fileTargetId,
                 memberId = commandFileRequestVO.memberId,
+                idempotencyKey = idempotencyKey,
             )
 
         commandFileService.deleteFile(commandFileDTO)

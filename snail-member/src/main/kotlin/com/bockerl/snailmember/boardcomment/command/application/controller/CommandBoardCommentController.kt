@@ -44,6 +44,7 @@ class CommandBoardCommentController(
     )
     @PostMapping("contents")
     fun postBoardComment(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestBody commandBoardCommentCreateRequestVO: CommandBoardCommentCreateRequestVO,
     ): ResponseDTO<*> {
         val commandBoardCommentCreateDTO =
@@ -51,6 +52,7 @@ class CommandBoardCommentController(
                 boardCommentContents = commandBoardCommentCreateRequestVO.boardCommentContents,
                 memberId = commandBoardCommentCreateRequestVO.memberId,
                 boardId = commandBoardCommentCreateRequestVO.boardId,
+                idempotencyKey = idempotencyKey,
             )
         commandBoardCommentService.createBoardComment(commandBoardCommentCreateDTO)
 
@@ -87,6 +89,7 @@ class CommandBoardCommentController(
     )
     @PostMapping("gif", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun postBoardCommentByGif(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestPart("commandBoardCommentCreateByGifRequestVO") commandBoardCommentCreateByGifRequestVO:
             CommandBoardCommentCreateByGifRequestVO,
         @RequestPart("file", required = true) file: MultipartFile,
@@ -95,6 +98,7 @@ class CommandBoardCommentController(
             CommandBoardCommentCreateByGifDTO(
                 memberId = commandBoardCommentCreateByGifRequestVO.memberId,
                 boardId = commandBoardCommentCreateByGifRequestVO.boardId,
+                idempotencyKey = idempotencyKey,
             )
 
         commandBoardCommentService.createBoardCommentByGif(commandBoardCommentCreateByGifDTO, file)
@@ -120,6 +124,7 @@ class CommandBoardCommentController(
     )
     @DeleteMapping("")
     fun deleteBoardComment(
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
         @RequestBody commandBoardCommentDeleteRequestVO: CommandBoardCommentDeleteRequestVO,
     ): ResponseDTO<*> {
         val commandBoardCommentDeleteDTO =
@@ -127,6 +132,7 @@ class CommandBoardCommentController(
                 boardCommentId = commandBoardCommentDeleteRequestVO.boardCommentId,
                 memberId = commandBoardCommentDeleteRequestVO.memberId,
                 boardId = commandBoardCommentDeleteRequestVO.boardId,
+                idempotencyKey = idempotencyKey,
             )
         commandBoardCommentService.deleteBoardComment(commandBoardCommentDeleteDTO)
 

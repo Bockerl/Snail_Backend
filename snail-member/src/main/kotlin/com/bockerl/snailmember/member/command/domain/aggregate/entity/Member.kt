@@ -4,6 +4,10 @@
  */
 package com.bockerl.snailmember.member.command.domain.aggregate.entity
 
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Gender
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.Language
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.MemberStatus
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.SignUpPath
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners

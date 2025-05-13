@@ -11,10 +11,17 @@ import com.bockerl.snailmember.area.query.vo.request.AreaKeywordRequestVO
 import com.bockerl.snailmember.area.query.vo.request.AreaPositionRequestVO
 import com.bockerl.snailmember.area.query.vo.response.AreaKeywordResponseVO
 import com.bockerl.snailmember.area.query.vo.response.AreaPositionResponseVO
+import com.bockerl.snailmember.common.exception.CommonException
+import com.bockerl.snailmember.common.exception.ErrorCode
+import com.bockerl.snailmember.member.command.application.dto.request.ActivityAreaRequestDTO
+import com.bockerl.snailmember.member.command.domain.vo.request.ActivityAreaRequestVO
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 
 @Component
 class AreaConverter {
+    private val logger = KotlinLogging.logger {}
+
     // 지역 키워드 검색 요청 vo to dto
     fun areaKeywordRequestVOToDTO(requestVO: AreaKeywordRequestVO) =
         AreaKeywordRequestDTO(
@@ -83,4 +90,21 @@ class AreaConverter {
                     )
                 },
         )
+
+    // 활동지역 변경 혹은 oauth 회원을 위한 vo to dto
+    fun activityAreaRequestVOToDTO(requestVO: ActivityAreaRequestVO): ActivityAreaRequestDTO {
+        val primaryId = requestVO.primaryId
+
+        if (primaryId.isNullOrBlank() ||
+            !primaryId.startsWith("EMD") ||
+            primaryId == requestVO.workplaceId
+        ) {
+            logger.warn { "잘못된 형식의 활동번호, PrimaryId: $primaryId WorkplaceId: ${requestVO.workplaceId}" }
+            throw CommonException(ErrorCode.INVALID_PARAMETER_FORMAT, "활동지역PK가 유효하지 않습니다.")
+        }
+        return ActivityAreaRequestDTO(
+            primaryId = requestVO.primaryId,
+            workplaceId = requestVO.workplaceId,
+        )
+    }
 }

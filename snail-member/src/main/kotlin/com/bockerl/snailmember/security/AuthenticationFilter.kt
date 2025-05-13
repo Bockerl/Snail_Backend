@@ -20,7 +20,6 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-import java.io.IOException
 import java.lang.Exception
 import java.util.Date
 import javax.crypto.spec.SecretKeySpec
@@ -58,9 +57,9 @@ class AuthenticationFilter(
             log.info { "생성된 인증 토큰: $authToken" }
             // 인증 토큰 전달(인증 수행)
             authenticationManager.authenticate(authToken)
-        } catch (e: IOException) {
-            log.error { "이메일 기반 유저 인증 실패" }
-            throw CommonException(ErrorCode.AUTH_TOKEN_GENERATION_ERROR)
+        } catch (e: Exception) {
+            log.error { "이메일 기반 유저 인증 실패, ${e.message}, ${e.javaClass}" }
+            throw e
         }
     }
 
@@ -71,7 +70,6 @@ class AuthenticationFilter(
         authResult: Authentication,
     ) {
         log.info { "Authentication 인증 객체 정보: $authResult" }
-
         // 환경 변수 관리
         val accessExpiration =
             environment.getProperty("ACCESS_TOKEN_EXPIRATION")?.toLong()
@@ -90,7 +88,6 @@ class AuthenticationFilter(
         val authority = customMember.authorities.firstOrNull()?.authority
         val accessTokenExpiration = System.currentTimeMillis() + accessExpiration * 1000
         val refreshTokenExpiration = System.currentTimeMillis() + refreshExpiration * 1000
-
         // accessToken에 memberEmail, memberNickname, memberPhoto 넣을 예정
         val accessClaims =
             Jwts.claims().apply {
@@ -100,13 +97,11 @@ class AuthenticationFilter(
         accessClaims["memberNickname"] = customMember.memberNickname
         accessClaims["memberId"] = customMember.memberId
         accessClaims["memberPhoto"] = customMember.memberPhoto
-
         val refreshClaims =
             Jwts.claims().apply {
                 subject = customMember.memberEmail
             }
         refreshClaims["auth"] = authority
-
         val accessToken: String =
             Jwts
                 .builder()
@@ -127,7 +122,6 @@ class AuthenticationFilter(
                 .signWith(SecretKeySpec(tokenSecret.toByteArray(), SignatureAlgorithm.HS512.jcaName))
                 .compact()!!
         log.info { "생성된 refreshToken: $refreshToken" }
-
         // key - RT:email, value - refreshToken, TTL - refreshExpiration
         redisTemplate.execute { connection ->
             // transaction 시작
@@ -160,21 +154,21 @@ class AuthenticationFilter(
                 throw CommonException(ErrorCode.TOKEN_GENERATION_ERROR)
             }
         }
-
         log.info { "rt와 at를 담은 loginVO 생성 시작" }
-        // 앱 환경에선 body에서 꺼내 쓴다고 하여 수정
+        // at는 Header, rt는 Body
+        response.setHeader("Authorization", "Bearer $accessToken")
         val loginVO =
             LoginResponseVO(
-                accessToken = accessToken,
                 refreshToken = refreshToken,
             )
         log.info { "전달한 loginVO: $loginVO" }
         log.info { "멤버 마지막 로그인 시각 변경 시작" }
-        commandMemberService.putLastAccessTime(customMember.memberEmail)
-
+        val ipAddress = request.remoteAddr
+        val userAgent = request.getHeader("User-Agent")
+        val idempotencyKey = request.getHeader("IdempotencyKey")
+        commandMemberService.putLastAccessTime(customMember.memberEmail, ipAddress, userAgent, idempotencyKey)
         log.info { "ResponseDTO 생성 시작" }
         val responseDTO = ResponseDTO.ok(loginVO)
-
         // JSON 문자열로 변환
         val json = ObjectMapper().writeValueAsString(responseDTO)
         response.contentType = "application/json"

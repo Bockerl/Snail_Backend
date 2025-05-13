@@ -2,7 +2,7 @@ package com.bockerl.snailmember.security
 
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
-import com.bockerl.snailmember.member.command.application.dto.response.LoginResponseDTO
+import com.bockerl.snailmember.member.command.application.service.CommandMemberService
 import com.bockerl.snailmember.security.config.TokenType
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.jsonwebtoken.Claims
@@ -11,7 +11,11 @@ import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.core.env.Environment
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import java.lang.Exception
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.Date
 import javax.crypto.spec.SecretKeySpec
 
@@ -19,6 +23,7 @@ import javax.crypto.spec.SecretKeySpec
 class Oauth2JwtUtils(
     environment: Environment,
     private val redisTemplate: RedisTemplate<String, String>,
+    private val commandMemberService: CommandMemberService,
 ) {
     companion object {
         private const val REDIS_RT_PREFIX = "RT:"
@@ -41,14 +46,33 @@ class Oauth2JwtUtils(
         environment.getProperty("TOKEN_SECRET")
             ?: throw CommonException(ErrorCode.NOT_FOUND_ENV)
 
-    fun generateJwtResponse(customMember: CustomMember): LoginResponseDTO {
-        logger.info { "Oauth2 회원의 토큰 생성 시작" }
+    fun generateJwtResponse(customMember: CustomMember) {
         val email = customMember.memberEmail
-        // AccessToken 생성 및 저장
-        val accessToken = generateAccessToken(customMember)
-        // RefreshToken 처리
-        val refreshToken = getOrCreateRefreshToken(email, customMember.authorities.firstOrNull()?.authority)
-        return LoginResponseDTO(accessToken, refreshToken)
+        // accessToken 생성
+        val accessToken =
+            runCatching { generateAccessToken(customMember) }
+                .getOrElse {
+                    logger.error { "accessToken 처리 중 에러 발생, memberId: ${customMember.memberId}" }
+                    throw CommonException(ErrorCode.TOKEN_GENERATION_ERROR)
+                }
+        // refreshToken 생성
+        val refreshToken =
+            runCatching { getOrCreateRefreshToken(email, customMember.authorities.firstOrNull()?.authority) }
+                .getOrElse {
+                    logger.error { "refreshToken 처리 중 에러 발생, memberId: ${customMember.memberId}" }
+                    throw CommonException(ErrorCode.TOKEN_GENERATION_ERROR)
+                }
+        // Header에 담기위한 response 꺼내기
+        val reqAttrs = RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes
+        val response = reqAttrs.response
+        response?.setHeader("Authorization", "Bearer $accessToken")
+        response?.setHeader("refreshToken", refreshToken)
+        // ipAddress, userAgent, idempotencyKey 추출
+        val httpRequest = reqAttrs.request
+        val ipAddress = httpRequest.remoteAddr
+        val userAgent = httpRequest.getHeader("User-Agent")
+        val idempotencyKey = "$email:${Instant.now().truncatedTo(ChronoUnit.SECONDS)}"
+        commandMemberService.putLastAccessTime(email, ipAddress, userAgent, idempotencyKey)
     }
 
     private fun generateAccessToken(customMember: CustomMember): String {
@@ -159,10 +183,6 @@ class Oauth2JwtUtils(
         redisTemplate
             .runCatching {
                 delete("$REDIS_AT_PREFIX$email")
-            }.onSuccess {
-                logger.info { "redis에 존재하는 at 삭제 성공" }
-            }.onFailure {
-                logger.warn { "redis에 존재하는 at 삭제 실패" }
-            }
+            }.getOrElse { logger.warn { "redis에 존재하는 at 삭제 실패, message: ${it.message}" } }
     }
 }

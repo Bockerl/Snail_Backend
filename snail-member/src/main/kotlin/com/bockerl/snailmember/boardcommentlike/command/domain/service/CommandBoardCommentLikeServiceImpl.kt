@@ -104,6 +104,7 @@ class CommandBoardCommentLikeServiceImpl(
                 aggregateId = commandBoardCommentLikeDTO.boardCommentId,
                 eventType = EventType.LIKE,
                 payload = jsonPayload,
+                idempotencyKey = commandBoardCommentLikeDTO.idempotencyKey,
             )
 
         outboxService.createOutbox(outbox)
@@ -214,6 +215,7 @@ class CommandBoardCommentLikeServiceImpl(
                 aggregateId = commandBoardCommentLikeDTO.boardId,
                 eventType = EventType.LIKE,
                 payload = jsonPayload,
+                idempotencyKey = commandBoardCommentLikeDTO.idempotencyKey,
             )
 
         outboxService.createOutbox(outbox)

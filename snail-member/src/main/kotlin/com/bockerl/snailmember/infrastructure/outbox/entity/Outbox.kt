@@ -23,6 +23,9 @@ class Outbox(
         allocationSize = 1, // seq 증가량 (추후에 성능에 따라 변경해야 할지도 모름)
     )
     var outboxId: Long? = null,
+    // 클라이언트로부터 받은 idempotency key를 저장하면, 추가 검증에 활용 가능
+    @Column(name = "idempotency_key", unique = true, nullable = false)
+    var idempotencyKey: String? = null,
     @Column(name = "event_id", unique = true, nullable = false)
     var eventId: Long? = null,
     @Column(name = "aggregate_id", nullable = false)

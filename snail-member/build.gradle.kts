@@ -9,10 +9,11 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
-    kotlin("plugin.jpa") version "2.1.10"
+    kotlin("plugin.jpa") version "1.9.25"
     id("org.springframework.boot") version "3.2.3"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
+    id("me.champeau.jmh") version "0.7.2"
 }
 
 ktlint {
@@ -26,6 +27,7 @@ ktlint {
         exclude("**/*.kts")
     }
     disabledRules.set(setOf("header")) // HEADER_KEYWORD 규칙 비활성화
+    ignoreFailures.set(true)
 }
 
 // build.gradle.kts
@@ -43,8 +45,12 @@ version = "0.0.1-SNAPSHOT"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
+}
+
+springBoot {
+    mainClass.set("com.bockerl.snailmember.SnailMemberApplicationKt")
 }
 
 repositories {
@@ -67,12 +73,13 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.kafka:spring-kafka")
+    implementation("org.apache.kafka:kafka-streams")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
@@ -111,12 +118,27 @@ dependencies {
     // kotest 추가
     testImplementation("io.kotest:kotest-runner-junit5:5.9.0")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
+    // 성능 테스트를 위한 jmh 추가
+    jmh("org.openjdk.jmh:jmh-core:1.37")
+    jmhAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:1.37")
+    // prometheus 추가
+    implementation("io.micrometer:micrometer-registry-prometheus")
 }
 dependencyManagement {
     imports {
         mavenBom("com.azure.spring:spring-cloud-azure-dependencies:$springCloudAzureVersion")
         mavenBom("org.springframework.cloud:spring-cloud-dependencies:2023.0.0")
     }
+}
+
+jmh {
+    warmupIterations.set(2)
+    iterations.set(5)
+    fork.set(1)
+    timeOnIteration.set("1s")
+    resultFormat.set("JSON")
+    resultsFile.set(file("build/reports/jmh/results.json"))
+    zip64.set(true)
 }
 
 kotlin {

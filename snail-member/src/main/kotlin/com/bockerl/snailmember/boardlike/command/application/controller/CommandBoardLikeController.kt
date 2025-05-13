@@ -39,12 +39,14 @@ class CommandBoardLikeController(
     )
     @PostMapping("")
     fun postBoardLike(
-        @RequestBody commandBoardCommentLikeRequestVO: CommandBoardLikeRequestVO,
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
+        @RequestBody commandBoardLikeRequestVO: CommandBoardLikeRequestVO,
     ): ResponseDTO<*> {
         val commandBoardLikeDTO =
             CommandBoardLikeDTO(
-                boardId = commandBoardCommentLikeRequestVO.boardId,
-                memberId = commandBoardCommentLikeRequestVO.memberId,
+                boardId = commandBoardLikeRequestVO.boardId,
+                memberId = commandBoardLikeRequestVO.memberId,
+                idempotencyKey = idempotencyKey,
             )
 
         commandBoardLikeService.createBoardLike(commandBoardLikeDTO)
@@ -69,12 +71,14 @@ class CommandBoardLikeController(
     )
     @DeleteMapping("")
     fun deleteBoardLike(
-        @RequestBody commandBoardCommentLikeRequestVO: CommandBoardLikeRequestVO,
+        @RequestHeader("idempotencyKey") idempotencyKey: String,
+        @RequestBody commandBoardLikeRequestVO: CommandBoardLikeRequestVO,
     ): ResponseDTO<*> {
         val commandBoardLikeDTO =
             CommandBoardLikeDTO(
-                boardId = commandBoardCommentLikeRequestVO.boardId,
-                memberId = commandBoardCommentLikeRequestVO.memberId,
+                boardId = commandBoardLikeRequestVO.boardId,
+                memberId = commandBoardLikeRequestVO.memberId,
+                idempotencyKey = idempotencyKey,
             )
         commandBoardLikeService.deleteBoardLike(commandBoardLikeDTO)
 

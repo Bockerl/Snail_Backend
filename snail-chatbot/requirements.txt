@@ -2,7 +2,6 @@
 
 # FastAPI - Python 기반의 고성능 웹 프레임워크 (비동기 지원)
 fastapi  
-requests
 
 # Uvicorn - FastAPI와 함께 사용되는 ASGI 서버 (초고속 비동기 서버)
 uvicorn[standard] 
@@ -66,6 +65,3 @@ selenium
 
 # py스케줄러 - 백그라운드 작업을 예약하고 실행할 수 있게 해주는 라이브러리
 apscheduler
-
-# ElasticsearchStore
-langchain-elasticsearch

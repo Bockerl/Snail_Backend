@@ -59,7 +59,7 @@
         FROM
         member
         WHERE
-        member_id = #{memberId}
+        member_id = #{memberId} AND member_status != 'ROLE_DELETED'
     </select>
 
     <select id="selectMemberByMemberEmail" parameterType="String" resultMap="memberResultMap">
@@ -82,6 +82,6 @@
         FROM
         member
         WHERE
-        member_email = #{memberEmail}
+        member_email = #{memberEmail} AND member_status != 'ROLE_DELETE'
     </select>
 </mapper>

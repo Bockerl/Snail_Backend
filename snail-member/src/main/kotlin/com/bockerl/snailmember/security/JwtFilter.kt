@@ -1,22 +1,28 @@
 package com.bockerl.snailmember.security
 
-import com.bockerl.snailmember.common.ResponseDTO
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.service.CommandMemberService
-import com.bockerl.snailmember.member.command.domain.vo.response.LoginResponseVO
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.MemberStatus
 import com.bockerl.snailmember.member.query.service.QueryMemberService
 import com.bockerl.snailmember.security.config.TokenType
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
+import io.jsonwebtoken.MalformedJwtException
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.core.env.Environment
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.security.authentication.AuthenticationServiceException
+import org.springframework.security.authentication.BadCredentialsException
+import org.springframework.security.authentication.CredentialsExpiredException
+import org.springframework.security.authentication.InsufficientAuthenticationException
+import org.springframework.security.authentication.LockedException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.filter.OncePerRequestFilter
 import java.lang.Exception
@@ -25,6 +31,8 @@ class JwtFilter(
     private val queryMemberService: QueryMemberService,
     private val commandMemberService: CommandMemberService,
     private val jwtUtils: JwtUtils,
+    private val authenticationEntryPoint: CustomAuthenticationEntryPoint,
+    private val eventPublisher: ApplicationEventPublisher,
     private val redisTemplate: RedisTemplate<String, String>,
     environment: Environment,
 ) : OncePerRequestFilter() {
@@ -51,7 +59,8 @@ class JwtFilter(
             path.startsWith("/favicon.ico") or
             path.startsWith("/v3/api-docs") or
             path.startsWith("/api/member/health") or
-            path.startsWith("/api/area/")
+            path.startsWith("/api/area/") or
+            path.startsWith("/actuator/prometheus")
     }
 
     override fun doFilterInternal(
@@ -62,38 +71,38 @@ class JwtFilter(
         try {
             log.info { "Jwt 인증 시작" }
             val accessToken = jwtUtils.extractAccessToken(request)
-            if (accessToken != null && processAccessToken(accessToken)) {
-                log.info { "accessToken 유효성 검사 성공" }
-                filterChain.doFilter(request, response)
-                return
+            if (!accessToken.isNullOrBlank()) {
+                processAccessToken(accessToken)
+            } else {
+                log.info { "AccessToken 비어있음, RefreshToken 검증 시작" }
+                processRefreshToken(request, response)
             }
-            log.info { "at가 없거나 유효하지 않음, rt 검증 시작" }
-            if (processRefreshToken(request, response)) {
-                log.info { "rt 유효성 검사 성공" }
-                filterChain.doFilter(request, response)
-                return
-            }
-            log.warn { "인증 실패, at와 rt 모두 유효하지 않음" }
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "토큰 인증이 필요합니다.")
-        } catch (e: CommonException) {
-            log.error { "토큰 인증 중 에러 발생: ${e.message}" }
-            response.sendError(
-                HttpServletResponse.SC_UNAUTHORIZED,
-                e.message,
-            )
+            log.info { "토큰 인증 통과" }
+            filterChain.doFilter(request, response)
+        } catch (e: AuthenticationException) {
+            log.error { "AuthenticationException 발생: ${e.javaClass.simpleName} - ${e.message}" }
+            SecurityContextHolder.clearContext()
+            authenticationEntryPoint.commence(request, response, e)
         }
     }
 
     private fun processAccessToken(accessToken: String): Boolean =
         try {
+            log.info { "accessToken 유효성 검사 시작" }
             val claims = jwtUtils.parseClaims(accessToken)
             validateClaims(claims, accessToken, TokenType.ACCESS_TOKEN)
         } catch (e: ExpiredJwtException) {
             log.warn { "만료된 accessToken: ${e.message}" }
-            false
+            throw InsufficientAuthenticationException(e.message, e)
+        } catch (e: MalformedJwtException) {
+            log.warn { "Malformed accessToken 검출: ${e.message}" }
+            throw BadCredentialsException(e.message, e)
+        } catch (e: AuthenticationException) {
+            log.warn { "accessToken Authentication 예외 발생: ${e.message}" }
+            throw e
         } catch (e: Exception) {
-            log.warn { "accessToken 유효성 검사 중 에러 발생: ${e.message}" }
-            false
+            log.warn { "accessToken 유효성 검사 중 에러 발생, message: ${e.message}, ex: ${e.javaClass.name}" }
+            throw AuthenticationServiceException("AccessToken 검증 중 알 수 없는 오류 발생", e)
         }
 
     private fun processRefreshToken(
@@ -104,25 +113,29 @@ class JwtFilter(
             val refreshToken = jwtUtils.extractRefreshToken(request)
             val claims = jwtUtils.parseClaims(refreshToken)
             if (!validateClaims(claims, refreshToken, TokenType.REFRESH_TOKEN)) {
-                sendErrorResponse(response, ErrorCode.INVALID_TOKEN_ERROR)
                 return false
             }
-            processValidRefreshToken(claims, refreshToken, response)
+            processValidRefreshToken(claims, refreshToken, request, response)
             true
         } catch (e: ExpiredJwtException) {
             log.warn { "만료된 refreshToken: ${e.message}" }
-            sendErrorResponse(response, ErrorCode.EXPIRED_TOKEN_ERROR)
-            false
+            throw InsufficientAuthenticationException(e.message, e)
+        } catch (e: MalformedJwtException) {
+            log.warn { "Malformed refreshToken 검출: ${e.message}" }
+            throw BadCredentialsException(e.message, e)
+        } catch (e: AuthenticationException) {
+            log.warn { "refreshToken Authentication 예외 발생: ${e.message}" }
+            throw e
         } catch (e: Exception) {
-            log.warn { "refreshToken 유효성 검사 중 에러 발생: ${e.message}" }
-            sendErrorResponse(response, ErrorCode.INTERNAL_SERVER_ERROR)
-            false
+            log.warn { "refreshToken 유효성 검사 중 에러 발생, message: ${e.message}, ex: ${e.javaClass.name}" }
+            throw AuthenticationServiceException("AccessToken 검증 중 알 수 없는 오류 발생", e)
         }
     }
 
     private fun processValidRefreshToken(
         claims: Claims,
         refreshToken: String,
+        request: HttpServletRequest,
         response: HttpServletResponse,
     ) {
         // 액세스 토큰 발급
@@ -130,6 +143,7 @@ class JwtFilter(
         // Refresh Token 만료 기간 확인
         val remainingTime = claims.expiration.time - System.currentTimeMillis()
         val sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000L
+        log.info { "RT 만료기간 검증 시작(7일 이내)" }
         // RT가 7일 이하로 남았으면 새로 발급, 아니면 기존 것 사용
         val finalRefreshToken =
             if (remainingTime <= sevenDaysInMillis) {
@@ -139,53 +153,19 @@ class JwtFilter(
                 refreshToken
             }
         // 사용자 마지막 로그인 시간 업데이트
-        updateLastAccessTime(claims.subject)
-        // 응답 데이터 생성 및 전송
-        sendTokenResponse(response, newAccessToken, finalRefreshToken)
-    }
-
-    private fun updateLastAccessTime(email: String) {
-        commandMemberService
-            .runCatching {
-                log.info { "멤버 마지막 로그인 시각 변경 시작" }
-                putLastAccessTime(email)
-            }.onSuccess {
-                log.info { "멤버 마지막 로그인 시각 변경 성공" }
-            }.onFailure { e ->
-                log.warn { "멤버 마지막 로그인 시각 변경 실패: ${e.message}" }
-            }
-    }
-
-    private fun sendTokenResponse(
-        response: HttpServletResponse,
-        accessToken: String,
-        refreshToken: String,
-    ) {
-        val loginVO =
-            LoginResponseVO(
-                accessToken = accessToken,
-                refreshToken = refreshToken,
-            )
-        val responseDTO = ResponseDTO.ok(loginVO)
-        sendJsonResponse(response, responseDTO)
-    }
-
-    private fun sendErrorResponse(
-        response: HttpServletResponse,
-        errorCode: ErrorCode,
-    ) {
-        val responseDTO = ResponseDTO.fail(CommonException(errorCode))
-        sendJsonResponse(response, responseDTO)
-    }
-
-    private fun sendJsonResponse(
-        response: HttpServletResponse,
-        responseDTO: ResponseDTO<*>,
-    ) {
-        val json = ObjectMapper().writeValueAsString(responseDTO)
-        response.contentType = "application/json"
-        response.characterEncoding = "UTF-8"
-        response.writer.write(json)
+        val ipAddress = request.remoteAddr
+        log.info { "사용자 ipAddress: $ipAddress" }
+        val userAgent = request.getHeader("User-Agent")
+        log.info { "사용자 userAgent: $userAgent" }
+        val idempotencyKey =
+            request.getHeader("IdempotencyKey")
+                ?: throw InsufficientAuthenticationException("Idempotency-Key가 누락되었습니다.")
+        log.info { "사용자 IdempotencyKey: $idempotencyKey" }
+        commandMemberService.putLastAccessTime(claims.subject, ipAddress, userAgent, idempotencyKey)
+        // 새로운 at Header에 담기
+        response.setHeader("Authorization", "Bearer $newAccessToken")
+        // RT Header에 담기
+        response.setHeader("refreshToken", finalRefreshToken)
     }
 
     private fun validateClaims(
@@ -198,20 +178,22 @@ class JwtFilter(
         val issuer = claims.issuer
         if (issuer != tokenIssuer) {
             log.warn { "유효하지 않은 발행처: $issuer" }
-            return false
+            throw BadCredentialsException("유효하지 않은 issuer: $issuer")
         }
         log.info { "issuer 통과" }
         // subject 추출
-        val email = claims.subject ?: throw CommonException(ErrorCode.TOKEN_MALFORMED_ERROR)
+        val email = claims.subject ?: throw BadCredentialsException("$type's email이 null입니다.")
         log.info { "subject 통과, sub: $email" }
         // auth 추출
-        val auth = claims["auth"] as? String ?: throw CommonException(ErrorCode.TOKEN_AUTH_ERROR)
+        val auth = claims["auth"] as? String ?: throw BadCredentialsException("$type's auth가 null입니다.")
         log.info { "auth: $auth" }
         if (auth.isBlank()) {
             log.warn { "권한 정보가 없는 $type" }
-            return false
+            throw BadCredentialsException("$type's auth이 빈칸입니다.")
+        } else if (auth == MemberStatus.ROLE_BLACKLIST.toString()) {
+            log.warn { "블랙리스트 접근, email: $email" }
+            throw LockedException("블랙리스트 계정입니다.")
         }
-
         val prefix =
             when (type) {
                 TokenType.ACCESS_TOKEN -> REDIS_AT_PREFIX
@@ -223,11 +205,11 @@ class JwtFilter(
             redisTemplate.opsForValue().get("$prefix$email")
                 ?: {
                     logger.info { "$prefix$email 로 조회된 토큰이 없음" }
-                    throw CommonException(ErrorCode.EXPIRED_TOKEN_ERROR)
+                    throw CredentialsExpiredException("Redis에 저장된 토큰이 없음 또는 만료됨")
                 }
         if (redisToken != token) {
             log.warn { "redis에 저장된 $type 과 일치하지 않음" }
-            throw CommonException(ErrorCode.INVALID_TOKEN_ERROR)
+            throw InsufficientAuthenticationException("부적절한 $type 입니다.")
         }
         log.info { "redis 토큰과 일치" }
         // auth 검증
@@ -235,10 +217,9 @@ class JwtFilter(
         val memberAuth = member.authorities.firstOrNull()?.authority
         if (auth != memberAuth) {
             log.warn { "토큰의 권한($auth)과 멤버 본래 권한($memberAuth)이 일치하지 않음" }
-            return false
+            throw BadCredentialsException("회원과 일치하지 않은 권한입니다.")
         }
         log.info { "auth 통과" }
-
         // SecurityContext에 설정
         val authentication =
             UsernamePasswordAuthenticationToken(

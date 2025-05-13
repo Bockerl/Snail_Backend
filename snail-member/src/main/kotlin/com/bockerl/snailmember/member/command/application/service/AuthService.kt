@@ -1,6 +1,6 @@
 package com.bockerl.snailmember.member.command.application.service
 
-import com.bockerl.snailmember.member.command.domain.aggregate.entity.tempMember.VerificationType
+import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.VerificationType
 
 interface AuthService {
     fun createEmailVerificationCode(email: String)

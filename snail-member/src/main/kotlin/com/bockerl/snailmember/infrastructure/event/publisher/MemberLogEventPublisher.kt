@@ -37,7 +37,7 @@ class MemberLogEventPublisher(
         }
     }
 
-    // 회원 도메인 요청 실패 로그
+    // 도메인 요청 실패 로그
 
     // 인증 실패 로그
     @Async("logTaskExecutor")

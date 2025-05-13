@@ -36,7 +36,10 @@ class MemberEventConsumerImpl(
         acknowledgment: Acknowledgment,
     ) {
         logger.info { "Received event: $event, eventId: $eventId" }
-
+        if (idempotencyKey.isNullOrBlank()) {
+            logger.error { "유효하지 않은 멱등키, $idempotencyKey, eventId: $eventId" }
+            throw CommonException(ErrorCode.INVALID_IDEMPOTENCY)
+        }
         try {
             when (event) {
                 is MemberCreateEvent -> memberEventProcessor.processCreate(event, eventId, idempotencyKey)
@@ -50,7 +53,7 @@ class MemberEventConsumerImpl(
         } catch (e: Exception) {
             // DLQ or 보상 Transaction 추가
             logger.error { "멤버 이벤트 에러 발생, event: $event, eventId: $eventId" }
-            throw CommonException(ErrorCode.EVENT_CONSUMER_ERROR)
+            throw CommonException(ErrorCode.EVENT_CONSUMER_ERROR, "cause: ${e.message}")
         }
     }
 }

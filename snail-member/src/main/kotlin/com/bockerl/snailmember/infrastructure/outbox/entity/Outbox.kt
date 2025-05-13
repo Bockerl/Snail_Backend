@@ -24,7 +24,7 @@ class Outbox(
     )
     var outboxId: Long? = null,
     // 클라이언트로부터 받은 idempotency key를 저장하면, 추가 검증에 활용 가능
-    @Column(name = "idempotency_key", unique = true)
+    @Column(name = "idempotency_key", unique = true, nullable = false)
     var idempotencyKey: String? = null,
     @Column(name = "event_id", unique = true, nullable = false)
     var eventId: Long? = null,

@@ -134,9 +134,7 @@ class RegistrationServiceImpl(
         tempMemberRepository
             .runCatching {
                 update(redisId, updatedTempMember)
-            }.onSuccess {
-                logger.info { "redis에 임시회원 이메일 인증 업데이트 성공 - redisId: $redisId" }
-            }.onFailure {
+            }.getOrElse {
                 logger.warn { "redis에 tempMember 저장 중 오류 발생, redisId: $redisId, error: $it" }
             }
         // 멱등성을 위해
@@ -173,9 +171,7 @@ class RegistrationServiceImpl(
         tempMemberRepository
             .runCatching {
                 update(redisId, tempMember)
-            }.onSuccess {
-                logger.info { "redis에 임시회원 휴대폰 번호 업데이트 성공 - redisId: $redisId" }
-            }.onFailure {
+            }.getOrElse {
                 logger.warn { "redis에 tempMember 저장 중 오류 발생, redisId: $redisId, error: $it" }
             }
         logger.info { "휴대폰 인증 코드 발송 성공" }
@@ -242,9 +238,7 @@ class RegistrationServiceImpl(
         tempMemberRepository
             .runCatching {
                 update(redisId, updatedMember)
-            }.onSuccess {
-                logger.info { "redis에 임시회원 휴대폰 번호 업데이트 성공 - redisId: $redisId" }
-            }.onFailure {
+            }.getOrElse {
                 logger.info { "redis에 임시회원 휴대폰 번호 업데이트 실패 - redisId: $redisId" }
                 throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
             }
@@ -296,18 +290,14 @@ class RegistrationServiceImpl(
         memberRepository
             .runCatching {
                 save(newMember)
-            }.onSuccess {
-                logger.info { "메인 DB에 새 회원 저장 성공 - newMember: $newMember" }
-            }.onFailure {
+            }.getOrElse {
                 logger.warn { "메인 DB에 새 회원 저장 실패 - newMember: $newMember" }
                 throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
             }
         tempMemberRepository
             .runCatching {
                 delete(redisId)
-            }.onSuccess {
-                logger.info { "redis에 저장된 임시 회원 삭제 성공 - redisId: $redisId" }
-            }.onFailure {
+            }.getOrElse {
                 logger.info { "redis에 저장된 임시 회원 삭제 실패 - redisId: $redisId" }
                 throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
             }

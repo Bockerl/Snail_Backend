@@ -32,10 +32,10 @@ class MemberEventProcessor(
     fun processCreate(
         event: MemberCreateEvent,
         eventId: String,
-        idempotencyKey: String?,
+        idempotencyKey: String,
     ) {
         logger.info { "멤버 생성 이벤트 처리 시작: $event" }
-        memberEventHandler.handleCreate(event)
+        memberEventHandler.handleCreate(event, idempotencyKey)
         logger.info { "멤버 생성 이벤트 처리 성공" }
     }
 
@@ -62,10 +62,10 @@ class MemberEventProcessor(
     fun processUpdate(
         event: MemberUpdateEvent,
         eventId: String,
-        idempotencyKey: String?,
+        idempotencyKey: String,
     ) {
         logger.info { "멤버 수정 이벤트 처리 시작: $event" }
-        memberEventHandler.handleUpdate(event)
+        memberEventHandler.handleUpdate(event, idempotencyKey)
         logger.info { "멤버 수정 이벤트 처리 성공" }
     }
 
@@ -77,10 +77,10 @@ class MemberEventProcessor(
     fun processDelete(
         event: MemberDeleteEvent,
         eventId: String,
-        idempotencyKey: String?,
+        idempotencyKey: String,
     ) {
         logger.info { "멤버 탈퇴 이벤트 처리 시작: $event" }
-        memberEventHandler.handleDelete(event)
+        memberEventHandler.handleDelete(event, idempotencyKey)
         logger.info { "멤버 틸퇴 이벤트 처리 성공" }
     }
 

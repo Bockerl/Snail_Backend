@@ -41,7 +41,7 @@ class CustomLogoutHandler(
                 }
             }
         } catch (e: Exception) {
-            logger.warn { "로그아웃 도중 에러 발생" }
+            logger.warn { "로그아웃 도중 에러 발생, message: ${e.message}" }
             throw e
         }
     }

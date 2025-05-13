@@ -1,5 +1,6 @@
 package com.bockerl.snailmember.member.command.domain.service
 
+import com.bockerl.snailmember.area.command.application.service.CommandAreaService
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
@@ -26,6 +27,7 @@ import java.time.LocalDateTime
 @Service
 class CommandMemberServiceImpl(
     private val memberRepository: MemberRepository,
+    private val activityAreaService: CommandAreaService,
     private val commandFileService: CommandFileService,
     private val outboxService: OutboxService,
     private val eventPublisher: ApplicationEventPublisher,
@@ -65,10 +67,12 @@ class CommandMemberServiceImpl(
 //                            idempotencyKey = idempotencyKey,
 //                        )
 //                    outboxService.createOutbox(outBox)
-            }.getOrElse {
+            }.onSuccess {
+                logger.info { "마지막 로그인 시간 업데이트 성공 - email: $email" }
+            }.onFailure {
                 logger.info { "마지막 로그인 시간 업데이트 실패, memberId: ${member.formattedId}" }
                 throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "로그인 시간 업데이트 실패 - email: $email")
-            }
+            }.getOrThrow()
     }
 
     @Transactional
@@ -105,7 +109,11 @@ class CommandMemberServiceImpl(
         memberRepository
             .runCatching {
                 save(member)
-            }.getOrElse { throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "프로플 사진 제외 회원 정보 수정 실패") }
+            }.onSuccess {
+                logger.info { "프로필 사진 제외 회원 정보 수정 성공" }
+            }.onFailure {
+                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "프로플 사진 제외 회원 정보 수정 실패")
+            }
         file?.let {
             logger.info { "프로필 사진 수정 시작" }
             val commandFileDTO =
@@ -128,9 +136,11 @@ class CommandMemberServiceImpl(
             memberRepository
                 .runCatching {
                     save(member)
-                }.getOrElse {
+                }.onSuccess {
+                    logger.info { "프로필 사진 수정 성공" }
+                }.onFailure {
                     throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "프로필 사진 수정 실패")
-                }
+                }.getOrThrow()
         }
         val jsonPayLoad = objectMapper.writeValueAsString(event)
         val outBox =
@@ -164,11 +174,13 @@ class CommandMemberServiceImpl(
             .runCatching {
                 logger.info { "멤버 탈퇴 시작" }
                 save(member)
-            }.getOrElse {
+            }.onSuccess {
+                logger.info { "멤버 탈퇴 성공, memberId: $memberId" }
+            }.onFailure {
                 logger.info { "멤버 탈퇴 실패, memberId: $memberId" }
                 // 로그 전송 및 보상 트랜잭션 예상
                 throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
-            }
+            }.getOrThrow()
         // 회원 삭제 이벤트 아웃박스 생성
         val jsonPayLoad = objectMapper.writeValueAsString(event)
         val outBox =

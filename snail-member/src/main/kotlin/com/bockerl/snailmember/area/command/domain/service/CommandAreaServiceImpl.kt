@@ -53,7 +53,7 @@ class CommandAreaServiceImpl(
                 logger.info { "기존 주 활동지역 삭제 성공" }
             }.onFailure {
                 throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "기존 주 활동지역 삭제 실패")
-            }
+            }.getOrThrow()
         logger.info { "새로운 주 활동지역 생성" }
         val primaryId = ActivityArea.ActivityId(extractedId, newEmdId)
         val primaryArea =
@@ -68,7 +68,7 @@ class CommandAreaServiceImpl(
                 logger.info { "새로운 주 활동지역 저장 성공" }
             }.onFailure {
                 throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "새로운 주 활동지역 저장 실패")
-            }
+            }.getOrThrow()
         requestDTO.workplaceId?.let {
             logger.info { "직장근처 활동지역 수정 시작" }
             areaRepository
@@ -78,7 +78,7 @@ class CommandAreaServiceImpl(
                     logger.info { "기존 직장근처 활동지역 삭제 성공" }
                 }.onFailure {
                     throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "기존 Workplace 활동 지역 삭제 실패")
-                }
+                }.getOrThrow()
             logger.info { "새로운 직장근처 활동지역 생성" }
             val newEmdId2 = extractDigits(requestDTO.workplaceId)
             val workplaceId = ActivityArea.ActivityId(extractedId, newEmdId2)
@@ -94,7 +94,7 @@ class CommandAreaServiceImpl(
                     logger.info { "Workplace 활동 지역 저장 성공" }
                 }.onFailure {
                     throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "Workplace 활동 지역 저장 실패")
-                }
+                }.getOrThrow()
         }
         val jsonPayLoad = objectMapper.writeValueAsString(event)
         val outBox =
@@ -121,7 +121,7 @@ class CommandAreaServiceImpl(
             }.onFailure {
                 // 로그 전송 및 보상 트랜잭션 예상
                 throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "Primary 활동 지역 삭제 실패")
-            }
+            }.getOrThrow()
         areaRepository
             .runCatching {
                 logger.info { "WorkPlace 활동 지역 삭제 시작" }
@@ -131,7 +131,7 @@ class CommandAreaServiceImpl(
             }.onFailure {
                 // 로그 전송 및 보상 트랜잭션 예상
                 throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR, "Workplace 활동 지역 삭제 실패")
-            }
+            }.getOrThrow()
     }
 
     private fun extractDigits(input: String): Long = input.filter { it.isDigit() }.toLong()

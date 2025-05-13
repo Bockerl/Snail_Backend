@@ -183,6 +183,11 @@ class Oauth2JwtUtils(
         redisTemplate
             .runCatching {
                 delete("$REDIS_AT_PREFIX$email")
-            }.getOrElse { logger.warn { "redis에 존재하는 at 삭제 실패, message: ${it.message}" } }
+            }.onSuccess {
+                logger.info { "redis에 존재하는 at 삭제 성공" }
+            }.onFailure {
+                logger.warn { "redis에 존재하는 at 삭제 실패" }
+                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+            }.getOrThrow()
     }
 }

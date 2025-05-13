@@ -51,9 +51,6 @@ class CustomAuthenticationFailureHandler(
         response.status = statusCode
         response.contentType = "application/json;charset=UTF-8"
 
-        // 로그인 실패, 이벤트 생성
-//        val event =
-
         // json 응답 본문 설정
         val errorResponse =
             mapOf(

@@ -150,8 +150,15 @@ class GoogleOauth2ServiceImpl(
             )
 
         logger.info { "새로 생성되는 구글 계정 멤버: $newGoogleMember" }
-        memberRepository.save(newGoogleMember)
-        logger.info { "구글 계정 새 멤버 저장 성공" }
+        memberRepository
+            .runCatching {
+                save(newGoogleMember)
+            }.onSuccess {
+                logger.info { "구글 계정 새 멤버 저장 성공" }
+            }.onFailure {
+                logger.error { "구글 계정 새 멤버 저장 실패, member: $newGoogleMember, message: ${it.message}" }
+                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+            }.getOrThrow()
         // outbox 이벤트 발행(회원 생성)
         val event =
             MemberCreateEvent(
@@ -167,9 +174,10 @@ class GoogleOauth2ServiceImpl(
                 memberLanguage = newGoogleMember.memberLanguage,
                 signUpPath = SignUpPath.Google,
             )
+
         // logging을 위한 비동기 리스너 이벤트 처리
-        logger.info { "현재 Thread: ${Thread.currentThread().name}" }
         eventPublisher.publishEvent(event)
+
         val jsonPayLoad = objectMapper.writeValueAsString(event)
         val outBox =
             OutboxDTO(

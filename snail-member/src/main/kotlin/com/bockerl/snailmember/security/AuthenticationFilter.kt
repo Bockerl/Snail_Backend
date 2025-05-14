@@ -5,7 +5,6 @@ import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.application.service.CommandMemberService
 import com.bockerl.snailmember.member.command.domain.vo.request.MemberEmailLoginRequestVO
-import com.bockerl.snailmember.member.command.domain.vo.response.LoginResponseVO
 import com.bockerl.snailmember.member.query.service.QueryMemberService
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -154,21 +153,18 @@ class AuthenticationFilter(
                 throw CommonException(ErrorCode.TOKEN_GENERATION_ERROR)
             }
         }
-        log.info { "rt와 at를 담은 loginVO 생성 시작" }
+        log.info { "rt와 at를 header에 담기 시작" }
         // at는 Header, rt는 Body
         response.setHeader("Authorization", "Bearer $accessToken")
-        val loginVO =
-            LoginResponseVO(
-                refreshToken = refreshToken,
-            )
-        log.info { "전달한 loginVO: $loginVO" }
-        log.info { "멤버 마지막 로그인 시각 변경 시작" }
+        response.setHeader("refreshToken", refreshToken)
+
         val ipAddress = request.remoteAddr
         val userAgent = request.getHeader("User-Agent")
         val idempotencyKey = request.getHeader("IdempotencyKey")
         commandMemberService.putLastAccessTime(customMember.memberEmail, ipAddress, userAgent, idempotencyKey)
+
         log.info { "ResponseDTO 생성 시작" }
-        val responseDTO = ResponseDTO.ok(loginVO)
+        val responseDTO = ResponseDTO.ok("로그인 성공")
         // JSON 문자열로 변환
         val json = ObjectMapper().writeValueAsString(responseDTO)
         response.contentType = "application/json"

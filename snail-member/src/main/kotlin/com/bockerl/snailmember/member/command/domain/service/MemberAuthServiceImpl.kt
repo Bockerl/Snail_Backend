@@ -2,7 +2,7 @@ package com.bockerl.snailmember.member.command.domain.service
 
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
-import com.bockerl.snailmember.member.command.application.service.AuthService
+import com.bockerl.snailmember.member.command.application.service.MemberAuthService
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.VerificationType
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.redis.core.RedisTemplate
@@ -15,10 +15,10 @@ import java.time.Duration
 import kotlin.random.Random
 
 @Service
-class AuthServiceImpl(
+class MemberAuthServiceImpl(
     private val redisTemplate: RedisTemplate<String, String>,
     private val mailSender: JavaMailSender,
-) : AuthService {
+) : MemberAuthService {
     private val logger = KotlinLogging.logger {}
 
     // 상수로 관리할 static 변수들

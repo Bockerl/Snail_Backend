@@ -1,9 +1,9 @@
 package com.bockerl.snailmember.infrastructure.event.consumer
 
-import com.bockerl.snailmember.common.event.BaseFileCreatedEvent
-import com.bockerl.snailmember.file.command.domain.aggregate.event.FileCreatedEvent
+import com.bockerl.snailmember.common.event.BaseFileEvent
 import com.bockerl.snailmember.file.command.domain.aggregate.event.FileDeletedEvent
-import com.bockerl.snailmember.file.command.domain.aggregate.event.GatheringFileCreatedEvent
+import com.bockerl.snailmember.file.command.domain.aggregate.event.FileEvent
+import com.bockerl.snailmember.file.command.domain.aggregate.event.GatheringFileEvent
 import com.bockerl.snailmember.infrastructure.event.processor.FileEventProcessor
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
@@ -28,7 +28,7 @@ class FileEventConsumerImpl(
         containerFactory = "kafkaListenerContainerFactory",
     )
     fun consumeCreate(
-        @Payload event: BaseFileCreatedEvent,
+        @Payload event: BaseFileEvent,
         @Header(KafkaHeaders.RECEIVED_PARTITION) partition: Int,
         @Header("eventId") eventId: String,
         @Header("idempotencyKey") idempotencyKey: String?,
@@ -37,8 +37,8 @@ class FileEventConsumerImpl(
         logger.info { "Received event: $event, eventId: $eventId" }
         try {
             when (event) {
-                is FileCreatedEvent -> fileEventProcessor.processCreate(event, eventId, idempotencyKey)
-                is GatheringFileCreatedEvent -> fileEventProcessor.processCreate(event, eventId, idempotencyKey)
+                is FileEvent -> fileEventProcessor.processCreate(event, eventId, idempotencyKey)
+                is GatheringFileEvent -> fileEventProcessor.processCreate(event, eventId, idempotencyKey)
                 is FileDeletedEvent -> fileEventProcessor.processDelete(event, eventId, idempotencyKey)
                 else -> logger.warn { "알 수 없는 이벤트 타입: $event" }
             }

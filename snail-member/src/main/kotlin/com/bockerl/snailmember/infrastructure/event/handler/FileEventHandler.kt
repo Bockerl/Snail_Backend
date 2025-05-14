@@ -1,13 +1,13 @@
 package com.bockerl.snailmember.infrastructure.event.handler
 
-import com.bockerl.snailmember.common.event.BaseFileCreatedEvent
+import com.bockerl.snailmember.common.event.BaseFileEvent
 import com.bockerl.snailmember.file.command.application.dto.CommandFileCreateDTO
 import com.bockerl.snailmember.file.command.application.dto.CommandFileDeleteDTO
 import com.bockerl.snailmember.file.command.application.dto.CommandFileWithGatheringCreateDTO
 import com.bockerl.snailmember.file.command.application.service.CommandFileService
-import com.bockerl.snailmember.file.command.domain.aggregate.event.FileCreatedEvent
 import com.bockerl.snailmember.file.command.domain.aggregate.event.FileDeletedEvent
-import com.bockerl.snailmember.file.command.domain.aggregate.event.GatheringFileCreatedEvent
+import com.bockerl.snailmember.file.command.domain.aggregate.event.FileEvent
+import com.bockerl.snailmember.file.command.domain.aggregate.event.GatheringFileEvent
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 
@@ -16,9 +16,9 @@ class FileEventHandler(
     private val commandFileService: CommandFileService,
 ) {
     @Transactional
-    fun handleCreate(event: BaseFileCreatedEvent) {
+    fun handleCreate(event: BaseFileEvent) {
         when (event) {
-            is FileCreatedEvent -> {
+            is FileEvent -> {
                 val fileDTO =
                     CommandFileCreateDTO(
                         fileName = event.fileName,
@@ -32,7 +32,7 @@ class FileEventHandler(
                 commandFileService.createFileEvent(fileDTO)
             }
 
-            is GatheringFileCreatedEvent -> {
+            is GatheringFileEvent -> {
                 val fileDTO =
                     CommandFileWithGatheringCreateDTO(
                         fileName = event.fileName,

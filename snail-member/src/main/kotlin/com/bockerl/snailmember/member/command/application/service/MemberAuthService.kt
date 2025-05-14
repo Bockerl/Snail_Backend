@@ -2,7 +2,7 @@ package com.bockerl.snailmember.member.command.application.service
 
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.VerificationType
 
-interface AuthService {
+interface MemberAuthService {
     fun createEmailVerificationCode(email: String)
 
     fun createPhoneVerificationCode(phoneNumber: String): String

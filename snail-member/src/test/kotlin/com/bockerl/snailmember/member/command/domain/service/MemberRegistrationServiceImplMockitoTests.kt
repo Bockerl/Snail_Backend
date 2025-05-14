@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.*
 
 @ExtendWith(MockitoExtension::class)
-class RegistrationServiceImplMockitoTests
+class MemberRegistrationServiceImplMockitoTests
 //    : TestSupport() {
 //    @Mock
 //    private lateinit var tempMemberRepository: TempMemberRepository

@@ -4,11 +4,12 @@ package com.bockerl.snailmember.member.command.domain.service
 
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
+import com.bockerl.snailmember.infrastructure.aop.Logging
 import com.bockerl.snailmember.infrastructure.outbox.dto.OutboxDTO
 import com.bockerl.snailmember.infrastructure.outbox.enums.EventType
 import com.bockerl.snailmember.infrastructure.outbox.service.OutboxService
 import com.bockerl.snailmember.member.command.application.dto.request.*
-import com.bockerl.snailmember.member.command.application.service.AuthService
+import com.bockerl.snailmember.member.command.application.service.MemberAuthService
 import com.bockerl.snailmember.member.command.application.service.RegistrationService
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.*
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.TempMember
@@ -31,8 +32,8 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class RegistrationServiceImpl(
-    private val authService: AuthService,
+class MemberRegistrationServiceImpl(
+    private val memberAuthService: MemberAuthService,
     private val tempMemberRepository: TempMemberRepository,
     private val memberRepository: MemberRepository,
     private val bcryptPasswordEncoder: BCryptPasswordEncoder,
@@ -45,6 +46,7 @@ class RegistrationServiceImpl(
 
     // 1.회원가입 시작(닉네임, 이메일, 생년월일 입력 및 이메일 코드 생성)
     @Transactional
+    @Logging
     override fun initiateRegistration(
         requestDTO: EmailRequestDTO,
         idempotencyKey: String,
@@ -72,7 +74,7 @@ class RegistrationServiceImpl(
         val redisId = tempMemberRepository.save(tempMember)
         logger.info { "임시 회원 객체 redis에 저장 성공 redisId: $redisId" }
         // 이메일 인증 요청
-        authService.createEmailVerificationCode(requestDTO.memberEmail)
+        memberAuthService.createEmailVerificationCode(requestDTO.memberEmail)
         // 멱등성을 위해
         redisTemplate.opsForValue().set(idempotencyKey, UUID.randomUUID().toString())
         return redisId
@@ -80,6 +82,7 @@ class RegistrationServiceImpl(
 
     // 1-1.이메일 인증 코드 재요청
     @Transactional
+    @Logging
     override fun createEmailRefreshCode(
         redisId: String,
         idempotencyKey: String,
@@ -98,13 +101,14 @@ class RegistrationServiceImpl(
             logger.error { "이메일 인증 순서가 아닌 상태에서 인증 요청이 날라온 에러 발생 - redisId: $redisId" }
             throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
         }
-        authService.createEmailVerificationCode(tempMember.email)
+        memberAuthService.createEmailVerificationCode(tempMember.email)
         // 멱등성을 위해
         redisTemplate.opsForValue().set(idempotencyKey, UUID.randomUUID().toString())
     }
 
     // 2.이메일 인증 요청
     @Transactional
+    @Logging
     override fun verifyEmailCode(
         requestDTO: EmailVerifyRequestDTO,
         idempotencyKey: String,
@@ -126,7 +130,7 @@ class RegistrationServiceImpl(
             throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
         }
         // 이메일 인증 시도
-        authService.verifyCode(tempMember.email, requestDTO.verificationCode, VerificationType.EMAIL)
+        memberAuthService.verifyCode(tempMember.email, requestDTO.verificationCode, VerificationType.EMAIL)
         // 이메일 인증 상태로 변경
         val updatedTempMember = tempMember.verifyEmail()
         logger.info { "이메일 인증 성공 후 tempMember: $tempMember" }
@@ -146,6 +150,7 @@ class RegistrationServiceImpl(
 
     // 3. 휴대폰 인증 코드 생성
     @Transactional
+    @Logging
     override fun createPhoneVerificationCode(
         requestDTO: PhoneRequestDTO,
         idempotencyKey: String,
@@ -167,7 +172,7 @@ class RegistrationServiceImpl(
             throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
         }
         // 휴대폰 인증 코드 생성
-        val verificationCode = authService.createPhoneVerificationCode(requestDTO.phoneNumber)
+        val verificationCode = memberAuthService.createPhoneVerificationCode(requestDTO.phoneNumber)
         // 임시 회원의 번호에 휴대폰 번호 등록
         tempMember.phoneNumber = requestDTO.phoneNumber
         tempMemberRepository
@@ -186,6 +191,7 @@ class RegistrationServiceImpl(
 
     // 3-1. 휴대폰 인증 코드 재요청
     @Transactional
+    @Logging
     override fun createPhoneRefreshCode(
         requestDTO: PhoneRequestDTO,
         idempotencyKey: String,
@@ -204,7 +210,7 @@ class RegistrationServiceImpl(
             logger.error { "휴대폰 인증 순서가 아닌 상태에서 인증 요청이 날라온 에러 발생 - redisId: $redisId" }
             throw CommonException(ErrorCode.UNAUTHORIZED_ACCESS)
         }
-        val code = authService.createPhoneVerificationCode(tempMember.phoneNumber)
+        val code = memberAuthService.createPhoneVerificationCode(tempMember.phoneNumber)
         logger.info { "새로 재생성된 핸드폰 인증 코드: $code" }
         // 멱등성을 위해
         redisTemplate.opsForValue().set(idempotencyKey, UUID.randomUUID().toString())
@@ -213,6 +219,7 @@ class RegistrationServiceImpl(
 
     // 4. 휴대폰 인증 요청
     @Transactional
+    @Logging
     override fun verifyPhoneCode(
         requestDTO: PhoneVerifyRequestDTO,
         idempotencyKey: String,
@@ -235,7 +242,7 @@ class RegistrationServiceImpl(
         }
         val phoneNumber = tempMember.phoneNumber
         // 휴대폰 인증 시도
-        authService.verifyCode(phoneNumber, requestDTO.verificationCode, VerificationType.PHONE)
+        memberAuthService.verifyCode(phoneNumber, requestDTO.verificationCode, VerificationType.PHONE)
         // 인증된 상태로 임시회원 변경
         val updatedMember = tempMember.verifyPhoneNumber()
         // 임시 회원 저장
@@ -255,6 +262,7 @@ class RegistrationServiceImpl(
 
     // 5. 비밀번호 입력(회원가입 완료)
     @Transactional
+    @Logging
     override fun postPassword(
         requestDTO: PasswordRequestDTO,
         idempotencyKey: String,

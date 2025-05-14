@@ -1,8 +1,8 @@
 package com.bockerl.snailmember.infrastructure.event.processor
 
-import com.bockerl.snailmember.common.event.BaseFileCreatedEvent
-import com.bockerl.snailmember.file.command.domain.aggregate.event.FileCreatedEvent
+import com.bockerl.snailmember.common.event.BaseFileEvent
 import com.bockerl.snailmember.file.command.domain.aggregate.event.FileDeletedEvent
+import com.bockerl.snailmember.file.command.domain.aggregate.event.FileEvent
 import com.bockerl.snailmember.infrastructure.event.handler.FileEventHandler
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.dao.DuplicateKeyException
@@ -29,7 +29,7 @@ class FileEventProcessor(
         backoff = Backoff(delay = 1000, multiplier = 2.0, random = true),
     )
     fun processCreate(
-        event: BaseFileCreatedEvent,
+        event: BaseFileEvent,
         eventId: String,
         idempotencyKey: String?,
     ) {
@@ -66,7 +66,7 @@ class FileEventProcessor(
     @Recover
     fun recoverCreate(
         ex: Exception,
-        event: FileCreatedEvent,
+        event: FileEvent,
     ) {
         logger.error(ex) { "이벤트 처리 실패 후 DLQ 전송: $event" }
         dlqProcessor.sendToDlq(event)

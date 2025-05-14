@@ -12,4 +12,5 @@ enum class EventType(
     MEMBER("member-events"),
     MEMBER_LOGGING("member-log-events"),
     ACTIVITY_AREA("activity-area-events"),
+    DOMAIN_FAILED("domain-fail-events"),
 }

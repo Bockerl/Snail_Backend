@@ -26,7 +26,6 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.Base64
 import java.util.UUID
@@ -131,7 +130,6 @@ class LineOauthServiceImpl(
         }
     }
 
-    @Transactional
     @Logging
     fun createNewLineMember(
         email: String,

@@ -1,13 +1,9 @@
 @file:Suppress("ktlint:standard:no-wildcard-imports")
 
-package com.bockerl.snailmember.member.command.domain.service
+package com.bockerl.snailmember.member.command.application.service
 
-import com.bockerl.snailmember.member.command.application.dto.request.*
-import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.*
 
 @ExtendWith(MockitoExtension::class)
 class MemberRegistrationServiceImplMockitoTests

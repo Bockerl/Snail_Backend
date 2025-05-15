@@ -1,6 +1,6 @@
 @file:Suppress("ktlint:standard:no-wildcard-imports")
 
-package com.bockerl.snailmember.member.command.domain.service
+package com.bockerl.snailmember.member.command.application.service
 
 class CommandMemberServiceImplTests
 //    :

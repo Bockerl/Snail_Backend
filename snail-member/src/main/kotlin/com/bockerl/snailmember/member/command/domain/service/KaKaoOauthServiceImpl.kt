@@ -26,7 +26,6 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Base64
@@ -117,7 +116,6 @@ class KaKaoOauthServiceImpl(
         }
     }
 
-    @Transactional
     @Logging
     fun createNewKaKaoMember(
         email: String,

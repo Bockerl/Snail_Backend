@@ -26,6 +26,7 @@ const val TEST_PASSWORD = "Password123!"
 const val TEST_REDIS_ID = "test-redis-id"
 const val VERIFICATION_CODE = "12345"
 val TEST_BIRTH = Timestamp(1708300800000)
+val LOCAL_DATE_TEST_BIRTH = TEST_BIRTH.toLocalDateTime().toLocalDate()!!
 const val TEST_PRIMARY_AREA = "Emd-00000001"
 const val TEST_WORKPLACE_AREA = "Emd-00000002"
 const val EMAIL_PREFIX = "verification:email:"
@@ -39,6 +40,8 @@ const val TEST_TOKEN_TYPE = "test-token"
 const val TEST_ACCESS_TOKEN = "test-access-token"
 const val TEST_REFRESH_TOKEN = "test-refresh-token"
 const val TEST_ID_TOKEN = "test-id-token"
+const val IDEMPOTENCYKEY = "idempotencykey"
+const val FORMATTED_ID = "MEM-00000001"
 
 fun createMember(
     memberId: Long = 1L,
@@ -164,3 +167,7 @@ fun createKaKaoTokenResponseDTO(
         refreshTokenExpiresIn = refreshExpiresIn,
         idToken = idToken,
     )
+
+fun createIdempotencyKey(): String = IDEMPOTENCYKEY
+
+fun createFormattedId(): String = FORMATTED_ID

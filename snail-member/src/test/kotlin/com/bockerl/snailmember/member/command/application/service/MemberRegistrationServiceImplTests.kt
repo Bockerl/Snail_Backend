@@ -52,26 +52,33 @@ class MemberRegistrationServiceImplTests :
             }
 
         // test 서비스 설정
-        val registrationService =
-            MemberRegistrationServiceImpl(
-                memberAuthService = memberAuthService,
-                tempMemberRepository = tempRepository,
-                memberRepository = memberRepository,
-                bcryptPasswordEncoder = bcryptPasswordEncoder,
-                outboxService = outBoxService,
-                eventPublisher = eventPublisher,
-                objectMapper = objectMapper,
-                redisTemplate = redisTemplate,
-            )
+        lateinit var registrationService: RegistrationService
 
-        var cnt = 0
-        beforeTest {
+        beforeContainer {
+            clearMocks(
+                memberAuthService,
+                tempRepository,
+                outBoxService,
+                eventPublisher,
+                redisTemplate,
+                answers = false,
+            )
+            registrationService =
+                MemberRegistrationServiceImpl(
+                    memberAuthService = memberAuthService,
+                    tempMemberRepository = tempRepository,
+                    memberRepository = memberRepository,
+                    bcryptPasswordEncoder = bcryptPasswordEncoder,
+                    outboxService = outBoxService,
+                    eventPublisher = eventPublisher,
+                    objectMapper = objectMapper,
+                    redisTemplate = redisTemplate,
+                )
+
             val valOps = mockk<ValueOperations<String, String>>()
             every { redisTemplate.opsForValue() } returns valOps
             every { valOps.get(IDEMPOTENCYKEY) } returns null
-            every { valOps.set(IDEMPOTENCYKEY, any()) } answers {
-                cnt += 1
-            }
+            every { valOps.set(IDEMPOTENCYKEY, any()) } just Runs
         }
 
         // 1. 회원가입 초기화 테스트
@@ -353,7 +360,11 @@ class MemberRegistrationServiceImplTests :
             When("유효한 코드로 휴대폰 인증을 하면") {
                 every { tempRepository.find(request.redisId) } returns tempMember
                 every {
-                    memberAuthService.verifyCode(tempMember.phoneNumber, request.verificationCode, VerificationType.PHONE)
+                    memberAuthService.verifyCode(
+                        tempMember.phoneNumber,
+                        request.verificationCode,
+                        VerificationType.PHONE,
+                    )
                 } just Runs
                 every { tempRepository.update(any(), any()) } just Runs
                 val result = registrationService.verifyPhoneCode(request, idempotencyKey)

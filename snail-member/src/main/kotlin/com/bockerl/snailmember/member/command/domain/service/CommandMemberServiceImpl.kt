@@ -47,17 +47,17 @@ class CommandMemberServiceImpl(
             memberRepository.findMemberByMemberEmailAndMemberStatusNot(email, MemberStatus.ROLE_DELETED)
                 ?: throw CommonException(ErrorCode.NOT_FOUND_MEMBER)
         member.lastAccessTime = LocalDateTime.now()
+        val event =
+            MemberLoginEvent(
+                memberId = member.formattedId,
+                userAgent = userAgent,
+                ipAddress = ipAddress,
+                idemPotencyKey = idempotencyKey,
+            )
+        eventPublisher.publishEvent(event)
         memberRepository
             .runCatching {
-                memberRepository.save(member)
-                val event =
-                    MemberLoginEvent(
-                        memberId = member.formattedId,
-                        userAgent = userAgent,
-                        ipAddress = ipAddress,
-                        idemPotencyKey = idempotencyKey,
-                    )
-                eventPublisher.publishEvent(event)
+                save(member)
                 // outBox를 통한 이벤트 처리
 //                    val jsonPayload = objectMapper.writeValueAsString(event)
 //                    val outBox =

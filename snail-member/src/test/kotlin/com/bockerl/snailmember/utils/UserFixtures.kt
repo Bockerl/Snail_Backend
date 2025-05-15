@@ -2,12 +2,7 @@
 
 package com.bockerl.snailmember.utils
 
-import com.bockerl.snailmember.member.command.application.dto.request.ActivityAreaRegisterRequestDTO
-import com.bockerl.snailmember.member.command.application.dto.request.EmailRequestDTO
-import com.bockerl.snailmember.member.command.application.dto.request.EmailVerifyRequestDTO
-import com.bockerl.snailmember.member.command.application.dto.request.PasswordRequestDTO
-import com.bockerl.snailmember.member.command.application.dto.request.PhoneRequestDTO
-import com.bockerl.snailmember.member.command.application.dto.request.PhoneVerifyRequestDTO
+import com.bockerl.snailmember.member.command.application.dto.request.*
 import com.bockerl.snailmember.member.command.application.dto.response.KaKaoTokenResponseDTO
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.*
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.TempMember
@@ -41,7 +36,12 @@ const val TEST_ACCESS_TOKEN = "test-access-token"
 const val TEST_REFRESH_TOKEN = "test-refresh-token"
 const val TEST_ID_TOKEN = "test-id-token"
 const val IDEMPOTENCYKEY = "idempotencykey"
+const val IPADDRESS = "127.0.0.1"
+const val USER_AGENT = "user-agent"
 const val FORMATTED_ID = "MEM-00000001"
+const val INTRODUCTION = "hello-world"
+val GENDER = Gender.FEMALE
+const val CHANGE_NICKNAME = "changeNickname"
 
 fun createMember(
     memberId: Long = 1L,
@@ -59,7 +59,7 @@ fun createMember(
         memberBirth = LocalDate.now(),
         memberNickname = memberNickname,
         memberStatus = memberStatus,
-        memberPhoto = "default",
+        memberPhoto = "",
         memberGender = Gender.MALE,
         memberLanguage = Language.KOR,
         memberRegion = "default",
@@ -171,3 +171,16 @@ fun createKaKaoTokenResponseDTO(
 fun createIdempotencyKey(): String = IDEMPOTENCYKEY
 
 fun createFormattedId(): String = FORMATTED_ID
+
+fun createProfileRequestDTO(
+    nickname: String,
+    gender: Gender,
+    birth: LocalDate,
+    intro: String,
+): ProfileRequestDTO =
+    ProfileRequestDTO(
+        nickName = nickname,
+        gender = gender,
+        birth = birth,
+        selfIntroduction = intro,
+    )

@@ -50,14 +50,7 @@ class CommandMemberServiceImplTests :
         lateinit var memberService: CommandMemberService
 
         beforeContainer {
-            clearMocks(
-                memberRepository,
-                eventPublisher,
-                commandFileService,
-                outBoxService,
-                answers = false,
-            )
-
+            clearAllMocks(answers = false)
             memberService =
                 CommandMemberServiceImpl(
                     memberRepository,

@@ -13,10 +13,10 @@ class KafkaStreamConfig(
     @Value("\${spring.kafka.bootstrap-servers}") private val bootstrapServers: String,
 ) {
     @Bean
-    fun authFailStreamConfig(): KafkaStreamsConfiguration {
+    fun streamConfig(): KafkaStreamsConfiguration {
         val props =
             mapOf(
-                StreamsConfig.APPLICATION_ID_CONFIG to "auth-fail-streams-app",
+                StreamsConfig.APPLICATION_ID_CONFIG to "snail-streams-app",
                 StreamsConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServers,
                 StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG to Serdes.String()::class.java,
                 StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG to Serdes.String()::class.java,
@@ -25,5 +25,5 @@ class KafkaStreamConfig(
     }
 
     @Bean
-    fun authFailStreamBuilder(): StreamsBuilderFactoryBean = StreamsBuilderFactoryBean(authFailStreamConfig())
+    fun streamBuilder(): StreamsBuilderFactoryBean = StreamsBuilderFactoryBean(streamConfig())
 }

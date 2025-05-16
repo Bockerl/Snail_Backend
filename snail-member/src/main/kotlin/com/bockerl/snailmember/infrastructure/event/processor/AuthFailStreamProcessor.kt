@@ -1,7 +1,7 @@
 package com.bockerl.snailmember.infrastructure.event.processor
 
+import com.bockerl.snailmember.infrastructure.metrics.AuthFailMetrics
 import com.bockerl.snailmember.security.config.event.AuthFailEvent
-import com.bockerl.snailmember.security.config.metrics.AuthFailMetrics
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.kafka.common.serialization.Serde
 import org.apache.kafka.common.serialization.Serdes
@@ -22,7 +22,7 @@ class AuthFailStreamProcessor(
     // 인증 실패 Stream Topology 설정(Kafka Streams의 데이터 처리 흐름을 정의한 실행 그래프)
     @Bean
     fun authFailStream(
-        @Qualifier("authFailStreamBuilder") builder: StreamsBuilder,
+        @Qualifier("streamBuilder") builder: StreamsBuilder,
         authFailMetrics: AuthFailMetrics,
     ): KStream<String, AuthFailEvent> {
         // Kafka 토픽 "auth-fail-log-events"에서 스트림을 가져옴

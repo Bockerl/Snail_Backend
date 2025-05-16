@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
@@ -34,7 +33,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 
 class MemberRegistrationServiceImplTests :
     BehaviorSpec({
-        val logger = KotlinLogging.logger {}
         // mock 설정
         val memberAuthService = mockk<MemberAuthService>()
         val tempRepository = mockk<TempMemberRepository>()
@@ -55,14 +53,7 @@ class MemberRegistrationServiceImplTests :
         lateinit var registrationService: RegistrationService
 
         beforeContainer {
-            clearMocks(
-                memberAuthService,
-                tempRepository,
-                outBoxService,
-                eventPublisher,
-                redisTemplate,
-                answers = false,
-            )
+            clearAllMocks(answers = false)
             registrationService =
                 MemberRegistrationServiceImpl(
                     memberAuthService = memberAuthService,

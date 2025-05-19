@@ -24,7 +24,7 @@ class VoToDtoConverter {
         messageType = requestVo.messageType,
     )
 
-    fun commandChatRoomDeleteRequestVoTODto(
+    fun commandChatRoomDeleteRequestVoTODTO(
         requestVo: CommandChatRoomDeleteRequestVo,
         memberId: String,
         memberNickname: String,
@@ -36,7 +36,7 @@ class VoToDtoConverter {
         memberPhoto = memberPhoto,
     )
 
-    fun commandChatRoomJoinRequestVoToDto(
+    fun commandChatRoomJoinRequestVoToDTO(
         requestVo: CommandChatRoomJoinRequestVo,
         memberId: String,
         memberNickname: String,
@@ -48,7 +48,7 @@ class VoToDtoConverter {
         memberPhoto = memberPhoto,
     )
 
-    fun sendMessageRequestVoAndKeyToDto(
+    fun sendMessageRequestVoAndKeyToDTO(
         requestVo: SendMessageRequestVo,
         chatRoomId: String,
         idempotencyKey: String,
@@ -57,6 +57,7 @@ class VoToDtoConverter {
         memberId = requestVo.memberId,
         memberNickname = requestVo.memberNickname,
         memberPhoto = requestVo.memberPhoto,
+        chatRoomType = requestVo.chatRoomType,
         message = requestVo.message,
         messageType = requestVo.messageType,
         idempotencyKey = idempotencyKey,

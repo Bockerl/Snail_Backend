@@ -112,7 +112,7 @@ class CommandChatRoomController(
         @PathVariable memberPhoto: String,
     ): ResponseDTO<*> {
         val commandChatRoomDeleteRequestDto =
-            voToDtoConverter.commandChatRoomDeleteRequestVoTODto(commandChatRoomDeleteRequestVo, memberId, memberNickname, memberPhoto)
+            voToDtoConverter.commandChatRoomDeleteRequestVoTODTO(commandChatRoomDeleteRequestVo, memberId, memberNickname, memberPhoto)
 
         commandChatRoomService.deletePersonalChatRoom(commandChatRoomDeleteRequestDto)
 
@@ -145,7 +145,7 @@ class CommandChatRoomController(
         @PathVariable memberPhoto: String,
     ): ResponseDTO<*> {
         val commandChatRoomDeleteRequestDto =
-            voToDtoConverter.commandChatRoomDeleteRequestVoTODto(commandChatRoomDeleteRequestVo, memberId, memberNickname, memberPhoto)
+            voToDtoConverter.commandChatRoomDeleteRequestVoTODTO(commandChatRoomDeleteRequestVo, memberId, memberNickname, memberPhoto)
 
         commandChatRoomService.deleteGroupChatRoom(commandChatRoomDeleteRequestDto)
 
@@ -178,7 +178,7 @@ class CommandChatRoomController(
         @PathVariable memberPhoto: String,
     ): ResponseDTO<*> {
         val commandChatRoomJoinRequestDto =
-            voToDtoConverter.commandChatRoomJoinRequestVoToDto(commandChatRoomJoinRequestVo, memberId, memberNickname, memberPhoto)
+            voToDtoConverter.commandChatRoomJoinRequestVoToDTO(commandChatRoomJoinRequestVo, memberId, memberNickname, memberPhoto)
 
         commandChatRoomService.joinGroupChatRoom(commandChatRoomJoinRequestDto)
 

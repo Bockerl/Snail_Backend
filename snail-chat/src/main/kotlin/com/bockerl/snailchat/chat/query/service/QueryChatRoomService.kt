@@ -6,6 +6,7 @@ import com.bockerl.snailchat.chat.query.dto.request.chatRoomDTO.QuerySearchGroup
 import com.bockerl.snailchat.chat.query.dto.request.chatRoomDTO.QuerySearchPersonalChatRoomRequestDTO
 import com.bockerl.snailchat.chat.query.dto.response.chatRoomDTO.QueryGroupChatRoomResponseDTO
 import com.bockerl.snailchat.chat.query.dto.response.chatRoomDTO.QueryPersonalChatRoomResponseDTO
+import org.bson.types.ObjectId
 
 interface QueryChatRoomService {
     fun getPersonalChatRoomList(queryPersonalChatRoomRequestDTO: QueryPersonalChatRoomRequestDTO): List<QueryPersonalChatRoomResponseDTO>
@@ -17,4 +18,6 @@ interface QueryChatRoomService {
     ): List<QueryPersonalChatRoomResponseDTO>
 
     fun searchGroupChatRoomByKeyword(querySearchGroupChatRoomDTO: QuerySearchGroupChatRoomRequestDTO): List<QueryGroupChatRoomResponseDTO>
+
+    fun getGroupChatRoomParticipantsNum(chatRoomId: ObjectId): Int
 }

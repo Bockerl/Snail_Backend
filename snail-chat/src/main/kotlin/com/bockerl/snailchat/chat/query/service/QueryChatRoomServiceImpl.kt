@@ -174,4 +174,10 @@ class QueryChatRoomServiceImpl(
             )
         }
     }
+
+    override fun getGroupChatRoomParticipantsNum(chatRoomId: ObjectId): Int =
+        queryGroupChatRoomRepository
+            .findById(chatRoomId)
+            .orElseThrow { IllegalArgumentException("그룹 채팅방 없음") }
+            .participantsNum
 }

@@ -31,7 +31,6 @@ class RedisConfig(
     @Value("\${REDIS_PORT2}") private val redisPort2: String,
     @Value("\${REDIS_PORT3}") private val redisPort3: String,
     @Value("\${DB_PASSWORD}") private val redisPassword: String,
-    private val objectMapper: ObjectMapper,
 ) {
     private val logger = KotlinLogging.logger { }
 

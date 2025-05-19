@@ -10,13 +10,13 @@ import com.bockerl.snailchat.chat.command.domain.aggregate.vo.request.SendMessag
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
-import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.messaging.handler.annotation.DestinationVariable
 import org.springframework.messaging.handler.annotation.Header
+import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor
 
@@ -26,7 +26,6 @@ class CommandChatMessageController(
     private val commandChatMessageService: CommandChatMessageService,
     private val voToDtoConverter: VoToDtoConverter,
 ) {
-    //    @MessageMapping("{chatRoomId}")
     @Operation(
         summary = "메시지 송신 (Stomp) ",
         description =
@@ -162,7 +161,7 @@ class CommandChatMessageController(
         println("idempotencyKey:$idempotencyKey")
         // Vo -> Dto + 토큰에서 memberId/Nickname/Photo를 받아올 수 있도록 수정해야 함
         val commandChatMessageKeyRequestDTO =
-            voToDtoConverter.sendMessageRequestVoAndKeyToDto(
+            voToDtoConverter.sendMessageRequestVoAndKeyToDTO(
                 sendMessageRequestVo,
                 chatRoomId,
                 idempotencyKey,

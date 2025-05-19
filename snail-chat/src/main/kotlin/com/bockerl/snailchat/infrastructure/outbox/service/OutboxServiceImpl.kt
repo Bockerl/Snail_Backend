@@ -22,7 +22,7 @@ class OutboxServiceImpl(
         outboxRepository.save(outbox)
     }
 
-    override fun existsByIdempotencyKey(idempotencyKey: String): Boolean = outboxRepository.existsByidempotencyKey(idempotencyKey)
+    override fun existsByIdempotencyKey(idempotencyKey: String): Boolean = outboxRepository.existsByIdempotencyKey(idempotencyKey)
 
     override fun findByStatus(status: List<OutboxStatus>): List<Outbox> = outboxRepository.findByStatusIn(status)
 

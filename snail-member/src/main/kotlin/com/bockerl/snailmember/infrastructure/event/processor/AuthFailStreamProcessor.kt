@@ -3,6 +3,7 @@ package com.bockerl.snailmember.infrastructure.event.processor
 import com.bockerl.snailmember.infrastructure.metrics.AuthFailMetrics
 import com.bockerl.snailmember.security.config.event.AuthFailEvent
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.kafka.common.serialization.Serde
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsBuilder
@@ -19,12 +20,15 @@ import org.springframework.kafka.support.serializer.JsonSerializer
 class AuthFailStreamProcessor(
     private val objectMapper: ObjectMapper,
 ) {
+    private val logger = KotlinLogging.logger {}
+
     // 인증 실패 Stream Topology 설정(Kafka Streams의 데이터 처리 흐름을 정의한 실행 그래프)
     @Bean
     fun authFailStream(
         @Qualifier("streamBuilder") builder: StreamsBuilder,
         authFailMetrics: AuthFailMetrics,
     ): KStream<String, AuthFailEvent> {
+        logger.info { "✅authStream created!" }
         // Kafka 토픽 "auth-fail-log-events"에서 스트림을 가져옴
         val stream =
             builder
@@ -39,7 +43,10 @@ class AuthFailStreamProcessor(
             // Kafka Streams는 자동으로 changelog 토픽을 생성해서 durability 보장
             .count(Materialized.`as`("failType-count-store"))
             .toStream()
-            .foreach { key, _ -> authFailMetrics.incrementFailCounter(key) }
+            .foreach { key, _ ->
+                authFailMetrics.incrementFailCounter(key)
+                logger.info { "auth-fail-event increment" }
+            }
         return stream
     }
 

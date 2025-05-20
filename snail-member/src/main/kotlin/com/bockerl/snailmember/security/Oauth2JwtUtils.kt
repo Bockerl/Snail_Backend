@@ -53,6 +53,7 @@ class Oauth2JwtUtils(
             runCatching { generateAccessToken(customMember) }
                 .getOrElse {
                     logger.error { "accessToken 처리 중 에러 발생, memberId: ${customMember.memberId}" }
+                    logger.error { "from accessToken exception: ${it.message}" }
                     throw CommonException(ErrorCode.TOKEN_GENERATION_ERROR)
                 }
         // refreshToken 생성
@@ -60,6 +61,7 @@ class Oauth2JwtUtils(
             runCatching { getOrCreateRefreshToken(email, customMember.authorities.firstOrNull()?.authority) }
                 .getOrElse {
                     logger.error { "refreshToken 처리 중 에러 발생, memberId: ${customMember.memberId}" }
+                    logger.error { "from refreshToken exception: ${it.message}" }
                     throw CommonException(ErrorCode.TOKEN_GENERATION_ERROR)
                 }
         // Header에 담기위한 response 꺼내기
@@ -187,7 +189,7 @@ class Oauth2JwtUtils(
                 logger.info { "redis에 존재하는 at 삭제 성공" }
             }.onFailure {
                 logger.warn { "redis에 존재하는 at 삭제 실패" }
-                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+                logger.error { "ex, ${it.message}" }
             }.getOrThrow()
     }
 }

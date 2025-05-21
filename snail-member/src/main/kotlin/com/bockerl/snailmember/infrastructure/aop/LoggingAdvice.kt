@@ -34,9 +34,7 @@ class LoggingAdvice(
 
     private fun extractDomainName(joinPoint: ProceedingJoinPoint): String {
         val packageName = joinPoint.signature.declaringType.packageName
-        println("packageName: $packageName")
         val subPackge = packageName.substringAfter("com.bockerl.snailmember.")
-        println("subPackge: $subPackge")
         return when {
             "member" in subPackge -> "MEMBER"
             "area" in subPackge -> "AREA"

@@ -7,7 +7,6 @@ import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.VerificationType
 import com.bockerl.snailmember.member.command.domain.service.MemberAuthServiceImpl
 import com.bockerl.snailmember.utils.*
-import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
@@ -20,7 +19,6 @@ import java.time.Duration
 
 class AuthServiceImplTests :
     BehaviorSpec({
-        val logger = KotlinLogging.logger {}
         // mock
         val mailSender = mockk<JavaMailSender>()
         val redisTemplate = mockk<RedisTemplate<String, String>>()

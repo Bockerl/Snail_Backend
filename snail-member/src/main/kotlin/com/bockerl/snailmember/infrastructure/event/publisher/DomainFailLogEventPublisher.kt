@@ -20,9 +20,11 @@ class DomainFailLogEventPublisher(
     @EventListener
     fun domainFailLogging(event: DomainFailEvent) {
         val topic = EventType.DOMAIN_FAILED
+        // key = 순서 보장 단위 -> domain + method별
+        val key = "${event.domainName}:${event.methodName}"
         try {
             logger.info { "도메인 실패 로그 이벤트 전송 시작: $topic" }
-            kafkaTemplate.send(topic.topic, event)
+            kafkaTemplate.send(topic.topic, key, event)
             logger.info { "도메인 실패 로그 이벤트 전송 완료: $topic" }
         } catch (e: Exception) {
             logger.warn { "도메인 실패 로그 이벤트 전송 실패, 예외 메세지: ${e.message}" }

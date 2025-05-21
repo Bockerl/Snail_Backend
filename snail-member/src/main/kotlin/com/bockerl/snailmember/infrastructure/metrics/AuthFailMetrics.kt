@@ -1,4 +1,4 @@
-package com.bockerl.snailmember.security.config.metrics
+package com.bockerl.snailmember.infrastructure.metrics
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry

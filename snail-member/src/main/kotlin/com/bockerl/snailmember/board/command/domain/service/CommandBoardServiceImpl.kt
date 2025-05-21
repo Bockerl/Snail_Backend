@@ -17,6 +17,8 @@ import com.bockerl.snailmember.common.exception.ErrorCode
 import com.bockerl.snailmember.file.command.application.dto.CommandFileDTO
 import com.bockerl.snailmember.file.command.application.service.CommandFileService
 import com.bockerl.snailmember.file.command.domain.aggregate.enums.FileTargetType
+import com.bockerl.snailmember.infrastructure.aop.Logging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
 import org.springframework.data.redis.core.Cursor
 import org.springframework.data.redis.core.RedisTemplate
@@ -31,13 +33,18 @@ class CommandBoardServiceImpl(
     private val commandFileService: CommandFileService,
     private val redisTemplate: RedisTemplate<String, Any>,
 ) : CommandBoardService {
+    private val logger = KotlinLogging.logger { }
+
     @Transactional
+    @Logging
     override fun createBoard(
         commandBoardCreateDTO: CommandBoardCreateDTO,
         files: List<MultipartFile>,
     ) {
+        logger.info { "게시글 생성 서비스 메서드 도착" }
         // 따닥 방지
         if (redisTemplate.hasKey(commandBoardCreateDTO.idempotencyKey)) {
+            logger.warn { "멱등성 위반 요청 - 이미 요청된 멱등키" }
             throw CommonException(ErrorCode.ALREADY_REQUESTED)
         }
 

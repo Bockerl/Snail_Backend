@@ -13,9 +13,9 @@ import com.bockerl.snailmember.file.command.application.dto.*
 import com.bockerl.snailmember.file.command.application.service.CommandFileService
 import com.bockerl.snailmember.file.command.application.service.CommandGatheringFileService
 import com.bockerl.snailmember.file.command.domain.aggregate.entity.File
-import com.bockerl.snailmember.file.command.domain.aggregate.event.FileCreatedEvent
 import com.bockerl.snailmember.file.command.domain.aggregate.event.FileDeletedEvent
-import com.bockerl.snailmember.file.command.domain.aggregate.event.GatheringFileCreatedEvent
+import com.bockerl.snailmember.file.command.domain.aggregate.event.FileEvent
+import com.bockerl.snailmember.file.command.domain.aggregate.event.GatheringFileEvent
 import com.bockerl.snailmember.file.command.domain.repository.CommandFileRepository
 import com.bockerl.snailmember.infrastructure.outbox.dto.OutboxDTO
 import com.bockerl.snailmember.infrastructure.outbox.enums.EventType
@@ -57,7 +57,7 @@ class CommandFileServiceImpl(
         val fileUrl = blobClient.blobUrl
 
         val event =
-            FileCreatedEvent(
+            FileEvent(
                 fileName = fileName,
                 fileType = file.contentType ?: "unknown",
                 fileUrl = fileUrl,
@@ -108,7 +108,7 @@ class CommandFileServiceImpl(
 
             // 각 파일마다 개별 이벤트 생성
             val event =
-                FileCreatedEvent(
+                FileEvent(
                     fileName = fileName,
                     fileType = file.contentType ?: "unknown",
                     fileUrl = fileUrl,
@@ -159,7 +159,7 @@ class CommandFileServiceImpl(
 
             // 각 파일마다 개별 이벤트 생성
             val event =
-                GatheringFileCreatedEvent(
+                GatheringFileEvent(
                     fileName = fileName,
                     fileType = file.contentType ?: "unknown",
                     fileUrl = fileUrl,
@@ -237,7 +237,7 @@ class CommandFileServiceImpl(
         val fileUrl = blobClient.blobUrl
 
         val event =
-            FileCreatedEvent(
+            FileEvent(
                 fileName = fileName,
                 fileType = file.contentType ?: "unknown",
                 fileUrl = fileUrl,
@@ -338,7 +338,7 @@ class CommandFileServiceImpl(
 
             // 생성 이벤트 생성
             val createEvent =
-                FileCreatedEvent(
+                FileEvent(
                     fileName = fileName,
                     fileType = file.contentType ?: "unknown",
                     fileUrl = fileUrl,
@@ -439,7 +439,7 @@ class CommandFileServiceImpl(
 
             // 생성 이벤트 생성
             val createEvent =
-                GatheringFileCreatedEvent(
+                GatheringFileEvent(
                     fileName = fileName,
                     fileType = file.contentType ?: "unknown",
                     fileUrl = fileUrl,

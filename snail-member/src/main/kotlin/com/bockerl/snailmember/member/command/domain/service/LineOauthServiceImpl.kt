@@ -2,6 +2,7 @@ package com.bockerl.snailmember.member.command.domain.service
 
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
+import com.bockerl.snailmember.infrastructure.aop.Logging
 import com.bockerl.snailmember.infrastructure.config.TransactionalConfig
 import com.bockerl.snailmember.infrastructure.outbox.dto.OutboxDTO
 import com.bockerl.snailmember.infrastructure.outbox.enums.EventType
@@ -30,7 +31,7 @@ import java.util.Base64
 import java.util.UUID
 
 @Service
-class LineOauth2ServiceImpl(
+class LineOauthServiceImpl(
     private val lineAuthClient: LineAuthClient,
     private val memberRepository: MemberRepository,
     private val loginProperties: Oauth2LoginProperties,
@@ -129,7 +130,8 @@ class LineOauth2ServiceImpl(
         }
     }
 
-    private fun createNewLineMember(
+    @Logging
+    fun createNewLineMember(
         email: String,
         lineResponse: LinePayloadDTO,
     ): Member {
@@ -150,8 +152,16 @@ class LineOauth2ServiceImpl(
             )
 
         logger.info { "새로 생성되는 라인 계정 멤버: $newLineMember" }
-        memberRepository.save(newLineMember)
-        logger.info { "라인 계정 새 멤버 저장 성공" }
+        memberRepository
+            .runCatching {
+                save(newLineMember)
+            }.onSuccess {
+                logger.info { "라인 계정 새 멤버 저장 성공" }
+            }.onFailure {
+                logger.error { "라인 계정 새 멤버 저장 실패, member: $newLineMember, message: ${it.message}" }
+                throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+            }.getOrThrow()
+
         // outbox 이벤트 발행(회원 생성)
         val event =
             MemberCreateEvent(
@@ -167,9 +177,10 @@ class LineOauth2ServiceImpl(
                 memberLanguage = newLineMember.memberLanguage,
                 signUpPath = SignUpPath.LINE,
             )
+
         // logging을 위한 비동기 리스너 이벤트 처리
-        logger.info { "현재 Thread: ${Thread.currentThread().name}" }
         eventPublisher.publishEvent(event)
+
         val jsonPayLoad = objectMapper.writeValueAsString(event)
         val outBox =
             OutboxDTO(

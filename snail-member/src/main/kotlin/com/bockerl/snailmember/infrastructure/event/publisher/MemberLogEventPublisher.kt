@@ -4,7 +4,6 @@ import com.bockerl.snailmember.common.event.BaseMemberEvent
 import com.bockerl.snailmember.infrastructure.event.processor.DiscordNotifier
 import com.bockerl.snailmember.infrastructure.outbox.enums.EventType
 import com.bockerl.snailmember.security.config.event.AuthFailEvent
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.context.event.EventListener
 import org.springframework.kafka.core.KafkaTemplate
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class MemberLogEventPublisher(
-    private val objectMapper: ObjectMapper,
     private val kafkaTemplate: KafkaTemplate<String, Any>,
     private val discordNotifier: DiscordNotifier,
 ) {
@@ -27,7 +25,7 @@ class MemberLogEventPublisher(
         val topic = EventType.MEMBER_LOGGING
         try {
             logger.info { "회원 로그 이벤트 전송 시작: ${topic.topic}, 현재 Thread: ${Thread.currentThread().name}" }
-            kafkaTemplate.send(topic.topic, event)
+            kafkaTemplate.send(topic.topic, event.memberId, event)
             logger.info { "회원 로그 이벤트 전송 완료: ${topic.topic}" }
         } catch (e: Exception) {
             logger.warn { "회원 로그 이벤트 전송 실패: ${topic.topic}" }
@@ -37,8 +35,6 @@ class MemberLogEventPublisher(
         }
     }
 
-    // 도메인 요청 실패 로그
-
     // 인증 실패 로그
     @Async("logTaskExecutor")
     @EventListener
@@ -46,7 +42,7 @@ class MemberLogEventPublisher(
         val topic = EventType.AUTH_LOGGING
         try {
             logger.info { "인증 실패 로그 이벤트 전송 시작: ${topic.topic}" }
-            kafkaTemplate.send(topic.topic, event)
+            kafkaTemplate.send(topic.topic, event.email, event)
             logger.info { "인증 실패 로그 이벤트 전송 완료: ${topic.topic}" }
         } catch (e: Exception) {
             logger.warn { "인증 실패 로그 이벤트 전송 실패: ${topic.topic}" }

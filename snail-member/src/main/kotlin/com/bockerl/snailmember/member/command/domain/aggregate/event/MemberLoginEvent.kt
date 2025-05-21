@@ -9,4 +9,5 @@ data class MemberLoginEvent(
     override val timestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
     val ipAddress: String,
     val userAgent: String,
+    val idemPotencyKey: String,
 ) : BaseMemberEvent

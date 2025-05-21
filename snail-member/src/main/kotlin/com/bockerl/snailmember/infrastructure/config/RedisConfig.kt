@@ -31,9 +31,12 @@ class RedisConfig(
 //    @Value("\${REDIS_HOST}") private val host: String,
 //    @Value("\${REDIS_PORT}") private val port: Int,
     @Value("\${REDIS_MASTER}") private val redisMaster: String,
-    @Value("\${REDIS_PORT1}") private val redisPort1: String,
-    @Value("\${REDIS_PORT2}") private val redisPort2: String,
-    @Value("\${REDIS_PORT3}") private val redisPort3: String,
+    @Value("\${REDIS_SENTINEL_HOST1}") private val redisHost1: String,
+    @Value("\${REDIS_SENTINEL_HOST2}") private val redisHost2: String,
+    @Value("\${REDIS_SENTINEL_HOST3}") private val redisHost3: String,
+    @Value("\${REDIS_SENTINEL_PORT1}") private val redisPort1: String,
+    @Value("\${REDIS_SENTINEL_PORT2}") private val redisPort2: String,
+    @Value("\${REDIS_SENTINEL_PORT3}") private val redisPort3: String,
     @Value("\${DB_PASSWORD}") private val redisPassword: String,
     private val objectMapper: ObjectMapper,
 ) {
@@ -46,12 +49,13 @@ class RedisConfig(
                 master(redisMaster)
                 logger.info { "redisMaster: " + redisMaster }
                 // 각 노드를 host와 port로 분리해서 설정
-                val (host1, port1) = parseHostPort(redisPort1)
-                sentinel(host1, port1)
-                val (host2, port2) = parseHostPort(redisPort2)
-                sentinel(host2, port2)
-                val (host3, port3) = parseHostPort(redisPort3)
-                sentinel(host3, port3)
+//                val (host1, port1) = parseHostPort(redisPort1)
+                logger.info { "redisHost1: $redisHost1, redisPort1: $redisPort1" }
+                logger.info { "redisHost2: $redisHost2, redisPort1: $redisPort2" }
+                logger.info { "redisHost3: $redisHost3, redisPort3: $redisPort3" }
+                sentinel(redisHost1, redisPort1.toInt())
+                sentinel(redisHost2, redisPort2.toInt())
+                sentinel(redisHost3, redisPort3.toInt())
                 setPassword(redisPassword)
             }
         return LettuceConnectionFactory(sentinelConfig)

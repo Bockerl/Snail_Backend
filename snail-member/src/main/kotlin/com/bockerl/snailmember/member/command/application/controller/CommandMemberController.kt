@@ -66,10 +66,6 @@ class CommandMemberController(
                         name = "profileRequestVO",
                         contentType = MediaType.APPLICATION_JSON_VALUE,
                     ),
-                    Encoding(
-                        name = "file",
-                        contentType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                    ),
                 ],
             ),
         ],

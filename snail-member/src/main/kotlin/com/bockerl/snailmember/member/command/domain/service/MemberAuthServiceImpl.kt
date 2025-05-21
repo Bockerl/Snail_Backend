@@ -2,7 +2,7 @@ package com.bockerl.snailmember.member.command.domain.service
 
 import com.bockerl.snailmember.common.exception.CommonException
 import com.bockerl.snailmember.common.exception.ErrorCode
-import com.bockerl.snailmember.member.command.application.service.AuthService
+import com.bockerl.snailmember.member.command.application.service.MemberAuthService
 import com.bockerl.snailmember.member.command.domain.aggregate.entity.enums.VerificationType
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.redis.core.RedisTemplate
@@ -10,15 +10,14 @@ import org.springframework.mail.MailException
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 import kotlin.random.Random
 
 @Service
-class AuthServiceImpl(
+class MemberAuthServiceImpl(
     private val redisTemplate: RedisTemplate<String, String>,
     private val mailSender: JavaMailSender,
-) : AuthService {
+) : MemberAuthService {
     private val logger = KotlinLogging.logger {}
 
     // 상수로 관리할 static 변수들
@@ -29,7 +28,6 @@ class AuthServiceImpl(
     }
 
     // 이메일 인증 코드 생성 메서드
-    @Transactional
     override fun createEmailVerificationCode(email: String) {
         logger.info { "새로운 이메일 인증 코드 생성 메서드 시작" }
         val verificationCode = generateCode()
@@ -41,6 +39,7 @@ class AuthServiceImpl(
             logger.info { "이메일 인증 코드 이메일($email) 전송 성공" }
         }.onFailure { exception ->
             logger.error { "이메일 인증 코드 생성 중 에러 발생, 문제 이메일: $email" }
+            logger.error { "ex: $exception" }
             redisTemplate.delete("$EMAIL_PREFIX$email")
             when (exception) {
                 is MailException -> throw CommonException(ErrorCode.MAIL_SEND_FAIL)
@@ -50,7 +49,6 @@ class AuthServiceImpl(
     }
 
     // 인증 메일을 보내는 메서드
-    @Transactional
     fun sendVerificationEmail(
         email: String,
         code: String,
@@ -76,7 +74,6 @@ class AuthServiceImpl(
     }
 
     // 휴대폰 인증 코드 생성 메서드
-    @Transactional
     override fun createPhoneVerificationCode(phoneNumber: String): String {
         logger.info { "새로운 휴대폰 인증 코드 생성 메서드 시작" }
         val verificationCode = generateCode()
@@ -93,7 +90,6 @@ class AuthServiceImpl(
     }
 
     // redis에 TTL(5분)으로 코드를 저장하는 공통 메서드
-    @Transactional
     fun saveVerificationCode(
         thing: String,
         code: String,
@@ -105,13 +101,17 @@ class AuthServiceImpl(
                 VerificationType.PHONE -> "$PHONE_PREFIX$thing"
             }
         // 미리 있을 수도 있는 value 삭제
-        redisTemplate.delete(key)
-        redisTemplate.opsForValue().set(key, code)
-        redisTemplate.expire(key, Duration.ofMinutes(VERIFICATION_CODE_TTL))
+        try {
+            redisTemplate.delete(key)
+            redisTemplate.opsForValue().set(key, code)
+            redisTemplate.expire(key, Duration.ofMinutes(VERIFICATION_CODE_TTL))
+        } catch (e: Exception) {
+            logger.error { "redis 저장 중 에러 발생, e: $e" }
+            throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+        }
     }
 
     // 공통 인증 메서드
-    @Transactional
     override fun verifyCode(
         thing: String,
         verificationCode: String,
@@ -146,7 +146,12 @@ class AuthServiceImpl(
                 VerificationType.EMAIL -> "$EMAIL_PREFIX$redisId"
                 VerificationType.PHONE -> "$PHONE_PREFIX$redisId"
             }
-        redisTemplate.delete(key)
+        try {
+            redisTemplate.delete(key)
+        } catch (e: Exception) {
+            logger.error { "redis 삭제 중 에러 발생, e:$e" }
+            throw CommonException(ErrorCode.INTERNAL_SERVER_ERROR)
+        }
         logger.info { "redis에서 $type 인증 성공한 코드 삭제 성공" }
     }
 }
